@@ -3,6 +3,7 @@ module brainbird-backend
 go 1.27.1
 
 require (
+	brainbird v0.0.0
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/go-sql-driver/mysql v1.9.0
 	github.com/gofiber/fiber/v2 v2.52.9
@@ -14,6 +15,8 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.42.0
 )
+
+replace brainbird => ..
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

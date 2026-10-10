@@ -4,18 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"log"
-	"os"
+	"net/http"
 	"os/signal"
-	"path/filepath"
+	"strings"
 	"syscall"
 
 	"brainbird-backend/internal/config"
 	"brainbird-backend/internal/middleware"
 	"brainbird-backend/internal/platform/database"
 	"brainbird-backend/internal/router"
+	brainbirdui "brainbird/frontend/ui"
 	"github.com/gofiber/fiber/v2"
 	fiberCors "github.com/gofiber/fiber/v2/middleware/cors"
+	fiberFilesystem "github.com/gofiber/fiber/v2/middleware/filesystem"
 	fiberLimiter "github.com/gofiber/fiber/v2/middleware/limiter"
 	fiberRecover "github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -40,15 +43,18 @@ func Run() error {
 		defer pool.Close()
 	}
 
-	staticDir, err := frontendDir()
+	staticFiles, err := fs.Sub(brainbirdui.Files, ".")
 	if err != nil {
-		return err
+		return fmt.Errorf("open embedded frontend assets: %w", err)
 	}
 
 	app := fiber.New()
 	app.Use(fiberRecover.New(), fiberCors.New(middleware.CORS()), fiberLimiter.New(middleware.RateLimiter()))
 	router.RegisterV1(app, pool, cfg.JWTSecret)
-	app.Static("/", staticDir)
+	app.Use("/", fiberFilesystem.New(fiberFilesystem.Config{
+		Root:  embeddedHTTPFS{FileSystem: http.FS(staticFiles)},
+		Index: "index.html",
+	}))
 
 	listenErr := make(chan error, 1)
 	go func() {
@@ -66,15 +72,14 @@ func Run() error {
 	}
 }
 
-func frontendDir() (string, error) {
-	for _, path := range []string{filepath.Join("frontend", "ui"), filepath.Join("..", "frontend", "ui")} {
-		info, err := os.Stat(path)
-		if err == nil && info.IsDir() {
-			return path, nil
-		}
-		if err != nil && !os.IsNotExist(err) {
-			return "", fmt.Errorf("inspect frontend directory %q: %w", path, err)
-		}
+type embeddedHTTPFS struct {
+	http.FileSystem
+}
+
+func (f embeddedHTTPFS) Open(name string) (http.File, error) {
+	name = strings.TrimLeft(name, "/")
+	if name == "" || name == "." {
+		name = "index.html"
 	}
-	return "", fmt.Errorf("frontend assets not found; expected frontend/ui or ../frontend/ui")
+	return f.FileSystem.Open(name)
 }

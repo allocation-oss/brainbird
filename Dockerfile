@@ -9,6 +9,7 @@ COPY go.mod go.sum ./
 COPY backend ./backend
 COPY cmd ./cmd
 COPY frontend ./frontend
+COPY backend/go.mod backend/go.sum ./backend/
 
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /src/bin/brainbird-api ./cmd/api
@@ -20,7 +21,6 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata curl
 
 COPY --from=builder /src/bin/brainbird-api /app/api
-COPY frontend/ui /app/frontend/ui
 
 ENV APP_ENV=production \
     PORT=8081 \
