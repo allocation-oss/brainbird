@@ -33,7 +33,9 @@ func Run() error {
 	defer stop()
 
 	var pool *sql.DB
-	if cfg.DatabaseURL != "" {
+	if cfg.DatabaseURL == "" {
+		log.Printf("database unavailable: DATABASE_URL is not configured")
+	} else {
 		pool, err = database.NewPool(ctx, cfg.DatabaseURL)
 		if err != nil {
 			log.Printf("database unavailable: %v", err)
