@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAGE_TITLE}} | Brain Bird</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --brand: #2563eb;
+      --brand-hover: #1d4ed8;
+      --canvas: #f4f6f7;
+      --line: #dce2e7;
+      --surface: #ffffff;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--canvas);
+      color: var(--text-dark);
+      margin: 0;
+      padding: 0;
+    }
+    .app-wrapper {
+      display: flex;
+      min-height: 100vh;
+    }
+    .app-main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      width: 100%;
+    }
+    .app-content {
+      padding: 24px;
+      flex-grow: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .breadcrumb-nav {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .breadcrumb-nav a {
+      color: var(--brand);
+      text-decoration: none;
+    }
+    .card-custom {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+      padding: 28px;
+    }
+    .feature-icon-badge {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: #eff6ff;
+      color: var(--brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  {{SIDEBAR_PARTIAL}}
+  <main class="app-main">
+    {{HEADER_PARTIAL}}
+    <div class="app-content">
+      <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-4 shadow-sm border-start border-primary border-5">
+        <div>
+          <div class="breadcrumb-nav mb-1">
+            <a href="/dashboard"><i class="fa-solid fa-house me-1"></i> Dashboard</a> &gt; 
+            <span>{{MODULE_CATEGORY}}</span> &gt;
+            <span class="text-dark">{{PAGE_TITLE}}</span>
+          </div>
+          <h4 class="fw-bold m-0 text-dark"><i class="{{PAGE_ICON}} text-primary me-2"></i> {{PAGE_TITLE}}</h4>
+          <p class="text-muted m-0 small">{{PAGE_SUBTITLE}}</p>
+        </div>
+        <a href="/dashboard" class="btn btn-light border fw-bold text-dark rounded-pill px-3 shadow-sm">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+      </div>
+
+      {{MODULE_BODY}}
+
+    </div>
+    {{FOOTER_PARTIAL}}
+  </main>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{{MODULE_SCRIPTS}}
+</body>
+</html>

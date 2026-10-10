@@ -1,0 +1,919 @@
+<footer class="app-footer d-flex flex-wrap align-items-center justify-content-between px-4 py-3 mt-auto" style="font-size: 0.85rem; z-index: 100; background: rgba(255, 255, 255, 0.82) !important; backdrop-filter: blur(20px) saturate(180%) !important; -webkit-backdrop-filter: blur(20px) saturate(180%) !important; border-top: 1px solid rgba(226, 232, 240, 0.8) !important; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.03);">
+    <div class="text-dark fw-medium">
+        &copy; 2026 <b>Brain Bird Consulting Pvt Ltd.</b> All rights reserved.
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <span class="badge border shadow-sm" style="background: rgba(248, 250, 252, 0.85); color: #334155; border-color: rgba(226, 232, 240, 0.8) !important;">Version 4.38.41</span>
+    </div>
+</footer>
+
+<!-- FLOATING PAGE UP/DOWN BUTTONS (GLOBAL) -->
+<div style="position: fixed; top: 50%; right: 25px; transform: translateY(-50%); z-index: 1050; display: flex; flex-direction: column; gap: 8px; opacity: 0.3; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.3'">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn btn-dark rounded-circle shadow-lg border-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" title="Scroll to Top"><i class="fa-solid fa-chevron-up"></i></button>
+    <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="btn btn-dark rounded-circle shadow-lg border-0 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" title="Scroll to Bottom"><i class="fa-solid fa-chevron-down"></i></button>
+</div>
+
+<!-- Silent Global Audit Logger Tracker -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const path = window.location.pathname;
+        const claimNo = (urlParams.get('claim_no') || urlParams.get('claim_number') || urlParams.get('search') || '').trim();
+        let caseId = urlParams.get('case_id') || urlParams.get('id') || '';
+        if (!caseId) {
+            const pm = path.match(/\/cases?(?:\/[a-z_-]+)?\/(\d+)(?:\/|$)/i);
+            if (pm) caseId = pm[1];
+        }
+        if (!/^\d+$/.test(caseId)) caseId = '';
+        let moduleName = 'Navigation';
+        if (path.includes('cases')) moduleName = 'Cases';
+        else if (path.includes('dispatch')) moduleName = 'Dispatch';
+        else if (path.includes('letters')) moduleName = 'Letters';
+        else if (path.includes('users') || path.includes('allocation') || path.includes('staff_mapping')) moduleName = 'Users';
+        else if (path.includes('settings') || path.includes('masters') || path.includes('menu') || path.includes('permission') || path.includes('audit')) moduleName = 'Settings';
+        else if (path.includes('attendance')) moduleName = 'Attendance';
+        else if (path.includes('dashboard')) moduleName = 'Dashboard';
+        else if (path.includes('performance') || path.includes('report')) moduleName = 'Performance';
+        else if (path.includes('tracking')) moduleName = 'Location Tracking';
+        else if (path.includes('payout')) moduleName = 'Payout';
+
+        const cleanParams = new URLSearchParams();
+        urlParams.forEach((val, key) => {
+            if (val && val !== '0' && val !== 'null' && key !== 'page' && key !== 'limit') {
+                cleanParams.append(key, val);
+            }
+        });
+        const queryString = cleanParams.toString() ? '?' + cleanParams.toString() : '';
+
+        const params = new URLSearchParams();
+        params.append('module_name', moduleName);
+        params.append('action_type', 'PAGE_VIEW');
+        params.append('description', 'Visited Page: ' + path + queryString);
+        if (claimNo) params.append('claim_number', claimNo);
+        if (caseId)  params.append('case_id', caseId);
+
+        fetch('/api/audit_log', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        }).catch(() => {});
+    } catch(e) {}
+});
+</script>
+
+<!-- PeerJS for WebRTC Video/Audio Calls -->
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+<style>
+    .intel-chat-bubble {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 54px;
+        height: 54px;
+        background: linear-gradient(135deg, #2563eb, #7c5cdb);
+        border-radius: 50%;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 22px;
+        cursor: pointer;
+        z-index: 9999;
+        transition: transform 0.3s ease;
+    }
+    .intel-chat-bubble:hover { transform: scale(1.1); }
+
+    .intel-chat-panel {
+        position: fixed;
+        bottom: 90px;
+        right: 25px;
+        width: 380px;
+        height: 560px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+        display: none;
+        flex-direction: column;
+        z-index: 9998;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .intel-chat-header {
+        background: #0f172a;
+        color: white;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .intel-mode-tabs {
+        display: flex;
+        background: #0f172a;
+        border-top: 1px solid #1e293b;
+        padding: 4px 12px;
+        gap: 8px;
+    }
+    .intel-mode-btn {
+        flex: 1;
+        text-align: center;
+        padding: 6px;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.05);
+    }
+    .intel-mode-btn.active {
+        background: #2563eb;
+        color: white;
+    }
+
+    .intel-filter-pills {
+        display: flex;
+        gap: 6px;
+        padding: 8px 12px;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        overflow-x: auto;
+    }
+    .intel-pill {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+    .intel-pill.active {
+        background: #dcfce7;
+        color: #15803d;
+        border-color: #86efac;
+    }
+
+    .intel-chat-search {
+        padding: 8px 12px;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .intel-chat-search input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        outline: none;
+    }
+
+    .intel-chat-body {
+        flex-grow: 1;
+        background: #f8fafc;
+        padding: 12px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .intel-fab-add {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        width: 44px;
+        height: 44px;
+        background: #2563eb;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        cursor: pointer;
+        z-index: 10;
+        transition: transform 0.2s;
+    }
+    .intel-fab-add:hover { transform: scale(1.1); }
+
+    .intel-chat-footer {
+        padding: 10px 12px;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .intel-chat-textarea {
+        flex-grow: 1;
+        border: none;
+        background: #f1f5f9;
+        padding: 8px 14px;
+        border-radius: 16px;
+        outline: none;
+        font-size: 13px;
+        resize: none;
+        max-height: 80px;
+        font-family: inherit;
+    }
+
+    .online-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-left: 5px; }
+    .offline-dot { width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; display: inline-block; margin-left: 5px; }
+
+    .msg-box { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .msg-box.me { align-items: flex-end; }
+    .msg-box.other { align-items: flex-start; }
+    .msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 12px; line-height: 1.4; white-space: pre-wrap; }
+    .msg-box.me .msg-bubble { background: #2563eb; color: white; border-bottom-right-radius: 2px; }
+    .msg-box.other .msg-bubble { background: white; color: #0f172a; border: 1px solid #e2e8f0; border-bottom-left-radius: 2px; }
+
+    .call-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        z-index: 10000;
+        display: none;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 10px;
+        color: white;
+    }
+
+    .call-top-info { text-align: center; z-index: 2; }
+    .call-top-info h5 { margin: 0; font-size: 18px; font-weight: 800; }
+    .call-top-info .call-timer-status { font-size: 13px; font-weight: 600; color: #38bdf8; margin-top: 4px; }
+
+    .call-video-container {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 1;
+        overflow: hidden;
+    }
+    .remote-video { width: 100%; height: 100%; object-fit: cover; }
+    .local-video-pip {
+        position: absolute;
+        top: 60px; right: 15px;
+        width: 100px; height: 130px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid rgba(255,255,255,0.3);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        z-index: 3;
+        background: #000;
+    }
+
+    .call-avatar-placeholder {
+        width: 100px; height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #7c5cdb);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 36px; font-weight: bold; color: white;
+        margin: auto;
+        box-shadow: 0 0 30px rgba(37, 99, 235, 0.5);
+        z-index: 2;
+    }
+
+    .call-action-bar {
+        z-index: 5;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 12px 16px;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 95%;
+    }
+
+    .call-ctrl-btn {
+        width: 42px; height: 42px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.1);
+        color: white;
+        font-size: 16px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .call-ctrl-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+    .call-ctrl-btn.active { background: #ef4444; color: white; }
+    .call-ctrl-btn.recording-active { background: #dc2626; animation: pulse-red-anim 1s infinite; }
+    .call-ctrl-btn.end-btn { background: #ef4444; width: 48px; height: 48px; font-size: 18px; }
+
+    .call-drawer {
+        position: absolute;
+        bottom: 85px;
+        left: 10px; right: 10px;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 20px;
+        padding: 15px;
+        z-index: 10;
+        display: none;
+    }
+
+    .dialpad-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 240px;
+        margin: 0 auto;
+    }
+    .dial-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: white;
+        padding: 10px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+    }
+    .dial-btn:active { background: #2563eb; }
+
+    .in-call-chat-box {
+        height: 180px;
+        overflow-y: auto;
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<!-- Floating Bubble -->
+<div class="intel-chat-bubble" onclick="toggleIntelChat()" title="Open Intel AI Messenger">
+    <i class="fa-solid fa-comment-dots"></i>
+</div>
+
+<!-- Main Chat Panel -->
+<div class="intel-chat-panel" id="intelChatPanel">
+    <div class="intel-chat-header" id="chatMainHeader">
+        <div>
+            <h6 class="m-0 fw-bold">Intel AI Messenger</h6>
+            <small class="text-success" style="font-size: 10px;"><i class="fa-solid fa-shield-halved"></i> E2EE Encrypted</small>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-light py-0 px-2" style="font-size:11px;" onclick="openCreateGroupModal()"><i class="fa-solid fa-users-plus me-1"></i> +Group</button>
+            <i class="fa-solid fa-xmark fs-5" style="cursor:pointer;" onclick="toggleIntelChat()"></i>
+        </div>
+    </div>
+
+    <div class="intel-chat-header" id="chatConvHeader" style="display:none; background: #1e293b;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-arrow-left fs-6" style="cursor:pointer;" onclick="closeConversationView()"></i>
+            <div>
+                <h6 class="m-0 fw-bold" style="font-size:12px;" id="convPartnerName">User Name</h6>
+                <small class="text-muted" style="font-size: 10px;" id="convPartnerStatus">Online</small>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-success py-0 px-2" onclick="startCall('audio')"><i class="fa-solid fa-phone"></i></button>
+            <button class="btn btn-sm btn-outline-info py-0 px-2" onclick="startCall('video')"><i class="fa-solid fa-video"></i></button>
+        </div>
+    </div>
+
+    <div class="intel-chat-header" id="chatDirectoryHeader" style="display:none; background: #2563eb;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-arrow-left fs-6" style="cursor:pointer;" onclick="closeDirectoryView()"></i>
+            <h6 class="m-0 fw-bold" style="font-size:12px;">New Chat & Call Directory</h6>
+        </div>
+    </div>
+
+    <div class="intel-mode-tabs" id="intelTopTabs">
+        <div class="intel-mode-btn active" id="tabBtnChats" onclick="switchModeTab('chats')"><i class="fa-solid fa-comments me-1"></i> Chats</div>
+        <div class="intel-mode-btn" id="tabBtnCalls" onclick="switchModeTab('calls')"><i class="fa-solid fa-phone-volume me-1"></i> Calls</div>
+    </div>
+
+    <div class="intel-filter-pills" id="intelFilterPillsBlock">
+        <div class="intel-pill active" onclick="applyFilter('all', this)">All</div>
+        <div class="intel-pill" onclick="applyFilter('unread', this)">Unread</div>
+        <div class="intel-pill" onclick="applyFilter('groups', this)">Groups</div>
+    </div>
+
+    <div class="intel-chat-search" id="intelSearchBlock">
+        <input type="text" id="intelUserSearch" placeholder="Search contact or group..." oninput="filterUsersSearch()">
+    </div>
+    
+    <div class="intel-chat-body" id="intelUsersBody">
+        <div class="text-center text-muted py-3"><i class="fa-solid fa-spinner fa-spin me-1"></i> Loading Conversations...</div>
+        <div class="intel-fab-add" id="fabAddBtn" onclick="openDirectoryView()" title="Start New Chat"><i class="fa-solid fa-plus"></i></div>
+    </div>
+
+    <div class="intel-chat-body" id="intelDirectoryBody" style="display:none;">
+        <div class="text-center text-muted py-3"><i class="fa-solid fa-spinner fa-spin me-1"></i> Loading Directory...</div>
+    </div>
+
+    <div class="intel-chat-body" id="intelCallsBody" style="display:none;">
+        <div class="text-center text-muted py-4 small">
+            <i class="fa-solid fa-phone-slash fa-2x mb-2 text-secondary"></i><br>
+            No recent Audio or Video call logs.
+        </div>
+    </div>
+
+    <div class="intel-chat-body" id="intelConvBody" style="display:none;">
+        <div class="text-center text-muted py-3 small"><i class="fa-solid fa-spinner fa-spin me-1"></i> Loading Messages...</div>
+    </div>
+    
+    <div class="intel-chat-footer" id="intelFooter" style="display:none;">
+        <button class="btn btn-sm btn-light" onclick="useAIMagic()" title="AI Magic Reply"><i class="fa-solid fa-wand-magic-sparkles text-primary"></i></button>
+        <textarea class="intel-chat-textarea" id="intelChatInput" rows="1" placeholder="Type message..."></textarea>
+        <button class="btn btn-sm btn-primary rounded-circle" onclick="sendIntelMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+
+    <div class="call-overlay" id="callOverlay">
+        <div class="call-video-container">
+            <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+            <video id="localVideo" class="local-video-pip" autoplay playsinline muted></video>
+        </div>
+
+        <div class="call-top-info">
+            <h5 id="callTargetName">User Name</h5>
+            <div class="call-timer-status" id="callTimerStatus"><i class="fa-solid fa-spinner fa-spin me-1"></i> Calling...</div>
+        </div>
+
+        <div class="call-avatar-placeholder" id="callAvatarPlaceholder">
+            <span id="callAvatarChar">U</span>
+        </div>
+
+        <div class="call-drawer" id="dialpadDrawer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="fw-bold text-muted">DTMF Dial Pad</small>
+                <i class="fa-solid fa-xmark text-white" style="cursor:pointer;" onclick="$('#dialpadDrawer').hide()"></i>
+            </div>
+            <input type="text" id="dialDisplay" class="form-control form-control-sm bg-dark text-white text-center border-secondary mb-2 fw-bold" readonly>
+            <div class="dialpad-grid">
+                <div class="dial-btn" onclick="pressDial('1')">1</div>
+                <div class="dial-btn" onclick="pressDial('2')">2</div>
+                <div class="dial-btn" onclick="pressDial('3')">3</div>
+                <div class="dial-btn" onclick="pressDial('4')">4</div>
+                <div class="dial-btn" onclick="pressDial('5')">5</div>
+                <div class="dial-btn" onclick="pressDial('6')">6</div>
+                <div class="dial-btn" onclick="pressDial('7')">7</div>
+                <div class="dial-btn" onclick="pressDial('8')">8</div>
+                <div class="dial-btn" onclick="pressDial('9')">9</div>
+                <div class="dial-btn" onclick="pressDial('*')">*</div>
+                <div class="dial-btn" onclick="pressDial('0')">0</div>
+                <div class="dial-btn" onclick="pressDial('#')">#</div>
+            </div>
+        </div>
+
+        <div class="call-drawer" id="inCallChatDrawer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="fw-bold text-muted">In-Call Messages</small>
+                <i class="fa-solid fa-xmark text-white" style="cursor:pointer;" onclick="$('#inCallChatDrawer').hide()"></i>
+            </div>
+            <div class="in-call-chat-box" id="inCallChatBox"></div>
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control bg-dark text-white border-secondary" id="inCallChatInput" placeholder="Quick text...">
+                <button class="btn btn-primary" onclick="sendInCallMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <div class="call-action-bar">
+            <button class="call-ctrl-btn" id="btnMute" onclick="toggleMute()" title="Mute/Unmute Mic"><i class="fa-solid fa-microphone"></i></button>
+            <button class="call-ctrl-btn" id="btnCam" onclick="toggleCamera()" title="Cam On/Off"><i class="fa-solid fa-video"></i></button>
+            <button class="call-ctrl-btn" id="btnDialpad" onclick="$('#dialpadDrawer').toggle(); $('#inCallChatDrawer').hide();" title="Dial Pad"><i class="fa-solid fa-calculator"></i></button>
+            <button class="call-ctrl-btn" id="btnInCallChat" onclick="$('#inCallChatDrawer').toggle(); $('#dialpadDrawer').hide();" title="In-call Chat"><i class="fa-solid fa-comment-dots"></i></button>
+            <button class="call-ctrl-btn" id="btnRecord" onclick="toggleCallRecording()" title="Record Screen + Audio"><i class="fa-solid fa-circle-dot"></i></button>
+            <button class="call-ctrl-btn end-btn" onclick="endCall()" title="End Call"><i class="fa-solid fa-phone-slash"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Group -->
+<div class="modal fade" id="createGroupModal" tabindex="-1" aria-hidden="true" style="z-index:10050;">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg" style="border-radius:18px;">
+            <div class="modal-header bg-dark text-white py-2" style="border-radius:18px 18px 0 0;">
+                <h6 class="modal-title fw-bold"><i class="fa-solid fa-users me-1 text-primary"></i> Create Group</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3">
+                <input type="text" id="grp_name" class="form-control form-control-sm mb-3 fw-bold" placeholder="Group Name...">
+                <label class="fw-bold small text-muted d-block mb-1">Select Members:</label>
+                <div id="grp_users_list" style="max-height: 200px; overflow-y: auto;"></div>
+            </div>
+            <div class="modal-footer bg-light py-2" style="border-radius:0 0 18px 18px;">
+                <button type="button" class="btn btn-primary btn-sm w-100 fw-bold" onclick="submitCreateGroup()">Create Group</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var intelPeer = null;
+    var intelMyPeerId = null;
+    var intelActiveCall = null;
+    var intelLocalStream = null;
+    var intelActivePartnerId = 0;
+    var intelActivePartnerName = 'User';
+    var intelActiveIsGroup = 0;
+    var intelCurrentFilter = 'all';
+    var intelCurrentMode = 'chats';
+
+    var intelCallTimerInterval = null;
+    var intelCallSeconds = 0;
+    var intelMediaRecorder = null;
+    var intelRecordedChunks = [];
+    var intelIsRecording = false;
+    var intelIsMuted = false;
+    var intelIsCamOff = false;
+    var intelCurrentUserId = window.__CURRENT_USER_ID__ || 0;
+
+    function initPeerJS() {
+        if (!intelPeer && typeof Peer !== 'undefined') {
+            try {
+                intelPeer = new Peer();
+                intelPeer.on('open', function(id) { intelMyPeerId = id; });
+                intelPeer.on('call', function(call) {
+                    intelActiveCall = call;
+                    $('#callTargetName').text('Incoming Call...');
+                    $('#callTimerStatus').html('<i class="fa-solid fa-bell-concierge me-1"></i> Ringing...');
+                    $('#callOverlay').css('display', 'flex');
+
+                    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function(stream) {
+                        intelLocalStream = stream;
+                        document.getElementById('localVideo').srcObject = stream;
+                        call.answer(stream);
+                        call.on('stream', function(remoteStream) {
+                            document.getElementById('remoteVideo').srcObject = remoteStream;
+                            startCallTimer();
+                        });
+                    }).catch(function() {
+                        navigator.mediaDevices.getUserMedia({ video: false, audio: true }).then(function(stream) {
+                            intelLocalStream = stream;
+                            call.answer(stream);
+                            call.on('stream', function(remoteStream) {
+                                document.getElementById('remoteVideo').srcObject = remoteStream;
+                                startCallTimer();
+                            });
+                        });
+                    });
+                });
+            } catch(e) {}
+        }
+    }
+
+    function toggleIntelChat() {
+        $('#intelChatPanel').fadeToggle(200);
+        initPeerJS();
+        if ($('#intelChatPanel').is(':visible')) {
+            loadUsersList();
+        }
+    }
+
+    function switchModeTab(mode) {
+        intelCurrentMode = mode;
+        $('.intel-mode-btn').removeClass('active');
+        if (mode === 'chats') {
+            $('#tabBtnChats').addClass('active');
+            $('#intelFilterPillsBlock, #intelSearchBlock, #intelUsersBody').show();
+            $('#intelCallsBody, #intelDirectoryBody').hide();
+            loadUsersList();
+        } else {
+            $('#tabBtnCalls').addClass('active');
+            $('#intelFilterPillsBlock, #intelSearchBlock, #intelUsersBody, #intelDirectoryBody').hide();
+            $('#intelCallsBody').show();
+        }
+    }
+
+    function applyFilter(filter, el) {
+        $('.intel-pill').removeClass('active');
+        $(el).addClass('active');
+        intelCurrentFilter = filter;
+        loadUsersList();
+    }
+
+    function loadUsersList() {
+        let q = $('#intelUserSearch').val();
+        $.post('/api/intel-chat/get-users', { search: q, filter: intelCurrentFilter, mode: 'conversations' }, function(res) {
+            if (res.status === 'success') {
+                if (res.current_user_id) intelCurrentUserId = res.current_user_id;
+                let html = '';
+                if (!res.users || res.users.length === 0) {
+                    html = '<div class="text-center text-muted py-4 small">No recent chats.<br>Click <b>+</b> button below to start a new chat.</div>';
+                } else {
+                    res.users.forEach(u => {
+                        let onlineDot = u.is_online == 1 ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>';
+                        if (u.is_group == 1) onlineDot = '<span class="badge bg-secondary ms-1" style="font-size:10px;">Group</span>';
+
+                        let tickIcon = '';
+                        if (u.last_msg) {
+                            if (u.msg_status === 'failed') tickIcon = '<i class="fa-solid fa-check text-danger me-1"></i>';
+                            else if (u.msg_status === 'sent') tickIcon = '<i class="fa-solid fa-check text-secondary me-1"></i>';
+                            else if (u.msg_status === 'delivered') tickIcon = '<i class="fa-solid fa-check-double text-secondary me-1"></i>';
+                            else if (u.msg_status === 'seen') tickIcon = '<i class="fa-solid fa-check-double text-success me-1"></i>';
+                        }
+
+                        let subText = u.last_msg ? `${tickIcon}<span class="text-truncate d-inline-block" style="max-width:180px; vertical-align:middle;">${u.last_msg}</span>` : `@${u.username}`;
+
+                        html += `
+                        <div class="p-2 bg-white rounded-3 mb-2 shadow-sm d-flex justify-content-between align-items-center" style="cursor:pointer;" onclick="openConversationView(${u.user_id}, '${escapeChatStr(u.fullname)}', ${u.is_group})">
+                            <div>
+                                <strong class="text-dark d-inline-block" style="font-size:12px;">${u.fullname}</strong>${onlineDot}
+                                <small class="text-muted d-block" style="font-size:11px;">${subText}</small>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-muted" style="font-size:11px;"></i>
+                        </div>`;
+                    });
+                }
+                html += '<div class="intel-fab-add" id="fabAddBtn" onclick="openDirectoryView()" title="Start New Chat"><i class="fa-solid fa-plus"></i></div>';
+                $('#intelUsersBody').html(html);
+            }
+        });
+    }
+
+    function escapeChatStr(s) {
+        return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function filterUsersSearch() {
+        if ($('#intelDirectoryBody').is(':visible')) {
+            loadDirectoryList();
+        } else {
+            loadUsersList();
+        }
+    }
+
+    function openDirectoryView() {
+        $('#chatMainHeader, #intelTopTabs, #intelFilterPillsBlock, #intelUsersBody').hide();
+        $('#chatDirectoryHeader, #intelSearchBlock, #intelDirectoryBody').show();
+        $('#intelUserSearch').val('');
+        loadDirectoryList();
+    }
+
+    function closeDirectoryView() {
+        $('#chatDirectoryHeader, #intelDirectoryBody').hide();
+        $('#chatMainHeader, #intelTopTabs, #intelFilterPillsBlock, #intelUsersBody').show();
+        $('#intelUserSearch').val('');
+        loadUsersList();
+    }
+
+    function loadDirectoryList() {
+        let q = $('#intelUserSearch').val();
+        $.post('/api/intel-chat/get-users', { search: q, mode: 'directory' }, function(res) {
+            if (res.status === 'success') {
+                if (res.current_user_id) intelCurrentUserId = res.current_user_id;
+                let html = '';
+                if (!res.users || res.users.length === 0) {
+                    html = '<div class="text-center text-muted py-4 small">No users found</div>';
+                } else {
+                    res.users.forEach(u => {
+                        let onlineDot = u.is_online == 1 ? '<span class="online-dot"></span>' : '<span class="offline-dot"></span>';
+                        html += `
+                        <div class="p-2 bg-white rounded-3 mb-2 shadow-sm d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-dark d-inline-block" style="font-size:12px;">${u.fullname}</strong>${onlineDot}
+                                <small class="text-muted d-block" style="font-size:10px;">@${u.username}</small>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11px;" onclick="closeDirectoryView(); openConversationView(${u.user_id}, '${escapeChatStr(u.fullname)}', 0)"><i class="fa-solid fa-comment"></i></button>
+                                <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11px;" onclick="initiateCallFromDir(${u.user_id}, '${escapeChatStr(u.fullname)}', 'audio')"><i class="fa-solid fa-phone"></i></button>
+                                <button class="btn btn-sm btn-outline-info py-0 px-2" style="font-size:11px;" onclick="initiateCallFromDir(${u.user_id}, '${escapeChatStr(u.fullname)}', 'video')"><i class="fa-solid fa-video"></i></button>
+                            </div>
+                        </div>`;
+                    });
+                }
+                $('#intelDirectoryBody').html(html);
+            }
+        });
+    }
+
+    function openConversationView(partnerId, name, isGroup = 0) {
+        intelActivePartnerId = partnerId;
+        intelActivePartnerName = name;
+        intelActiveIsGroup = isGroup;
+
+        $('#convPartnerName').text(name);
+        $('#chatMainHeader, #intelTopTabs, #intelFilterPillsBlock, #intelSearchBlock, #intelUsersBody, #intelDirectoryBody').hide();
+        $('#chatConvHeader, #intelConvBody, #intelFooter').show();
+        loadMessages();
+    }
+
+    function closeConversationView() {
+        $('#chatConvHeader, #intelConvBody, #intelFooter').hide();
+        $('#chatMainHeader, #intelTopTabs, #intelFilterPillsBlock, #intelSearchBlock, #intelUsersBody').show();
+        loadUsersList();
+    }
+
+    function loadMessages() {
+        $('#intelConvBody').html('<div class="text-center text-muted py-3 small"><i class="fa-solid fa-spinner fa-spin me-1"></i> Loading Messages...</div>');
+        $.post('/api/intel-chat/get-messages', { partner_id: intelActivePartnerId, is_group: intelActiveIsGroup }, function(res) {
+            if (res.status === 'success') {
+                let html = '';
+                if (res.messages && res.messages.length > 0) {
+                    res.messages.forEach(m => {
+                        let isMe = (intelCurrentUserId > 0 && m.sender_id == intelCurrentUserId);
+                        let side = isMe ? 'me' : 'other';
+                        let senderLabel = (intelActiveIsGroup && !isMe && m.sender_name) ? `<small class="text-muted fw-bold d-block" style="font-size:10px;">${m.sender_name}</small>` : '';
+                        html += `
+                        <div class="msg-box ${side}">
+                            ${senderLabel}
+                            <div class="msg-bubble">${m.message}</div>
+                        </div>`;
+                    });
+                }
+                $('#intelConvBody').html(html || '<div class="text-center text-muted py-4 small">No previous messages</div>');
+                $('#intelConvBody').scrollTop($('#intelConvBody')[0].scrollHeight);
+            }
+        });
+    }
+
+    function sendIntelMessage() {
+        let msg = $('#intelChatInput').val().trim();
+        if (!msg || !intelActivePartnerId) return;
+
+        $('#intelConvBody').append(`<div class="msg-box me"><div class="msg-bubble">${msg}</div></div>`);
+        $('#intelChatInput').val('').attr('rows', 1);
+        $('#intelConvBody').scrollTop($('#intelConvBody')[0].scrollHeight);
+
+        $.post('/api/intel-chat/send', { receiver_id: intelActivePartnerId, is_group: intelActiveIsGroup, message: msg });
+    }
+
+    $(document).on('keydown', '#intelChatInput', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendIntelMessage();
+        }
+    });
+
+    function startCall(type) {
+        if (!intelMyPeerId) { alert('Call Engine initializing... try again in 2 seconds.'); return; }
+        $('#callTargetName').text(intelActivePartnerName);
+        $('#callAvatarChar').text(intelActivePartnerName.charAt(0).toUpperCase());
+        $('#callTimerStatus').html('<i class="fa-solid fa-phone-volume me-1"></i> Calling...');
+        $('#callOverlay').css('display', 'flex');
+
+        navigator.mediaDevices.getUserMedia({ video: (type === 'video'), audio: true }).then(function(stream) {
+            intelLocalStream = stream;
+            document.getElementById('localVideo').srcObject = stream;
+            let call = intelPeer.call(intelMyPeerId, stream);
+            intelActiveCall = call;
+            $('#callTimerStatus').html('<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Ringing...');
+            $.post('/api/intel-chat/call-signal', { signal_action: 'initiate', receiver_id: intelActivePartnerId, call_type: type, peer_id: intelMyPeerId });
+            if (call) {
+                call.on('stream', function(remoteStream) {
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                    startCallTimer();
+                });
+            } else {
+                setTimeout(startCallTimer, 3000);
+            }
+        }).catch(function() {
+            startCallTimer();
+        });
+    }
+
+    function initiateCallFromDir(receiverId, name, type) {
+        intelActivePartnerId = receiverId;
+        intelActivePartnerName = name;
+        startCall(type);
+    }
+
+    function startCallTimer() {
+        clearInterval(intelCallTimerInterval);
+        intelCallSeconds = 0;
+        $('#callTimerStatus').text('00:00');
+        intelCallTimerInterval = setInterval(function() {
+            intelCallSeconds++;
+            let mins = Math.floor(intelCallSeconds / 60);
+            let secs = intelCallSeconds % 60;
+            let formatted = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+            $('#callTimerStatus').html(`<i class="fa-solid fa-circle text-danger me-1" style="font-size:10px;"></i> ${formatted}`);
+        }, 1000);
+    }
+
+    function toggleMute() {
+        if (intelLocalStream) {
+            intelIsMuted = !intelIsMuted;
+            intelLocalStream.getAudioTracks().forEach(track => track.enabled = !intelIsMuted);
+            $('#btnMute').toggleClass('active', intelIsMuted).find('i').toggleClass('fa-microphone-slash', intelIsMuted).toggleClass('fa-microphone', !intelIsMuted);
+        }
+    }
+
+    function toggleCamera() {
+        if (intelLocalStream) {
+            intelIsCamOff = !intelIsCamOff;
+            intelLocalStream.getVideoTracks().forEach(track => track.enabled = !intelIsCamOff);
+            $('#btnCam').toggleClass('active', intelIsCamOff).find('i').toggleClass('fa-video-slash', intelIsCamOff).toggleClass('fa-video', !intelIsCamOff);
+            $('#callAvatarPlaceholder').toggle(intelIsCamOff);
+        }
+    }
+
+    function pressDial(num) {
+        $('#dialDisplay').val($('#dialDisplay').val() + num);
+    }
+
+    function sendInCallMsg() {
+        let txt = $('#inCallChatInput').val().trim();
+        if (!txt) return;
+        $('#inCallChatBox').append(`<div class="text-end text-primary mb-1"><b>Me:</b> ${txt}</div>`);
+        $('#inCallChatInput').val('');
+        $('#inCallChatBox').scrollTop($('#inCallChatBox')[0].scrollHeight);
+    }
+
+    async function toggleCallRecording() {
+        if (intelIsRecording) {
+            stopCallRecording();
+            return;
+        }
+        try {
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const audioCtx = new AudioContext();
+            const dest = audioCtx.createMediaStreamDestination();
+            if (screenStream.getAudioTracks().length > 0) audioCtx.createMediaStreamSource(screenStream).connect(dest);
+            if (micStream.getAudioTracks().length > 0) audioCtx.createMediaStreamSource(micStream).connect(dest);
+
+            const tracks = [...screenStream.getVideoTracks(), ...dest.stream.getAudioTracks()];
+            const combinedStream = new MediaStream(tracks);
+            intelRecordedChunks = [];
+            intelMediaRecorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
+            intelMediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) intelRecordedChunks.push(e.data); };
+            intelMediaRecorder.onstop = function() {
+                const blob = new Blob(intelRecordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Intel_Call_Recording_${Date.now()}.webm`;
+                a.click();
+            };
+            intelMediaRecorder.start();
+            intelIsRecording = true;
+            $('#btnRecord').addClass('recording-active').attr('title', 'Recording... Click to Stop');
+            screenStream.getVideoTracks()[0].onended = function() { stopCallRecording(); };
+        } catch (err) {
+            alert("Recording Cancelled: " + err.message);
+        }
+    }
+
+    function stopCallRecording() {
+        if (intelMediaRecorder && intelIsRecording) {
+            intelMediaRecorder.stop();
+            intelIsRecording = false;
+            $('#btnRecord').removeClass('recording-active');
+        }
+    }
+
+    function endCall() {
+        if (intelIsRecording) stopCallRecording();
+        clearInterval(intelCallTimerInterval);
+        if (intelActiveCall) intelActiveCall.close();
+        if (intelLocalStream) intelLocalStream.getTracks().forEach(track => track.stop());
+        $('#callOverlay').hide();
+        $('#dialpadDrawer, #inCallChatDrawer').hide();
+    }
+
+    function openCreateGroupModal() {
+        $.post('/api/intel-chat/get-users', { mode: 'directory' }, function(res) {
+            if (res.status === 'success') {
+                let html = '';
+                if (res.users) {
+                    res.users.forEach(u => {
+                        html += `<div class="form-check mb-1" style="font-size:12px;"><input class="form-check-input grp-m-chk" type="checkbox" value="${u.user_id}" id="g_u_${u.user_id}"><label for="g_u_${u.user_id}">${u.fullname}</label></div>`;
+                    });
+                }
+                $('#grp_users_list').html(html);
+                $('#createGroupModal').modal('show');
+            }
+        });
+    }
+
+    function submitCreateGroup() {
+        let name = $('#grp_name').val().trim();
+        let members = [];
+        $('.grp-m-chk:checked').each(function() { members.push($(this).val()); });
+        if (!name || members.length === 0) { alert('Provide Group Name and select at least 1 member.'); return; }
+        $.post('/api/intel-chat/create-group', { group_name: name, member_ids: members }, function(res) {
+            if (res.status === 'success') {
+                $('#createGroupModal').modal('hide');
+                loadUsersList();
+            } else {
+                alert(res.message || 'Error creating group');
+            }
+        });
+    }
+
+    function useAIMagic() {
+        let currentText = $('#intelChatInput').val();
+        $('#intelChatInput').val('✨ AI Generating...');
+        $.post('/api/intel-chat/ai-tools', { ai_action: 'compose', text: currentText }, function(res) {
+            if (res.status === 'success') $('#intelChatInput').val(res.data);
+        });
+    }
+</script>

@@ -1,0 +1,502 @@
+<style>
+  /* Premium Glassmorphic Sidebar Design */
+  .app-sidebar {
+    width: 260px;
+    background: rgba(255, 255, 255, 0.84) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+    border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1040;
+    transform: translateX(-260px);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 8px 0 36px rgba(15, 23, 42, 0.08), inset -1px 0 0 rgba(255, 255, 255, 0.9);
+  }
+
+  .app-sidebar.open,
+  .app-sidebar:hover,
+  .sidebar-hover-notch:hover + .app-sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-hover-notch {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1035;
+    box-shadow: 4px 0 16px rgba(37, 99, 235, 0.35);
+    transition: all 0.2s ease;
+  }
+
+  .sidebar-hover-notch:hover {
+    width: 28px;
+    box-shadow: 6px 0 20px rgba(37, 99, 235, 0.45);
+  }
+
+  .sidebar-brand {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  }
+
+  .sidebar-brand img {
+    max-height: 38px !important;
+    width: auto !important;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+  }
+
+  .sidebar-brand .brand-title {
+    color: var(--text-dark, #0f172a);
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
+
+  .sidebar-brand .brand-caption {
+    color: var(--text-muted, #64748b);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .sidebar-menu {
+    padding: 16px 12px;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .menu-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--text-muted, #64748b);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 0 10px 8px;
+  }
+
+  .nav-group {
+    margin-bottom: 4px;
+  }
+
+  .nav-item-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 13px;
+    color: var(--text-dark, #0f172a);
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+  }
+
+  .nav-item-link:hover {
+    background: rgba(37, 99, 235, 0.07) !important;
+    color: #1d4ed8 !important;
+    border-color: rgba(37, 99, 235, 0.12);
+    transform: translateX(2px);
+  }
+
+  .nav-item-link.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.94), rgba(29, 78, 216, 0.98)) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .nav-item-link:hover i,
+  .nav-item-link.active i {
+    color: #ffffff !important;
+  }
+  .nav-item-link:hover i.nav-icon {
+    color: #1d4ed8 !important;
+  }
+
+  .nav-item-link i.nav-icon {
+    width: 18px;
+    text-align: center;
+    font-size: 0.92rem;
+    color: var(--brand, #2563eb);
+    transition: color 0.2s;
+  }
+
+  .nav-children {
+    display: none;
+    padding-left: 10px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    border-left: 2px solid rgba(37, 99, 235, 0.2);
+    margin-left: 20px;
+  }
+
+  .nav-group.expanded > .nav-children {
+    display: block;
+  }
+
+  .nav-group.expanded > .nav-item-link .chevron-icon {
+    transform: rotate(180deg);
+  }
+
+  .nav-subitem-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    color: var(--text-muted, #64748b);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 2px;
+  }
+
+  .nav-subitem-link:hover {
+    color: #1d4ed8 !important;
+    background: rgba(37, 99, 235, 0.08) !important;
+    border-color: rgba(37, 99, 235, 0.15) !important;
+    transform: translateX(3px);
+  }
+
+  .nav-subitem-link.active {
+    color: #1d4ed8 !important;
+    background: rgba(37, 99, 235, 0.12) !important;
+    border-color: rgba(37, 99, 235, 0.25) !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12) !important;
+  }
+
+  .nav-subitem-link i.nav-icon {
+    font-size: 0.8rem;
+  }
+
+  .sidebar-footer {
+    padding: 12px 18px;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted, #64748b);
+    background: rgba(248, 250, 252, 0.75) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  /* Global Glassmorphic tokens for all app surfaces */
+  .panel, .card, .stat-card, .metric-card, .table-panel, .filter-panel, .workload-panel, .kpi-card, .content-card, .chart-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 8px 30px -4px rgba(15, 23, 42, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+    border-radius: 14px !important;
+  }
+</style>
+
+<button class="sidebar-hover-notch" id="sidebarToggle" type="button" aria-label="Open navigation">
+  <i class="fa-solid fa-chevron-right"></i>
+</button>
+
+<aside class="app-sidebar" id="appSidebar">
+  <div class="sidebar-brand">
+    <img src="/assets/branding/logo.png" alt="Brain Bird" onerror="this.src='/favicon.ico';">
+    <div>
+      <div class="brand-title" id="companyName">Brain Bird</div>
+      <div class="brand-caption">Operations Portal</div>
+    </div>
+  </div>
+  <nav class="sidebar-menu" aria-label="Main navigation">
+    <div class="menu-label">Workspace</div>
+    <div id="sidebarMenu">
+      <div class="text-muted small py-3 px-2"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading navigation...</div>
+    </div>
+  </nav>
+  <div class="sidebar-footer" id="sidebarFooter">Version 4.38.41</div>
+</aside>
+
+<script>
+(function() {
+  function normalizeRoute(p) {
+    if (!p) return '';
+    return p.split('?')[0].split('#')[0].replace(/^\/+|\/+$/g, '').toLowerCase();
+  }
+
+  function matchesRoute(currentPath, menuSlug) {
+    var cleanSlug = normalizeRoute(menuSlug);
+    if (!cleanSlug || cleanSlug === '#') return false;
+
+    // Exact match
+    if (currentPath === cleanSlug) return true;
+
+    // Top-level Dashboard MUST ONLY match exact 'dashboard' or root ''
+    if (cleanSlug === 'dashboard') {
+      return currentPath === 'dashboard' || currentPath === '';
+    }
+
+    // Alias and multi-route mapping for all modules
+    var aliases = {
+      'cases/add': ['cases/matrix', 'cases/add', 'cases/edit', 'case/edit'],
+      'master_edit': ['master_edit', 'cases/master_edit'],
+      'case_reset': ['case_reset', 'cases/reset'],
+      'admin/rework_cases': ['admin/rework_cases', 'cases/rework', 'rework'],
+      'admin/case_cleanup': ['admin/case_cleanup', 'cases/trash', 'case_cleanup', 'trash'],
+      'cases/export_data': ['cases/export_data', 'cases/export'],
+      'letters-manager/generate': ['letters-manager/generate', 'letters/generate'],
+      'letters-manager/manage': ['letters-manager/manage', 'letters/manage'],
+      'dashboard/analytics': ['dashboard/analytics', 'analytics'],
+      'app_forensic_analytics': ['app_forensic_analytics', 'forensic_analytics'],
+      'reports/employee_performance': ['reports/employee_performance', 'reports', 'employee_performance', 'reports/view_case_detail'],
+      'payout/verification': ['payout/verification', 'payout'],
+      'users/manage': ['users/manage', 'users'],
+      'users/allocation_manager': ['users/allocation_manager', 'allocation_manager'],
+      'users/points_setup': ['users/points_setup', 'points_setup'],
+      'dashboard/id_generator': ['dashboard/id_generator', 'id_generator'],
+      'staff_mapping': ['staff_mapping'],
+      'masters/locations': ['masters/locations', 'locations'],
+      'settings/master_data': ['settings/master_data', 'master_data'],
+      'permission_manager': ['permission_manager', 'permissions'],
+      'menu_manager': ['menu_manager'],
+      'settings/audit_logs': ['settings/audit_logs', 'audit_logs'],
+      'settings/email_reports': ['settings/email_reports', 'email_reports'],
+      'tracking/index': ['tracking/index', 'tracking'],
+      'dispatch': ['dispatch'],
+      'attendance/manual_matrix': ['attendance/manual_matrix', 'attendance'],
+      'users/change_password': ['users/change_password', 'change_password']
+    };
+
+    var list = aliases[cleanSlug];
+    if (list) {
+      for (var i = 0; i < list.length; i++) {
+        var r = list[i];
+        if (currentPath === r) {
+          return true;
+        }
+        if (r !== 'users' && r !== 'dashboard' && r !== 'payout' && r !== 'reports' && currentPath.indexOf(r + '/') === 0) {
+          return true;
+        }
+      }
+    }
+
+    if (cleanSlug !== 'users' && cleanSlug !== 'dashboard' && currentPath.indexOf(cleanSlug + '/') === 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function initDynamicSidebar() {
+    var nav = document.getElementById('sidebarMenu');
+    if (!nav) return;
+
+    var sidebar = document.getElementById('appSidebar');
+    var toggles = document.querySelectorAll('#sidebarToggle, #notchToggleBtn, .sidebar-hover-notch');
+    toggles.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (sidebar) sidebar.classList.toggle('open');
+      });
+    });
+
+    if (sidebar) {
+      document.addEventListener('click', function(e) {
+        var clickedInside = sidebar.contains(e.target);
+        var clickedToggle = false;
+        toggles.forEach(function(btn) {
+          if (btn.contains(e.target)) clickedToggle = true;
+        });
+        if (!clickedInside && !clickedToggle) {
+          sidebar.classList.remove('open');
+        }
+      });
+    }
+
+    fetch('/api/v1/dashboard/layout')
+      .then(function(res) {
+        if (!res.ok) throw new Error('Layout unavailable');
+        return res.json();
+      })
+      .then(function(data) {
+        if (!data || !data.sidebarModules) return;
+        var currentPath = normalizeRoute(window.location.pathname);
+        nav.innerHTML = '';
+
+        function createItem(menu, isChild) {
+          var group = document.createElement('div');
+          group.className = 'nav-group';
+          var hasChildren = menu.submenus && menu.submenus.length > 0;
+          var link = hasChildren ? document.createElement('button') : document.createElement('a');
+          link.className = isChild ? 'nav-subitem-link' : 'nav-item-link';
+
+          var slug = normalizeRoute(menu.module_slug);
+          if (!hasChildren) {
+            link.href = (slug && slug !== '#') ? ('/' + slug) : 'javascript:void(0)';
+            if (matchesRoute(currentPath, menu.module_slug)) {
+              link.classList.add('active');
+            }
+          } else {
+            link.type = 'button';
+            link.onclick = function(e) {
+              e.preventDefault();
+              group.classList.toggle('expanded');
+            };
+          }
+
+          var iconClass = menu.icon || 'fa-solid fa-circle';
+          var chevron = hasChildren ? '<i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6; transition:transform 0.2s;"></i>' : '';
+          link.innerHTML = '<i class="nav-icon ' + iconClass + '"></i><span>' + (menu.module_name || '') + '</span>' + chevron;
+          group.appendChild(link);
+
+          if (hasChildren) {
+            var childContainer = document.createElement('div');
+            childContainer.className = 'nav-children';
+            var anyChildActive = false;
+
+            menu.submenus.forEach(function(child) {
+              if (matchesRoute(currentPath, child.module_slug)) {
+                anyChildActive = true;
+              }
+              childContainer.appendChild(createItem(child, true));
+            });
+
+            if (anyChildActive) {
+              group.classList.add('expanded');
+            }
+            group.appendChild(childContainer);
+          }
+          return group;
+        }
+
+        data.sidebarModules.forEach(function(m) {
+          nav.appendChild(createItem(m, false));
+        });
+
+        if (data.appSettings && data.appSettings.company_name) {
+          var el = document.getElementById('companyName');
+          if (el) el.textContent = data.appSettings.company_name;
+        }
+        if (data.appSettings && data.appSettings.app_version) {
+          var sf = document.getElementById('sidebarFooter');
+          if (sf) sf.textContent = 'Version ' + data.appSettings.app_version;
+        }
+      })
+      .catch(function(err) {
+        // Fallback static links matching active database hierarchy (7 Logical Groups)
+        var currentPath = normalizeRoute(window.location.pathname);
+        nav.innerHTML = `
+          <!-- 1. Dashboard -->
+          <a class="nav-item-link ${matchesRoute(currentPath, 'dashboard') ? 'active' : ''}" href="/dashboard"><i class="nav-icon fa-solid fa-gauge"></i><span>Dashboard</span></a>
+
+          <!-- 2. Cases Management -->
+          <div class="nav-group ${['cases/matrix','cases/add','master_edit','case_reset','admin/rework_cases','admin/case_cleanup','cases/export_data'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-folder-tree"></i><span>Cases Management</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'cases/add') ? 'active' : ''}" href="/cases/matrix"><i class="nav-icon fa-solid fa-plus-circle"></i><span>Add New Case</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'master_edit') ? 'active' : ''}" href="/master_edit"><i class="nav-icon fa-solid fa-user-pen"></i><span>Master Case Edit</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'case_reset') ? 'active' : ''}" href="/case_reset"><i class="nav-icon fa-solid fa-undo"></i><span>Case Reset</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'admin/rework_cases') ? 'active' : ''}" href="/admin/rework_cases"><i class="nav-icon fa-solid fa-clock-rotate-left"></i><span>Rework</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'admin/case_cleanup') ? 'active' : ''}" href="/admin/case_cleanup"><i class="nav-icon fa-solid fa-trash-can"></i><span>Delete</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'cases/export_data') ? 'active' : ''}" href="/cases/export_data"><i class="nav-icon fa-solid fa-file-export"></i><span>Export Data</span></a>
+            </div>
+          </div>
+
+          <!-- 3. Field & Operations -->
+          <div class="nav-group ${['dispatch','attendance/manual_matrix','tracking/index','staff_mapping'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-truck-fast"></i><span>Field & Operations</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'dispatch') ? 'active' : ''}" href="/dispatch"><i class="nav-icon fa-solid fa-shield-halved"></i><span>Dispatch Dashboard</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'attendance/manual_matrix') ? 'active' : ''}" href="/attendance/manual_matrix"><i class="nav-icon fa-solid fa-calendar-xmark"></i><span>Attendance System</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'tracking/index') ? 'active' : ''}" href="/tracking/index"><i class="nav-icon fa-solid fa-map-location-dot"></i><span>Location Tracking</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'staff_mapping') ? 'active' : ''}" href="/staff_mapping"><i class="nav-icon fa-solid fa-map-pin"></i><span>Staff Mapping</span></a>
+            </div>
+          </div>
+
+          <!-- 4. Workforce & Users -->
+          <div class="nav-group ${['users/manage','users/allocation_manager','dashboard/id_generator'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-users-gear"></i><span>Workforce & Users</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'users/manage') ? 'active' : ''}" href="/users/manage"><i class="nav-icon fa-solid fa-users"></i><span>User Manager</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'users/allocation_manager') ? 'active' : ''}" href="/users/allocation_manager"><i class="nav-icon fa-solid fa-layer-group"></i><span>Allocation Manager</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'dashboard/id_generator') ? 'active' : ''}" href="/dashboard/id_generator"><i class="nav-icon fa-solid fa-id-card"></i><span>ID Card Generator</span></a>
+            </div>
+          </div>
+
+          <!-- 5. Performance Hub -->
+          <div class="nav-group ${['dashboard/analytics','app_forensic_analytics','reports/employee_performance','payout/verification','users/points_setup'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-chart-line"></i><span>Performance Hub</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'dashboard/analytics') ? 'active' : ''}" href="/dashboard/analytics"><i class="nav-icon fa-solid fa-chart-pie"></i><span>Analytics Hub</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'app_forensic_analytics') ? 'active' : ''}" href="/app_forensic_analytics"><i class="nav-icon fa-solid fa-fingerprint"></i><span>Forensic Analytics</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'reports/employee_performance') ? 'active' : ''}" href="/reports/employee_performance"><i class="nav-icon fa-solid fa-clipboard-user"></i><span>Performance</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'payout/verification') ? 'active' : ''}" href="/payout/verification"><i class="nav-icon fa-solid fa-file-invoice-dollar"></i><span>Payout Verification</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'users/points_setup') ? 'active' : ''}" href="/users/points_setup"><i class="nav-icon fa-solid fa-coins"></i><span>Points Setup</span></a>
+            </div>
+          </div>
+
+          <!-- 6. Letters Automation -->
+          <div class="nav-group ${['letters-manager/generate','letters-manager/manage'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-file-signature"></i><span>Letters Automation</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'letters-manager/generate') ? 'active' : ''}" href="/letters-manager/generate"><i class="nav-icon fa-solid fa-file-pdf"></i><span>Generate Letter</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'letters-manager/manage') ? 'active' : ''}" href="/letters-manager/manage"><i class="nav-icon fa-solid fa-file-code"></i><span>Manage Formats</span></a>
+            </div>
+          </div>
+
+          <!-- 7. System Governance -->
+          <div class="nav-group ${['masters/locations','settings/master_data','permission_manager','menu_manager','settings/audit_logs','settings/email_reports','users/change_password'].some(function(r){return matchesRoute(currentPath, r);}) ? 'expanded' : ''}">
+            <button class="nav-item-link" type="button" onclick="this.parentElement.classList.toggle('expanded')"><i class="nav-icon fa-solid fa-gear"></i><span>System Governance</span><i class="fa-solid fa-chevron-down chevron-icon ms-auto" style="font-size:10px; margin-left:auto; opacity:0.6;"></i></button>
+            <div class="nav-children">
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'masters/locations') ? 'active' : ''}" href="/masters/locations"><i class="nav-icon fa-solid fa-location-crosshairs"></i><span>Location Master</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'settings/master_data') ? 'active' : ''}" href="/settings/master_data"><i class="nav-icon fa-solid fa-cogs"></i><span>Master Insurance</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'permission_manager') ? 'active' : ''}" href="/permission_manager"><i class="nav-icon fa-solid fa-lock"></i><span>Master Permissions</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'menu_manager') ? 'active' : ''}" href="/menu_manager"><i class="nav-icon fa-solid fa-sitemap"></i><span>Menu Architecture</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'settings/audit_logs') ? 'active' : ''}" href="/settings/audit_logs"><i class="nav-icon fa-solid fa-clipboard-list"></i><span>Audit Log</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'settings/email_reports') ? 'active' : ''}" href="/settings/email_reports"><i class="nav-icon fa-solid fa-envelope-open-text"></i><span>Email Reports</span></a>
+              <a class="nav-subitem-link ${matchesRoute(currentPath, 'users/change_password') ? 'active' : ''}" href="/users/change_password"><i class="nav-icon fa-solid fa-key"></i><span>Change Password</span></a>
+            </div>
+          </div>
+        `;
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDynamicSidebar);
+  } else {
+    initDynamicSidebar();
+  }
+})();
+</script>

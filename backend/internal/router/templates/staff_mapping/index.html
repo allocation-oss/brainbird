@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Mapping Console | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .module-card { 
+        background: var(--surface); 
+        border: 1px solid var(--line); 
+        border-radius: 14px; 
+        padding: 24px; 
+        box-shadow: var(--shadow); 
+        margin-bottom: 24px; 
+    }
+
+    .nav-tabs .nav-link { 
+        font-weight: 700; 
+        color: var(--muted); 
+        border: none; 
+        border-bottom: 3px solid transparent; 
+        padding: 10px 20px; 
+        font-size: 13px;
+    }
+    .nav-tabs .nav-link.active { 
+        color: var(--brand); 
+        border-bottom-color: var(--brand); 
+        background: transparent; 
+    }
+
+    .mapping-badge { 
+        font-size: 11px; 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        font-weight: 700; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 4px; 
+        margin: 2px; 
+    }
+
+    .table-custom thead th { 
+        background: #f8fafc !important; 
+        color: var(--muted) !important; 
+        font-size: 11px; 
+        font-weight: 700;
+        text-transform: uppercase; 
+        letter-spacing: .06em;
+        padding: 12px 16px; 
+        border-bottom: 1px solid var(--line) !important; 
+    }
+    .table-custom tbody td { 
+        vertical-align: middle; 
+        font-size: 13px; 
+        padding: 12px 16px; 
+        border-bottom: 1px solid var(--line); 
+    }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Navigation Suite Bar -->
+            <div class="suite-nav-bar">
+                <a href="/users/manage" class="suite-nav-item"><i class="fa-solid fa-users"></i> Users Directory</a>
+                <a href="/staff_mapping" class="suite-nav-item active"><i class="fa-solid fa-network-wired"></i> Staff Mapping</a>
+                <a href="/users/allocation_manager" class="suite-nav-item"><i class="fa-solid fa-map-location-dot"></i> Allocation Manager</a>
+                <a href="/users/points_setup" class="suite-nav-item"><i class="fa-solid fa-sliders"></i> Points & TAT Setup</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-network-wired text-primary me-2"></i> Staff Mapping & Hierarchy Console</h4>
+                    <span class="muted">Link Area Managers to geographical regions, and Case/Report Managers to insurance companies</span>
+                </div>
+            </div>
+
+            <!-- MAPPING ADD FORM -->
+            <div class="module-card">
+                <ul class="nav nav-tabs mb-4" id="mappingTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="am-tab" data-bs-toggle="tab" data-bs-target="#am-pane" type="button"><i class="fa-solid fa-map-location-dot me-2"></i> Area Manager (State & District)</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="cm-tab" data-bs-toggle="tab" data-bs-target="#cm-pane" type="button"><i class="fa-solid fa-user-shield me-2"></i> Case Manager (Company Wise)</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="rm-tab" data-bs-toggle="tab" data-bs-target="#rm-pane" type="button"><i class="fa-solid fa-file-pen me-2"></i> Report Maker (Company Wise)</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="mappingTabsContent">
+                    <!-- TAB 1: Area Manager -->
+                    <div class="tab-pane fade show active" id="am-pane" role="tabpanel">
+                        <form id="amForm" onsubmit="event.preventDefault(); saveAMMapping();" class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Area Manager *</label>
+                                <select id="am_user_id" class="form-select fw-semibold" required>
+                                    <option value="">-- Select Area Manager --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted text-uppercase">State *</label>
+                                <select id="am_state_id" class="form-select fw-semibold" onchange="loadAMDistricts()" required>
+                                    <option value="0">All States</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted text-uppercase">District</label>
+                                <select id="am_district_id" class="form-select fw-semibold">
+                                    <option value="0">All Districts</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end mt-3">
+                                <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-pill"><i class="fa-solid fa-save me-2"></i> Save Area Manager Mapping</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- TAB 2: Case Manager -->
+                    <div class="tab-pane fade" id="cm-pane" role="tabpanel">
+                        <form id="cmForm" onsubmit="event.preventDefault(); saveCMMapping();" class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Case Manager *</label>
+                                <select id="cm_user_id" class="form-select fw-semibold" required>
+                                    <option value="">-- Select Case Manager --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Insurance Company *</label>
+                                <select id="cm_company_id" class="form-select fw-semibold" required>
+                                    <option value="0">All Companies</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end mt-3">
+                                <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-pill"><i class="fa-solid fa-save me-2"></i> Save Case Manager Mapping</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- TAB 3: Report Maker -->
+                    <div class="tab-pane fade" id="rm-pane" role="tabpanel">
+                        <form id="rmForm" onsubmit="event.preventDefault(); saveRMMapping();" class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Report Maker *</label>
+                                <select id="rm_user_id" class="form-select fw-semibold" required>
+                                    <option value="">-- Select Report Maker --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Insurance Company *</label>
+                                <select id="rm_company_id" class="form-select fw-semibold" required>
+                                    <option value="0">All Companies</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end mt-3">
+                                <button type="submit" class="btn btn-primary fw-semibold px-4 rounded-pill"><i class="fa-solid fa-save me-2"></i> Save Report Maker Mapping</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILTER & LISTING CARD -->
+            <div class="module-card">
+                <div class="row g-3 align-items-end mb-4 border-bottom pb-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase"><i class="fa-solid fa-filter text-primary me-1"></i> Filter Mapping Type *</label>
+                        <select id="filter_mapping_type" class="form-select fw-semibold" onchange="onFilterTypeChange()">
+                            <option value="all" selected>All Mappings (Area, Case, Report Managers)</option>
+                            <option value="am">Area Manager Mappings</option>
+                            <option value="cm">Case Manager Mappings</option>
+                            <option value="rm">Report Maker Mappings</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-muted text-uppercase"><i class="fa-solid fa-user me-1 text-primary"></i> Filter Staff Member</label>
+                        <select id="filter_staff_id" class="form-select fw-semibold" onchange="fetchList()">
+                            <option value="0">All Staff Members</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-primary fw-semibold w-100 rounded-pill" onclick="fetchList()"><i class="fa-solid fa-search me-1"></i> Load Mappings</button>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                    <h6 class="fw-bold m-0 text-uppercase text-muted small">Configured Staff Mappings</h6>
+                    <small class="fw-bold text-muted" id="recordCountInfo">Total Staff: 0</small>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover table-custom align-middle">
+                        <thead>
+                            <tr id="mappingTableHeaderTr">
+                                <th style="width: 50px;">#</th>
+                                <th style="width: 150px;">Type</th>
+                                <th style="width: 200px;">Staff Name</th>
+                                <th>Mapped Rules / Locations / Companies</th>
+                                <th class="text-center" style="width: 120px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mappingList">
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted fw-bold">
+                                    <i class="fa-solid fa-hand-pointer fa-2x mb-2 text-primary d-block"></i>
+                                    Please select a Mapping Type above to view configured mappings.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top">
+                    <div class="small fw-bold text-muted" id="pageNumberInfo">Page 1 of 1</div>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0" id="paginationControls"></ul>
+                    </nav>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bar">
+            {{FOOTER_PARTIAL}}
+        </div>
+    </div>
+</div>
+
+<!-- EDIT POPUP MODAL -->
+<div class="modal fade" id="editMappingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0" id="editModalTitle"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i> Manage Staff Mappings</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="edit_staff_id">
+                <input type="hidden" id="edit_type_code">
+
+                <div class="alert alert-light border fw-bold d-flex justify-content-between align-items-center mb-3">
+                    <span id="editStaffNameInfo" class="fs-6 text-dark">Staff Name</span>
+                    <span id="editTypeCodeBadge" class="badge bg-primary fs-7">Type</span>
+                </div>
+
+                <h6 class="fw-bold mb-2 text-muted text-uppercase small">Active Rules Configured:</h6>
+                <div id="modalRulesList" class="p-3 bg-light rounded-3 border mb-3" style="max-height: 250px; overflow-y: auto;">
+                    <div class="text-center text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2 justify-content-between">
+                <button type="button" class="btn btn-outline-danger btn-sm fw-bold rounded-pill" onclick="deleteAllStaffRules()"><i class="fa-solid fa-trash me-1"></i> Clear All Mappings</button>
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let allStaffMappings = [];
+let currentPage = 1;
+const pageSize = 25;
+let initialGlobalData = null;
+
+function initDropdowns() {
+    $.get('/api/staff_mapping/get_initial_data', function(res) {
+        if(res.status === 'success') {
+            initialGlobalData = res;
+            
+            if(res.amUsers) {
+                let amHtml = '<option value="">-- Select Area Manager --</option>';
+                res.amUsers.forEach(u => amHtml += `<option value="${u.id}">${u.fullname}</option>`);
+                $('#am_user_id').html(amHtml);
+            }
+            if(res.cmUsers) {
+                let cmHtml = '<option value="">-- Select Case Manager --</option>';
+                res.cmUsers.forEach(u => cmHtml += `<option value="${u.id}">${u.fullname}</option>`);
+                $('#cm_user_id').html(cmHtml);
+            }
+            if(res.rmUsers) {
+                let rmHtml = '<option value="">-- Select Report Maker --</option>';
+                res.rmUsers.forEach(u => rmHtml += `<option value="${u.id}">${u.fullname}</option>`);
+                $('#rm_user_id').html(rmHtml);
+            }
+            if(res.states) {
+                let sHtml = '<option value="0">All States</option>';
+                res.states.forEach(s => sHtml += `<option value="${s.id}">${s.state_name}</option>`);
+                $('#am_state_id').html(sHtml);
+            }
+            if(res.companies) {
+                let cHtml = '<option value="0">All Companies</option>';
+                res.companies.forEach(c => cHtml += `<option value="${c.id}">${c.company_name}</option>`);
+                $('#cm_company_id, #rm_company_id').html(cHtml);
+            }
+        }
+    });
+}
+
+function updateDynamicTableHeader(type) {
+    let ruleHeader = 'Mapped Rules / Locations / Companies';
+    if (type === 'am') {
+        ruleHeader = 'Mapped States & Districts';
+    } else if (type === 'cm' || type === 'rm') {
+        ruleHeader = 'Mapped Insurance Companies';
+    }
+
+    let headerHtml = `
+        <th style="width: 50px;">#</th>
+        <th style="width: 150px;">Type</th>
+        <th style="width: 200px;">Staff Name</th>
+        <th>${ruleHeader}</th>
+        <th class="text-center" style="width: 120px;">Action</th>
+    `;
+    $('#mappingTableHeaderTr').html(headerHtml);
+}
+
+function onFilterTypeChange() {
+    let type = $('#filter_mapping_type').val();
+    let staffSelect = $('#filter_staff_id');
+    staffSelect.html('<option value="0">All Staff Members</option>');
+
+    updateDynamicTableHeader(type);
+
+    if (type === 'am' && initialGlobalData && initialGlobalData.amUsers) {
+        initialGlobalData.amUsers.forEach(u => staffSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+    } else if (type === 'cm' && initialGlobalData && initialGlobalData.cmUsers) {
+        initialGlobalData.cmUsers.forEach(u => staffSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+    } else if (type === 'rm' && initialGlobalData && initialGlobalData.rmUsers) {
+        initialGlobalData.rmUsers.forEach(u => staffSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+    } else if (type === 'all' && initialGlobalData) {
+        let combined = [...(initialGlobalData.amUsers || []), ...(initialGlobalData.cmUsers || []), ...(initialGlobalData.rmUsers || [])];
+        let uniqueMap = {};
+        combined.forEach(u => uniqueMap[u.id] = u.fullname);
+        Object.keys(uniqueMap).forEach(id => staffSelect.append(`<option value="${id}">${uniqueMap[id]}</option>`));
+    }
+
+    if (type) {
+        fetchList();
+    } else {
+        allStaffMappings = [];
+        $('#mappingList').html(`
+            <tr>
+                <td colspan="5" class="text-center py-5 text-muted fw-bold">
+                    <i class="fa-solid fa-hand-pointer fa-2x mb-2 text-primary d-block"></i>
+                    Please select a Mapping Type above to view configured mappings.
+                </td>
+            </tr>
+        `);
+        $('#recordCountInfo').text('Total Staff: 0');
+        $('#pageNumberInfo').text('Page 1 of 1');
+        $('#paginationControls').html('');
+    }
+}
+
+function loadAMDistricts() {
+    let stateId = $('#am_state_id').val();
+    $('#am_district_id').html('<option value="0">All Districts</option>');
+    if(stateId && stateId !== '0') {
+        $.post('/api/alloc_mgr/get_districts', { state_id: stateId }, function(res) {
+            if(res.status === 'success') {
+                res.data.forEach(d => {
+                    $('#am_district_id').append(`<option value="${d.id}">${d.district_name}</option>`);
+                });
+            }
+        });
+    }
+}
+
+function saveAMMapping() {
+    let data = {
+        mapping_type: 'am',
+        area_manager_id: $('#am_user_id').val(),
+        state_id: $('#am_state_id').val(),
+        district_id: $('#am_district_id').val()
+    };
+    postSave(data, '#amForm');
+}
+
+function saveCMMapping() {
+    let data = {
+        mapping_type: 'cm',
+        case_manager_id: $('#cm_user_id').val(),
+        insurance_company_id: $('#cm_company_id').val()
+    };
+    postSave(data, '#cmForm');
+}
+
+function saveRMMapping() {
+    let data = {
+        mapping_type: 'rm',
+        report_maker_id: $('#rm_user_id').val(),
+        insurance_company_id: $('#rm_company_id').val()
+    };
+    postSave(data, '#rmForm');
+}
+
+function postSave(data, formId) {
+    $.post('/api/staff_mapping/save', data, function(res) {
+        if(res.status === 'success') {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 1500 });
+            $(formId)[0].reset();
+            if($('#filter_mapping_type').val()) {
+                fetchList();
+            }
+        } else {
+            Swal.fire('Error', res.message, 'error');
+        }
+    });
+}
+
+function fetchList() {
+    let fType = $('#filter_mapping_type').val();
+    let fStaff = $('#filter_staff_id').val();
+
+    if(!fType) return;
+
+    $('#mappingList').html('<tr><td colspan="5" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading mapped staff...</td></tr>');
+
+    $.post('/api/staff_mapping/list', { filter_type: fType, filter_staff_id: fStaff }, function(res) {
+        if(res.status === 'success' && res.data) {
+            allStaffMappings = res.data;
+            currentPage = 1;
+            renderPagedTable();
+        } else {
+            allStaffMappings = [];
+            renderPagedTable();
+        }
+    });
+}
+
+function renderPagedTable() {
+    let totalRecords = allStaffMappings.length;
+    let totalPages = Math.ceil(totalRecords / pageSize) || 1;
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    let startIdx = (currentPage - 1) * pageSize;
+    let endIdx = startIdx + pageSize;
+    let pageData = allStaffMappings.slice(startIdx, endIdx);
+
+    $('#recordCountInfo').text(`Total Staff: ${totalRecords}`);
+    $('#pageNumberInfo').text(`Showing ${pageData.length > 0 ? startIdx + 1 : 0} - ${Math.min(endIdx, totalRecords)} of ${totalRecords}`);
+
+    let html = '';
+    if(pageData.length > 0) {
+        pageData.forEach((r, idx) => {
+            let badgeBg = 'bg-primary';
+            if(r.mapping_type === 'Case Manager') badgeBg = 'bg-success';
+            else if(r.mapping_type === 'Report Maker') badgeBg = 'bg-warning text-dark';
+
+            let ruleBadgesHtml = '';
+            r.mappings.forEach(m => {
+                ruleBadgesHtml += `<span class="mapping-badge bg-light text-dark border shadow-sm"><i class="fa-solid fa-check text-success"></i> ${m.rule}</span>`;
+            });
+
+            html += `<tr>
+                <td class="fw-bold text-muted">${startIdx + idx + 1}</td>
+                <td><span class="badge ${badgeBg} fw-semibold">${r.mapping_type}</span></td>
+                <td class="fw-bold text-dark">${r.staff_name}</td>
+                <td><div class="d-flex flex-wrap align-items-center">${ruleBadgesHtml}</div></td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${r.staff_id}, '${r.type_code}')" title="Edit Mappings"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="clearAllStaffRules(${r.staff_id}, '${r.type_code}')" title="Delete All"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    } else {
+        html = '<tr><td colspan="5" class="text-center py-4 text-muted fw-bold">No Mappings Configured for this selection</td></tr>';
+    }
+    $('#mappingList').html(html);
+    renderPaginationControls(totalPages);
+}
+
+function renderPaginationControls(totalPages) {
+    if (totalPages <= 1) {
+        $('#paginationControls').html('');
+        return;
+    }
+
+    let pControls = '';
+    pControls += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(1)">«</a></li>`;
+    pControls += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${currentPage - 1})">‹</a></li>`;
+
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+        pControls += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" onclick="goToPage(${i})">${i}</a></li>`;
+    }
+
+    pControls += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${currentPage + 1})">›</a></li>`;
+    pControls += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${totalPages})">»</a></li>`;
+
+    $('#paginationControls').html(pControls);
+}
+
+function goToPage(page) {
+    currentPage = page;
+    renderPagedTable();
+}
+
+function openEditModal(staffId, typeCode) {
+    $('#edit_staff_id').val(staffId);
+    $('#edit_type_code').val(typeCode);
+    $('#modalRulesList').html('<div class="text-center py-3 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading rules...</div>');
+    $('#editMappingModal').modal('show');
+
+    $.post('/api/staff_mapping/get_staff_details', { staff_id: staffId, type_code: typeCode }, function(res) {
+        if(res.status === 'success') {
+            $('#editStaffNameInfo').text(res.staff_name);
+            let typeTitle = 'Area Manager';
+            if(typeCode === 'cm') typeTitle = 'Case Manager';
+            else if(typeCode === 'rm') typeTitle = 'Report Maker';
+            $('#editTypeCodeBadge').text(typeTitle);
+
+            let listHtml = '';
+            if(res.data && res.data.length > 0) {
+                res.data.forEach(item => {
+                    let ruleText = item.company_name || (item.state_name + (item.district_name ? ' (' + item.district_name + ')' : ''));
+                    listHtml += `
+                        <div class="d-flex align-items-center justify-content-between p-2 mb-2 bg-white rounded border">
+                            <span class="fw-bold text-dark small"><i class="fa-solid fa-check-circle text-success me-2"></i> ${ruleText}</span>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSingleRule(${item.id}, '${typeTitle}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                });
+            } else {
+                listHtml = '<div class="text-center text-muted py-3 fw-bold">No rules found.</div>';
+            }
+            $('#modalRulesList').html(listHtml);
+        }
+    });
+}
+
+function deleteSingleRule(id, typeTitle) {
+    $.post('/api/staff_mapping/delete', { id: id, mapping_type: typeTitle }, function(res) {
+        if(res.status === 'success') {
+            openEditModal($('#edit_staff_id').val(), $('#edit_type_code').val());
+            fetchList();
+        }
+    });
+}
+
+function clearAllStaffRules(staffId, typeCode) {
+    Swal.fire({ title: 'Remove All Mappings?', text: "This will delete all assigned mapping rules for this employee.", icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes, delete all!' })
+    .then((result) => {
+        if (result.isConfirmed) {
+            $.post('/api/staff_mapping/delete_all', { staff_id: staffId, type_code: typeCode }, function(res) {
+                if(res.status === 'success') { 
+                    fetchList(); 
+                }
+            });
+        }
+    });
+}
+
+function deleteAllStaffRules() {
+    let staffId = $('#edit_staff_id').val();
+    let typeCode = $('#edit_type_code').val();
+    clearAllStaffRules(staffId, typeCode);
+    $('#editMappingModal').modal('hide');
+}
+
+$(document).ready(function() { 
+    initDropdowns(); 
+    fetchList();
+});
+</script>
+</body>
+</html>

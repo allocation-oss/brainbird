@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Performance & Incentive Matrix | Brain Bird</title>
+    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --slate-base: #f8fafc;
+            --slate-surface: #ffffff;
+            --brand-primary: #2563eb;
+            --neutral-bg: #f1f5f9;
+            --neutral-border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--neutral-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Sidebar Styling - Matched with Dashboard */
+        .app-sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid var(--neutral-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1040;
+            transform: translateX(-260px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .app-sidebar:hover,
+        .sidebar-hover-notch:hover + .app-sidebar {
+            transform: translateX(0);
+        }
+
+        .sidebar-hover-notch {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 60px;
+            background-color: var(--brand-primary);
+            color: #ffffff;
+            border-radius: 0 12px 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1035;
+            box-shadow: 2px 0 10px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-hover-notch:hover {
+            width: 28px;
+        }
+
+        .sidebar-brand {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--neutral-border);
+        }
+
+        .sidebar-brand img {
+            max-height: 38px;
+            object-fit: contain;
+        }
+
+        .sidebar-brand .title {
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .sidebar-menu {
+            padding: 20px 14px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 0 12px 10px;
+        }
+
+        .nav-item-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-dark);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item-link:hover, .nav-item-link.active {
+            background-color: var(--brand-primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .nav-subitem-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px 8px 40px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-subitem-link:hover {
+            color: var(--brand-primary);
+            background-color: #f1f5f9;
+        }
+
+        .app-main {
+            margin-left: 0;
+            flex-grow: 1;
+            background-color: var(--neutral-bg);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .app-header {
+            background-color: #ffffff;
+            height: 70px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--neutral-border);
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        .header-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--brand-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .app-content {
+            padding: 20px 16px;
+            flex-grow: 1;
+        }
+
+        /* Light Theme Banner - Matched with Dashboard */
+        .perf-header-banner {
+            background: #ffffff;
+            border: 1px solid var(--neutral-border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            color: var(--text-dark);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        /* Stat KPI Cards - Matched with Dashboard */
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--neutral-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s ease;
+            height: 100%;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -5px rgba(0, 0, 0, 0.08);
+        }
+
+        .kpi-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+        }
+
+        /* Filter Controls Card */
+        .control-panel-card {
+            background: #ffffff;
+            border: 1px solid var(--neutral-border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .type-toggle-btn {
+            border-radius: 30px;
+            padding: 8px 22px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #64748b;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .type-toggle-btn.active {
+            background: var(--brand-primary);
+            color: #ffffff;
+            border-color: var(--brand-primary);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Matrix Table Container */
+        .matrix-card {
+            background: #ffffff;
+            border: 1px solid var(--neutral-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .matrix-scroll-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .table-matrix {
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.72rem;
+            width: 100% !important;
+            table-layout: fixed;
+        }
+
+        /* Table Header Color & Formatting Matched with Dashboard (#1e293b dark navy with white bold text) */
+        .table-matrix thead tr {
+            background-color: #1e293b !important;
+        }
+
+        .table-matrix thead th {
+            background: #1e293b !important;
+            color: #ffffff !important;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.70rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 2px !important;
+            border: none !important;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-matrix thead th.sticky-col-header {
+            position: sticky;
+            left: 0;
+            z-index: 20;
+            background: #1e293b !important;
+            color: #ffffff !important;
+            text-align: left;
+            padding-left: 14px !important;
+            width: 155px !important;
+            border-top-left-radius: 12px;
+        }
+
+        .table-matrix thead th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        .table-matrix tbody td {
+            vertical-align: middle;
+            text-align: center;
+            padding: 8px 2px !important;
+            border-bottom: 1px solid var(--neutral-border);
+            border-right: 1px dashed #f1f5f9;
+        }
+
+        .table-matrix tbody td.sticky-col-body {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 15;
+            text-align: left;
+            padding-left: 14px !important;
+            width: 155px !important;
+            font-weight: 700;
+            color: var(--text-dark);
+            border-right: 2px solid var(--neutral-border);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.02);
+        }
+
+        /* Matrix Badges */
+        .day-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.65rem;
+            transition: transform 0.15s ease;
+        }
+
+        .day-badge:hover {
+            transform: scale(1.2);
+        }
+
+        .day-badge-zero { background: #f1f5f9; color: #94a3b8; }
+        .day-badge-low { background: #dbeafe; color: #1e40af; }
+        .day-badge-mid { background: #dcfce7; color: #166534; }
+        .day-badge-high { background: #fef08a; color: #854d0e; }
+        .day-badge-max { background: #fee2e2; color: #991b1b; }
+
+        .tot-badge { 
+            background: #2563eb; 
+            color: #ffffff; 
+            font-size: 0.75rem; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-weight: 800; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tot-badge:hover {
+            background: #1d4ed8;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+
+        .pts-badge { 
+            background: #f59e0b; 
+            color: #ffffff; 
+            font-size: 0.75rem; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            font-weight: 800; 
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Employee name click -> 12 month popup */
+        .emp-name-link {
+            cursor: pointer;
+            color: var(--brand-primary);
+        }
+        .emp-name-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 12 month chips */
+        .m12-chip {
+            border: 1px solid var(--neutral-border);
+            border-radius: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: pointer;
+            background: #ffffff;
+            transition: all 0.15s ease;
+            height: 100%;
+        }
+        .m12-chip:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.12);
+        }
+        .m12-chip.active {
+            background: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: #ffffff;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+        }
+        .m12-chip .m12-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .m12-chip .m12-cases { font-size: 1.2rem; font-weight: 800; line-height: 1.2; }
+        .m12-chip .m12-pts { font-size: 0.68rem; font-weight: 700; opacity: 0.85; }
+
+        .pts-badge:hover {
+            background: #d97706;
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+<div class="suite-nav-bar" style="display:flex;align-items:center;gap:8px;background:#ffffff;padding:6px 10px;border-radius:12px;border:1px solid #dce2e7;margin-bottom:20px;overflow-x:auto;">
+    <a href="/dashboard/analytics" class="suite-nav-item" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#6b7785;text-decoration:none;border-radius:8px;"><i class="fa-solid fa-chart-line"></i> Analytics Hub</a>
+    <a href="/forensic_analytics" class="suite-nav-item" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#6b7785;text-decoration:none;border-radius:8px;"><i class="fa-solid fa-magnifying-glass-chart"></i> Forensic Analytics</a>
+    <a href="/reports/employee_performance" class="suite-nav-item active" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#ffffff;background:#2563eb;text-decoration:none;border-radius:8px;box-shadow:0 4px 12px rgba(37,99,235,.25);"><i class="fa-solid fa-chart-pie"></i> Employee Performance</a>
+</div>
+            
+            <!-- Top Banner Header -->
+            <div class="perf-header-banner d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h4 class="fw-bold m-0 d-flex align-items-center text-dark">
+                        <i class="fa-solid fa-award text-warning me-3 fs-3"></i> 
+                        Performance & Incentive Matrix
+                    </h4>
+                    <p class="text-muted m-0 mt-1 small opacity-75">Strict Database Mapped Points, Case Volume & TAT Calculation Engine</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-warning fw-bold px-3 py-2 rounded-3 shadow-sm text-nowrap" onclick="openSixMonthModal()">
+                        <i class="fa-solid fa-calendar-week me-2"></i> Last 6 Months
+                    </button>
+                    <button type="button" class="btn btn-info text-white fw-bold px-3 py-2 rounded-3 shadow-sm text-nowrap" onclick="openIndividualModal()">
+                        <i class="fa-solid fa-user-check me-2"></i> Individual Perf.
+                    </button>
+                    <button type="button" class="btn btn-success fw-bold px-3 py-2 rounded-3 shadow-sm text-nowrap" onclick="exportMatrixToExcel()">
+                        <i class="fa-solid fa-file-excel me-2"></i> Export To Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Stat KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">Total Month Points</span>
+                            <h2 class="fw-extrabold text-warning m-0 mt-1" id="kpi_total_points">0.00</h2>
+                        </div>
+                        <div class="kpi-icon-box bg-warning bg-opacity-10 text-warning">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">Active Employees</span>
+                            <h2 class="fw-extrabold text-success m-0 mt-1" id="kpi_active_employees">0</h2>
+                        </div>
+                        <div class="kpi-icon-box bg-success bg-opacity-10 text-success">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="kpi-card d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small text-uppercase">Top Points Scorer</span>
+                            <h5 class="fw-bold text-primary m-0 mt-1 text-truncate" id="kpi_top_scorer_name">--</h5>
+                            <small class="text-muted fw-bold" id="kpi_top_scorer_pts">0 Pts</small>
+                        </div>
+                        <div class="kpi-icon-box bg-primary bg-opacity-10 text-primary">
+                            <i class="fa-solid fa-ranking-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control & Filter Panel Card -->
+            <div class="control-panel-card">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 border-bottom pb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="type-toggle-btn active" id="btn_staff_salary" onclick="toggleStaffType('salary')">
+                            <i class="fa-solid fa-user-tie me-2"></i> Salaried Staff
+                        </button>
+                        <button type="button" class="type-toggle-btn" id="btn_staff_freelancer" onclick="toggleStaffType('freelancer')">
+                            <i class="fa-solid fa-user-gear me-2"></i> Freelancers
+                        </button>
+                    </div>
+                    <div class="text-muted small fw-bold">
+                        <i class="fa-solid fa-info-circle me-1 text-primary"></i> Select Role to generate Matrix Sheet
+                    </div>
+                </div>
+
+                <form id="perfFilterForm" class="row g-3 align-items-end" onsubmit="event.preventDefault(); loadMatrixData();">
+                    <input type="hidden" id="filter_staff_type" value="salary">
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Month & Year</label>
+                        <input type="month" id="filter_month" class="form-control fw-bold border-primary" onchange="loadMatrixData()" required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Role *</label>
+                        <select id="filter_role" class="form-select fw-bold border-primary" onchange="loadMatrixData()" required>
+                            <option value="Report Maker" selected>Report Maker</option>
+                            
+                                <option value="Report Maker">Report Maker</option>
+                                <option value="FO">Field Officer (FO)</option>
+                                <option value="Allocation Manager">Allocation Manager</option>
+                                <option value="Case Manager">Case Manager</option>
+                                <option value="ICM">ICM</option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Case Status Filter</label>
+                        <select id="filter_status" class="form-select fw-bold border-primary" onchange="loadMatrixData()">
+                            <option value="">-- All Status --</option>
+                            <!-- Loaded dynamically via /api/reports/meta -->
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Search Employee</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-primary border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
+                            <input type="text" id="filter_search_employee" class="form-control border-primary border-start-0" placeholder="Type employee name..." onkeyup="filterEmployeeRows()">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Performance Matrix Sheet Card -->
+            <div class="matrix-card">
+                <div class="matrix-scroll-wrapper">
+                    <table class="table table-matrix align-middle">
+                        <thead>
+                            <tr id="matrixTableHeader">
+                                <th class="sticky-col-header" style="width:155px;">EMPLOYEE</th>
+                                
+                                    <th style="width: 2.4%;">1</th>
+                                    <th style="width: 2.4%;">2</th>
+                                    <th style="width: 2.4%;">3</th>
+                                    <th style="width: 2.4%;">4</th>
+                                    <th style="width: 2.4%;">5</th>
+                                    <th style="width: 2.4%;">6</th>
+                                    <th style="width: 2.4%;">7</th>
+                                    <th style="width: 2.4%;">8</th>
+                                    <th style="width: 2.4%;">9</th>
+                                    <th style="width: 2.4%;">10</th>
+                                    <th style="width: 2.4%;">11</th>
+                                    <th style="width: 2.4%;">12</th>
+                                    <th style="width: 2.4%;">13</th>
+                                    <th style="width: 2.4%;">14</th>
+                                    <th style="width: 2.4%;">15</th>
+                                    <th style="width: 2.4%;">16</th>
+                                    <th style="width: 2.4%;">17</th>
+                                    <th style="width: 2.4%;">18</th>
+                                    <th style="width: 2.4%;">19</th>
+                                    <th style="width: 2.4%;">20</th>
+                                    <th style="width: 2.4%;">21</th>
+                                    <th style="width: 2.4%;">22</th>
+                                    <th style="width: 2.4%;">23</th>
+                                    <th style="width: 2.4%;">24</th>
+                                    <th style="width: 2.4%;">25</th>
+                                    <th style="width: 2.4%;">26</th>
+                                    <th style="width: 2.4%;">27</th>
+                                    <th style="width: 2.4%;">28</th>
+                                    <th style="width: 2.4%;">29</th>
+                                    <th style="width: 2.4%;">30</th>
+                                    <th style="width: 2.4%;">31</th>
+                                <th style="width: 45px;">TOT</th>
+                                <th style="width: 50px;">PTS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTableBody">
+                            <tr>
+                                <td colspan="34" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-hand-pointer fa-2x mb-2 text-warning d-block"></i>
+                                    <span class="fw-bold">Please select a Role from the filter panel above to view Performance Matrix</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </main>
+</div>
+
+<!-- Modal: Day Case Details Breakdown -->
+
+<!-- Last 6 Months Modal -->
+<div class="modal fade" id="sixMonthModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white py-3" style="background-color: #1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-calendar-week me-2 text-warning"></i> Last 6 Months Summary</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="sixMonthBody">
+                <div class="text-center py-4 text-muted">Loading...</div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee 12 Month Modal -->
+<div class="modal fade" id="emp12Modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white py-3" style="background-color: #1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user me-2 text-info"></i> <span id="emp12Title">Employee</span> — Last 12 Months</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Select Month</label>
+                    <select id="emp12_month_select" class="form-select form-select-sm border-primary fw-bold" style="max-width:220px" onchange="onEmp12MonthChange()"></select>
+                </div>
+                <div class="row g-2 mb-3" id="emp12Chips"></div>
+                <div id="emp12Detail"></div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dayCaseDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white py-3" style="background-color: #1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-list-check me-2 text-warning"></i> Daily Case & Points Breakdown</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="dayCaseDetailBody">
+                <div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Loading case details...</div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Pro-Level Full Month Case Details Breakdown -->
+<div class="modal fade" id="monthCaseDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white py-3" style="background-color: #1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-chart-line me-2 text-info"></i> Employee Full Month Performance Report</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" id="monthCaseDetailBody">
+                <div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Fetching complete month case records...</div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Individual Performance Modal -->
+<div class="modal fade" id="individualPerfModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white py-3" style="background-color: #1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-user-astronaut me-2 text-info"></i> Individual Performance Breakdown</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">Select Employee</label>
+                        <select id="ind_emp_select" class="form-select border-primary fw-bold">
+                            <option value="">-- Choose Employee --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary w-100 fw-bold" onclick="fetchIndividualBreakdown()"><i class="fa-solid fa-chart-pie me-1"></i> Generate Breakdown</button>
+                    </div>
+                </div>
+                <div id="indPerfResultBlock" class="mt-4" style="display:none;">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div id="indPerfDetails"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    let currentStaffType = 'salary';
+
+    function toggleStaffType(type) {
+        currentStaffType = type;
+        $('#filter_staff_type').val(type);
+        if(type === 'salary') {
+            $('#btn_staff_salary').addClass('active');
+            $('#btn_staff_freelancer').removeClass('active');
+        } else {
+            $('#btn_staff_freelancer').addClass('active');
+            $('#btn_staff_salary').removeClass('active');
+        }
+        if($('#filter_role').val()) {
+            loadMatrixData();
+        }
+    }
+
+    function setDefaultMonth() {
+        // Default to latest active month (2026-09) with extensive case data
+        $('#filter_month').val('2026-09');
+    }
+
+    
+async function loadReportsMeta() {
+    try {
+        const res = await fetch('/api/reports/meta');
+        const json = await res.json();
+        if (json.status === 'success' && json.statuses) {
+            const sel = document.getElementById('filter_status');
+            if (sel) {
+                json.statuses.forEach(st => {
+                    const opt = document.createElement('option');
+                    opt.value = st;
+                    opt.textContent = st;
+                    sel.appendChild(opt);
+                });
+            }
+        }
+    } catch(e) {
+        console.error('Reports meta load error:', e);
+    }
+}
+
+function loadMatrixData() {
+        let role = $('#filter_role').val();
+        let month = $('#filter_month').val();
+        let staffType = $('#filter_staff_type').val();
+        let status = $('#filter_status').val();
+
+        if(!role) {
+            return;
+        }
+
+        $('#matrixTableBody').html(`
+            <tr>
+                <td colspan="34" class="text-center py-5">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2 d-block"></i>
+                    <span class="fw-bold text-muted">Calculating Matrix Points & Daily Cases...</span>
+                </td>
+            </tr>
+        `);
+
+        $.ajax({
+            url: '/api/reports/get_performance_matrix',
+            type: 'POST',
+            data: { role: role, month: month, staff_type: staffType, status: status },
+            dataType: 'json',
+            success: function(res) {
+                if(res.status === 'success' && res.data && res.data.length > 0) {
+                    renderMatrixTable(res.data);
+                    updateKPICards(res.summary);
+                } else {
+                    $('#matrixTableBody').html(`
+                        <tr>
+                            <td colspan="34" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-folder-open fa-2x mb-2 text-secondary d-block"></i>
+                                <span class="fw-bold">No performance records mapped for selected filter criteria.</span>
+                            </td>
+                        </tr>
+                    `);
+                    resetKPICards();
+                }
+            },
+            error: function(err) {
+                $('#matrixTableBody').html(`
+                    <tr>
+                        <td colspan="34" class="text-center py-5 text-danger">
+                            <i class="fa-solid fa-triangle-exclamation fa-2x mb-2 d-block"></i>
+                            <span class="fw-bold">Unable to fetch Performance Matrix. Please verify API response.</span>
+                        </td>
+                    </tr>
+                `);
+                resetKPICards();
+            }
+        });
+    }
+
+    function renderMatrixTable(rows) {
+        let html = '';
+        let optionsListHtml = '<option value="">-- Choose Employee --</option>';
+        let currentMonth = $('#filter_month').val();
+        let currentRole = $('#filter_role').val();
+
+        rows.forEach(r => {
+            optionsListHtml += `<option value="${r.employee_id}">${r.employee_name}</option>`;
+            html += `<tr class="emp-row-data" data-name="${r.employee_name.toLowerCase()}">`;
+            html += `<td class="sticky-col-body"><div class="text-truncate" style="max-width:140px;">${r.employee_name}</div><small class="text-muted d-block font-normal">${r.role_title || ''}</small></td>`;
+            
+            for(let d = 1; d <= 31; d++) {
+                let dayData = r.daily[d] || {cases: 0, points: 0};
+                let val = dayData.cases || 0;
+                let pts = dayData.points || 0;
+                let badgeClass = 'day-badge-zero';
+                let clickAttr = '';
+
+                if(val > 0) {
+                    if(val <= 3) badgeClass = 'day-badge-low';
+                    else if(val > 3 && val <= 8) badgeClass = 'day-badge-mid';
+                    else if(val > 8 && val <= 12) badgeClass = 'day-badge-high';
+                    else if(val > 12) badgeClass = 'day-badge-max';
+
+                    let dayStr = String(d).padStart(2, '0');
+                    let fullDate = `${currentMonth}-${dayStr}`;
+
+                    clickAttr = `style="cursor:pointer;" onclick="openDayCaseDetailModal(${r.employee_id}, '${fullDate}', '${currentRole}')" title="Cases: ${val} | Points: ${pts.toFixed(2)}"`;
+                }
+
+                html += `<td><span class="day-badge ${badgeClass}" ${clickAttr}>${val}</span></td>`;
+            }
+
+            let totClick = `onclick="openMonthCaseDetailModal(${r.employee_id}, '${currentMonth}', '${currentRole}')" title="Click to view full monthly case & points breakdown"`;
+
+            html += `<td><span class="tot-badge" ${totClick}>${r.total_cases || 0}</span></td>`;
+            html += `<td><span class="pts-badge" ${totClick}>${parseFloat(r.total_points || 0).toFixed(1)}</span></td>`;
+            html += `</tr>`;
+        });
+
+        $('#matrixTableBody').html(html);
+        $('#ind_emp_select').html(optionsListHtml);
+    }
+
+    function openDayCaseDetailModal(empId, fullDate, role) {
+        let status = $('#filter_status').val();
+        $('#dayCaseDetailBody').html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Loading case details...</div>');
+        $('#dayCaseDetailModal').modal('show');
+
+        $.ajax({
+            url: '/api/reports/get_day_cases_detail',
+            type: 'POST',
+            data: { employee_id: empId, date: fullDate, role: role, status: status },
+            dataType: 'json',
+            success: function(res) {
+                if(res.status === 'success') {
+                    $('#dayCaseDetailBody').html(res.html);
+                } else {
+                    $('#dayCaseDetailBody').html('<div class="alert alert-danger m-0">' + (res.message || 'Unable to load details.') + '</div>');
+                }
+            },
+            error: function() {
+                $('#dayCaseDetailBody').html('<div class="alert alert-danger m-0">Server connection failed.</div>');
+            }
+        });
+    }
+
+    function openMonthCaseDetailModal(empId, month, role) {
+        let status = $('#filter_status').val();
+        $('#monthCaseDetailBody').html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Fetching complete month case records...</div>');
+        $('#monthCaseDetailModal').modal('show');
+
+        $.ajax({
+            url: '/api/reports/get_month_cases_detail',
+            type: 'POST',
+            data: { employee_id: empId, month: month, role: role, status: status },
+            dataType: 'json',
+            success: function(res) {
+                if(res.status === 'success') {
+                    $('#monthCaseDetailBody').html(res.html);
+                } else {
+                    $('#monthCaseDetailBody').html('<div class="alert alert-danger m-0">' + (res.message || 'Unable to load month details.') + '</div>');
+                }
+            },
+            error: function() {
+                $('#monthCaseDetailBody').html('<div class="alert alert-danger m-0">Server connection error.</div>');
+            }
+        });
+    }
+
+    function updateKPICards(summary) {
+        if(summary) {
+            $('#kpi_total_points').text(summary.total_points || '0.00');
+            $('#kpi_active_employees').text(summary.active_employees || '0');
+            $('#kpi_top_scorer_name').text(summary.top_scorer_name || 'N/A');
+            $('#kpi_top_scorer_pts').text((summary.top_scorer_pts || 0) + ' Pts');
+        }
+    }
+
+    function resetKPICards() {
+        $('#kpi_total_points').text('0.00');
+        $('#kpi_active_employees').text('0');
+        $('#kpi_top_scorer_name').text('N/A');
+        $('#kpi_top_scorer_pts').text('0 Pts');
+    }
+
+    function filterEmployeeRows() {
+        let query = $('#filter_search_employee').val().toLowerCase();
+        $('.emp-row-data').each(function() {
+            let name = $(this).data('name');
+            if(name.indexOf(query) !== -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    function openIndividualModal() {
+        $('#individualPerfModal').modal('show');
+    }
+
+    function fetchIndividualBreakdown() {
+        let empId = $('#ind_emp_select').val();
+        let month = $('#filter_month').val();
+        let status = $('#filter_status').val();
+        
+        if(!empId) {
+            Swal.fire('Notice', 'Please select an employee.', 'warning');
+            return;
+        }
+        $('#indPerfResultBlock').slideDown();
+        $('#indPerfDetails').html('<div class="text-center py-3"><i class="fa-solid fa-spinner fa-spin text-primary me-2"></i> Loading details...</div>');
+        
+        $.post('/api/reports/get_individual_perf', { employee_id: empId, month: month, status: status }, function(res) {
+            if(res.status === 'success') {
+                $('#indPerfDetails').html(res.html);
+            } else {
+                $('#indPerfDetails').html('<div class="text-muted text-center py-2">No detailed breakdown found for this month.</div>');
+            }
+        });
+    }
+
+    function exportMatrixToExcel() {
+        let role = $('#filter_role').val();
+        let month = $('#filter_month').val();
+        let status = $('#filter_status').val();
+        
+        if(!role) {
+            Swal.fire('Select Role', 'Please select a Role before exporting to Excel.', 'warning');
+            return;
+        }
+        window.location.href = `/api/reports/export_performance_excel?role=${encodeURIComponent(role)}&month=${month}&staff_type=${currentStaffType}&status=${encodeURIComponent(status)}`;
+    }
+
+    // Modal Export and Print logic
+    function exportIndvTableToExcel() {
+        var tab_text = '<table border="1px"><tr bgcolor="#1e293b" style="color:#ffffff;">';
+        var j=0;
+        var tab = document.getElementById('indv-perf-table-container').getElementsByTagName('table')[0]; 
+        for(j = 0 ; j < tab.rows.length ; j++) {     
+            tab_text += tab.rows[j].innerHTML + '</tr>';
+        }
+        tab_text += '</table>';
+        var data_type = 'data:application/vnd.ms-excel;charset=utf-8';
+        var a = document.createElement('a');
+        a.href = data_type + ', ' + encodeURIComponent(tab_text);
+        a.download = 'Individual_Performance_Report.xls';
+        a.click();
+    }
+
+    function printIndvTable() {
+        var printContent = document.getElementById('indv-perf-table-container').innerHTML;
+        var WinPrint = window.open('', '', 'left=0,top=0,width=900,height=900,toolbar=0,scrollbars=0,status=0');
+        WinPrint.document.write('<html><head><title>Print Report</title>');
+        WinPrint.document.write('<style>body{font-family:Arial;} table{width:100%;border-collapse:collapse;table-layout:fixed;word-wrap:break-word;} th,td{border:1px solid #ccc;padding:6px;font-size:11px;text-align:left;} thead th, tfoot th {background:#1e293b;color:#fff; -webkit-print-color-adjust: exact; print-color-adjust: exact;}</style>');
+        WinPrint.document.write('</head><body><h2 style="text-align:center;">Employee Detail Report</h2>');
+        WinPrint.document.write(printContent);
+        WinPrint.document.write('</body></html>');
+        WinPrint.document.close();
+        WinPrint.focus();
+        setTimeout(function(){ WinPrint.print(); WinPrint.close(); }, 500);
+    }
+
+    
+    function escHtml(v) {
+        return String(v === null || v === undefined ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function openSixMonthModal() {
+        let role = $('#filter_role').val();
+        if (!role) {
+            Swal.fire('Select Role', 'Please select a Role first.', 'warning');
+            return;
+        }
+        $('#sixMonthBody').html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Loading 6-month summary...</div>');
+        $('#sixMonthModal').modal('show');
+        $.ajax({
+            url: '/api/reports/get_six_month_summary',
+            type: 'POST',
+            data: {
+                role: role,
+                month: $('#filter_month').val(),
+                staff_type: $('#filter_staff_type').val(),
+                status: $('#filter_status').val()
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status !== 'success') {
+                    $('#sixMonthBody').html('<div class="alert alert-danger m-0">' + escHtml(res.message || 'Unable to load data.') + '</div>');
+                    return;
+                }
+                renderSixMonthTable(res);
+            },
+            error: function() {
+                $('#sixMonthBody').html('<div class="alert alert-danger m-0">Server connection error.</div>');
+            }
+        });
+    }
+
+    function renderSixMonthTable(res) {
+        if (!res.rows || res.rows.length === 0) {
+            $('#sixMonthBody').html('<div class="text-center py-5 text-muted fw-bold">Is selection me koi data nahi mila.</div>');
+            return;
+        }
+        let html = '<div class="table-responsive rounded border shadow-sm">';
+        html += '<table class="table table-sm table-hover align-middle mb-0" style="font-size:0.78rem;">';
+        html += '<thead style="background:#1e293b;"><tr>';
+        html += '<th style="background:#1e293b;color:#fff;padding:10px 12px;">EMPLOYEE</th>';
+        res.months.forEach(m => {
+            html += '<th class="text-center" style="background:#1e293b;color:#fff;">' + escHtml(m.label) + '</th>';
+        });
+        html += '<th class="text-center" style="background:#1e293b;color:#fff;">TOTAL</th>';
+        html += '</tr></thead><tbody>';
+        res.rows.forEach(r => {
+            html += '<tr><td class="fw-bold text-dark" style="padding-left:12px;">' + escHtml(r.employee_name) + '</td>';
+            r.months.forEach(m => {
+                if (m.cases > 0) {
+                    html += '<td class="text-center"><span class="fw-bold text-primary">' + m.cases + '</span>'
+                          + '<small class="d-block text-warning fw-bold">' + parseFloat(m.points).toFixed(2) + ' pts</small></td>';
+                } else {
+                    html += '<td class="text-center text-muted">0</td>';
+                }
+            });
+            html += '<td class="text-center bg-light"><span class="fw-bold text-primary">' + r.total_cases + '</span>'
+                  + '<small class="d-block text-warning fw-bold">' + parseFloat(r.total_points).toFixed(2) + ' pts</small></td>';
+            html += '</tr>';
+        });
+        html += '</tbody><tfoot><tr style="background:#f8fafc;border-top:2px solid #e2e8f0;">';
+        html += '<th style="padding-left:12px;">GRAND TOTAL</th>';
+        res.months.forEach(m => {
+            const t = res.month_totals[m.key] || {cases: 0, points: 0};
+            html += '<th class="text-center"><span class="text-primary">' + t.cases + '</span>'
+                  + '<small class="d-block text-warning">' + parseFloat(t.points).toFixed(2) + ' pts</small></th>';
+        });
+        html += '<th class="text-center"><span class="text-primary">' + res.grand_cases + '</span>'
+              + '<small class="d-block text-warning">' + parseFloat(res.grand_points).toFixed(2) + ' pts</small></th>';
+        html += '</tr></tfoot></table></div>';
+        $('#sixMonthBody').html(html);
+    }
+
+    let emp12State = { empId: 0, name: '', role: '' };
+
+    function buildLast12Months(baseMonth) {
+        let y, m;
+        if (baseMonth && /^\d{4}-\d{2}$/.test(baseMonth)) {
+            y = parseInt(baseMonth.substr(0, 4), 10);
+            m = parseInt(baseMonth.substr(5, 2), 10);
+        } else {
+            const now = new Date();
+            y = now.getFullYear();
+            m = now.getMonth() + 1;
+        }
+        const out = [];
+        for (let i = 11; i >= 0; i--) {
+            const dt = new Date(y, m - 1 - i, 1);
+            const key = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
+            const label = dt.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+            out.push({ key: key, label: label });
+        }
+        return out;
+    }
+
+    function openEmp12Modal(empId, name, role) {
+        emp12State = { empId: empId, name: name, role: role };
+        let base = $('#filter_month').val();
+        const months = buildLast12Months(base);
+        if (!base) base = months[months.length - 1].key;
+        let opts = '';
+        months.slice().reverse().forEach(m => {
+            opts += `<option value="${m.key}">${m.label}</option>`;
+        });
+        $('#emp12Title').text(name);
+        $('#emp12_month_select').html(opts).val(base);
+        $('#emp12Chips').html('<div class="col-12 text-center py-3"><i class="fa-solid fa-spinner fa-spin text-primary me-2"></i> Loading last 12 months...</div>');
+        $('#emp12Detail').html('');
+        $('#emp12Modal').modal('show');
+        loadEmp12Summary(base);
+        loadEmp12Detail(base);
+    }
+
+    function loadEmp12Summary(baseMonth) {
+        $.ajax({
+            url: '/api/reports/get_employee_12month_summary',
+            type: 'POST',
+            data: { employee_id: emp12State.empId, month: baseMonth, role: emp12State.role, status: $('#filter_status').val() },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status !== 'success') {
+                    $('#emp12Chips').html('<div class="col-12"><div class="alert alert-danger m-0">' + escHtml(res.message || 'Unable to load summary.') + '</div></div>');
+                    return;
+                }
+                let html = '';
+                res.months.forEach(m => {
+                    html += `<div class="col-6 col-md-2">
+                        <div class="m12-chip" data-month="${m.key}" onclick="selectEmp12Month('${m.key}')">
+                            <div class="m12-label">${escHtml(m.label)}</div>
+                            <div class="m12-cases">${m.cases}</div>
+                            <div class="m12-pts">${parseFloat(m.points).toFixed(2)} pts</div>
+                        </div>
+                    </div>`;
+                });
+                $('#emp12Chips').html(html);
+                highlightEmp12Chip($('#emp12_month_select').val());
+            },
+            error: function() {
+                $('#emp12Chips').html('<div class="col-12"><div class="alert alert-danger m-0">Server connection error.</div></div>');
+            }
+        });
+    }
+
+    function highlightEmp12Chip(monthKey) {
+        $('#emp12Chips .m12-chip').removeClass('active');
+        $('#emp12Chips .m12-chip[data-month="' + monthKey + '"]').addClass('active');
+    }
+
+    function selectEmp12Month(monthKey) {
+        $('#emp12_month_select').val(monthKey);
+        onEmp12MonthChange();
+    }
+
+    function onEmp12MonthChange() {
+        const monthKey = $('#emp12_month_select').val();
+        highlightEmp12Chip(monthKey);
+        loadEmp12Detail(monthKey);
+    }
+
+    function loadEmp12Detail(monthKey) {
+        $('#emp12Detail').html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin text-primary fa-2x mb-2 d-block"></i> Fetching month case records...</div>');
+        $.ajax({
+            url: '/api/reports/get_month_cases_detail',
+            type: 'POST',
+            data: { employee_id: emp12State.empId, month: monthKey, role: emp12State.role, status: $('#filter_status').val() },
+            dataType: 'json',
+            success: function(res) {
+                if (res.status === 'success') {
+                    $('#emp12Detail').html(res.html);
+                } else {
+                    $('#emp12Detail').html('<div class="alert alert-danger m-0">' + escHtml(res.message || 'Unable to load month details.') + '</div>');
+                }
+            },
+            error: function() {
+                $('#emp12Detail').html('<div class="alert alert-danger m-0">Server connection error.</div>');
+            }
+        });
+    }
+
+    $(document).ready(function() {
+    const notch = document.getElementById('notchToggleBtn');
+    const sidebar = document.querySelector('.app-sidebar');
+    if (notch && sidebar) {
+        notch.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+    }
+
+    loadReportsMeta();
+        setDefaultMonth();
+        loadMatrixData();
+    });
+</script>
+</body>
+</html>

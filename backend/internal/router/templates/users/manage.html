@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users & Team Console | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { min-height: 42px; padding: 9px 11px; margin-bottom: 3px; font-size: 13px; }
+    .nav-subitem-link { min-height: 34px; padding: 7px 10px 7px 38px; color: var(--muted); font-size: 12px; }
+    .nav-item-link:hover, .nav-subitem-link:hover { color: var(--brand); background: var(--brand-light); }
+    .nav-item-link.active { color: var(--brand); background: #eaf1ff; }
+    .nav-icon { width: 17px; text-align: center; color: var(--muted); }
+    .sidebar-footer { border-top: 1px solid var(--line); padding: 14px 16px; color: var(--muted); font-size: 11px; }
+
+    .app-main { min-height: 100vh; display: flex; flex-direction: column; flex: 1; margin-left: 0; width: 100%; min-width: 0; }
+    .app-header { position: sticky; z-index: 1020; top: 0; min-height: 70px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px 28px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+    .page-heading { min-width: 0; }
+    .eyebrow { margin: 0 0 3px; color: var(--brand); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 20px; line-height: 1.25; font-weight: 700; color: var(--ink); }
+    .header-actions, .profile { display: flex; align-items: center; gap: 12px; }
+    .profile { padding-left: 12px; border-left: 1px solid var(--line); }
+    .profile-avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--brand); font-weight: 700; }
+    .profile-copy { display: flex; flex-direction: column; }
+    .profile-name { display: block; font-weight: 600; font-size: 12px; }
+    .profile-role { display: block; color: var(--muted); font-size: 11px; }
+    .icon-button, .secondary-button { min-height: 36px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; }
+    .secondary-button { padding: 0 12px; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+
+    .app-content { width: min(1520px, 100%); margin: 0 auto; padding: 20px 24px 30px; flex: 1; }
+
+    /* Top Sub-navigation Suite Bar */
+    .suite-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 6px 10px; background: #fff; border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow); overflow-x: auto; }
+    .suite-nav-item { display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none; white-space: nowrap; transition: all .16s ease; }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: #fff; background: var(--brand); box-shadow: 0 2px 8px rgba(37,99,235,.28); }
+
+    .page-title-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .stats-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .stat-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
+    .stat-title { font-size: 11px; font-weight: 650; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .stat-val { font-size: 22px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+
+    .module-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 20px; }
+    .filter-panel { background: #fbfcfd; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+    
+    .table-custom { margin-bottom: 0; font-size: 13px; }
+    .table-custom thead th { background: #f8fafc; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--line); padding: 10px 12px; }
+    .table-custom tbody td { padding: 12px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+    .table-custom tbody tr:hover { background-color: #f8fafc; }
+
+    .badge-status-active { background: rgba(22,132,91,.12); color: var(--green); font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-status-inactive { background: rgba(179,59,66,.12); color: var(--red); font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-role { background: var(--brand-light); color: var(--brand); font-weight: 700; padding: 4px 9px; border-radius: 6px; font-size: 11px; }
+    .badge-type { background: #f1f5f9; color: var(--muted); font-weight: 600; padding: 3px 8px; border-radius: 6px; font-size: 11px; }
+
+    .user-avatar-circle { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), #3b82f6); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+    .page-footer { padding: 18px 24px; color: var(--muted); font-size: 11px; text-align: center; border-top: 1px solid var(--line); background: #fff; margin-top: auto; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Navigation Suite Bar -->
+            <div class="suite-nav-bar">
+                <a href="/users/manage" class="suite-nav-item active"><i class="fa-solid fa-users"></i> Users Directory</a>
+                <a href="/staff_mapping" class="suite-nav-item"><i class="fa-solid fa-network-wired"></i> Staff Mapping</a>
+                <a href="/users/allocation_manager" class="suite-nav-item"><i class="fa-solid fa-map-location-dot"></i> Allocation Manager</a>
+                <a href="/users/points_setup" class="suite-nav-item"><i class="fa-solid fa-sliders"></i> Points & TAT Setup</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-users-gear text-primary me-2"></i> User Management Console</h4>
+                    <span class="muted">Manage corporate accounts, roles, access levels and security policies</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadUsers()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                    <button class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm" onclick="openAddUserModal()"><i class="fa-solid fa-user-plus me-1"></i> Add New User</button>
+                </div>
+            </div>
+
+            <!-- Stats KPI Cards -->
+            <div class="stats-card-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Staff Accounts</div>
+                    <div class="stat-val" id="statTotalUsers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--green)">Active Accounts</div>
+                    <div class="stat-val" style="color:var(--green)" id="statActiveUsers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--red)">Inactive Accounts</div>
+                    <div class="stat-val" style="color:var(--red)" id="statInactiveUsers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--brand)">Salaried Staff</div>
+                    <div class="stat-val" style="color:var(--brand)" id="statSalaryUsers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--teal)">Freelance Officers</div>
+                    <div class="stat-val" style="color:var(--teal)" id="statFreelanceUsers">0</div>
+                </div>
+            </div>
+
+            <!-- Main Table Module Card -->
+            <div class="module-card">
+                <!-- Filter Bar -->
+                <div class="filter-panel">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                                <input type="text" id="filterSearch" class="form-control border-start-0" placeholder="Search name, username, email, phone..." oninput="debounceSearch()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filterRole" class="form-select form-select-sm" onchange="loadUsers()">
+                                <option value="0">All System Roles</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select id="filterStatus" class="form-select form-select-sm" onchange="loadUsers()">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active Only</option>
+                                <option value="inactive">Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filterEmploymentType" class="form-select form-select-sm" onchange="loadUsers()">
+                                <option value="">All Employment Types</option>
+                                <option value="salary">Salary</option>
+                                <option value="freelancer">Freelancer</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Full Name & Username</th>
+                                <th>Role</th>
+                                <th>Employment</th>
+                                <th>Location</th>
+                                <th>Contact Details</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="8" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination & Record count -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                    <span class="muted" id="userRecordCount">Showing 0 users</span>
+                    <nav><ul class="pagination pagination-sm m-0" id="userPagination"></ul></nav>
+                </div>
+            </div>
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </main>
+</div>
+
+<!-- Add / Edit User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+            <div class="modal-header bg-primary text-white py-3">
+                <h6 class="modal-title fw-bold" id="userModalTitle"><i class="fa-solid fa-user-gear me-2"></i> Add New User</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="userForm" onsubmit="event.preventDefault(); saveUser();">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="user_id" name="id" value="0">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Full Name *</label>
+                            <input type="text" id="fullname" name="fullname" class="form-control form-control-sm" required placeholder="e.g. Rahul Sharma">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Username *</label>
+                            <input type="text" id="username" name="username" class="form-control form-control-sm" required placeholder="e.g. rahul.sharma">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Role *</label>
+                            <select id="role_id" name="role_id" class="form-select form-select-sm" required>
+                                <option value="">-- Select Role --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Reporting Manager</label>
+                            <select id="area_manager_id" name="area_manager_id" class="form-select form-select-sm">
+                                <option value="0">-- Direct / Independent --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Employment Type</label>
+                            <select id="employment_type" name="employment_type" class="form-select form-select-sm">
+                                <option value="salary">Salary</option>
+                                <option value="freelancer">Freelancer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Official Mobile</label>
+                            <input type="text" id="official_mobile" name="official_mobile" class="form-control form-control-sm" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Personal Mobile</label>
+                            <input type="text" id="personal_mobile" name="personal_mobile" class="form-control form-control-sm" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control form-control-sm" placeholder="e.g. user@brainbird.co.in">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">State</label>
+                            <select id="state_id" name="state_id" class="form-select form-select-sm" onchange="loadDistricts()">
+                                <option value="0">-- Select State --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">District</label>
+                            <select id="district_id" name="district_id" class="form-select form-select-sm">
+                                <option value="0">-- Select District --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">Status</label>
+                            <select id="status" name="status" class="form-select form-select-sm">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Working Location / Hub</label>
+                            <input type="text" id="working_location" name="working_location" class="form-control form-control-sm" placeholder="e.g. Lucknow Center">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">IP Whitelist (Optional)</label>
+                            <input type="text" id="allowed_ip_address" name="allowed_ip_address" class="form-control form-control-sm" placeholder="e.g. 192.168.1.1">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Permanent Address</label>
+                            <textarea id="permanent_address" name="permanent_address" class="form-control form-control-sm" rows="2" placeholder="Full postal address..."></textarea>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted" id="passwordLabel">Password *</label>
+                            <input type="password" id="password" name="password" class="form-control form-control-sm" placeholder="Enter account password">
+                            <small class="muted" id="passwordHelp" style="display:none;">Leave blank to preserve current password.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2 justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4" id="saveUserBtn"><i class="fa-solid fa-save me-1"></i> Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let usersData = [];
+let currentPage = 1;
+const pageSize = 25;
+let debounceTimer = null;
+let userModalObj = null;
+
+$(document).ready(function() {
+    userModalObj = new bootstrap.Modal(document.getElementById('userModal'));
+    loadLayout();
+    loadInitialData();
+    loadUsers();
+});
+
+function loadLayout() {
+    $.get('/api/v1/dashboard/layout', function(data) {
+        if (!data) return;
+        var profile = data.userProfile || {};
+        var settings = data.appSettings || {};
+        $('#companyName').text(settings.company_name || 'Brain Bird');
+        $('#profileName').text(profile.fullname || profile.username || 'Account');
+        $('#profileRole').text('Role ' + (profile.role_id || ''));
+        $('#profileAvatar').text((profile.fullname || profile.username || 'B').trim().charAt(0).toUpperCase());
+        $('#sidebarFooter').text(settings.app_version ? 'Version ' + settings.app_version : 'Operations portal');
+        $('#pageFooter').text((settings.company_name || 'Brain Bird') + ' · Operations portal');
+
+        var sidebarModules = data.sidebarModules || [];
+        var nav = $('#sidebarMenu');
+        nav.empty();
+        sidebarModules.forEach(function(m) {
+            nav.append(buildMenuItem(m, false));
+        });
+    });
+}
+
+function buildMenuItem(menu, isChild) {
+    var group = $('<div class="nav-group"></div>');
+    var isParent = menu.submenus && menu.submenus.length;
+    var link = isParent ? $('<button type="button" class="nav-item-link"></button>') : $('<a class="nav-item-link"></a>');
+    if (isChild) link.removeClass('nav-item-link').addClass('nav-subitem-link');
+    if (!isParent) link.attr('href', menu.module_slug.startsWith('/') ? menu.module_slug : '/' + menu.module_slug);
+    if (menu.module_slug === 'users/manage' || menu.module_slug === '/users/manage') link.addClass('active');
+
+    link.append('<i class="nav-icon ' + (menu.icon || 'fa-solid fa-circle') + '"></i>');
+    link.append('<span>' + (menu.module_name || '') + '</span>');
+    if (isParent) link.append('<i class="fa-solid fa-chevron-down ms-auto text-muted" style="font-size:10px;"></i>');
+
+    if (isParent) {
+        link.on('click', function() { group.toggleClass('expanded'); });
+    }
+    group.append(link);
+
+    if (isParent) {
+        var childContainer = $('<div class="nav-children"></div>');
+        menu.submenus.forEach(function(child) {
+            childContainer.append(buildMenuItem(child, true));
+        });
+        group.append(childContainer);
+    }
+    return group;
+}
+
+function loadInitialData() {
+    $.get('/api/users/get_initial_data', function(res) {
+        if (res.status === 'success') {
+            var roleSelect = $('#filterRole');
+            var modalRoleSelect = $('#role_id');
+            (res.roles || []).forEach(function(r) {
+                roleSelect.append('<option value="' + r.id + '">' + r.role_name + '</option>');
+                modalRoleSelect.append('<option value="' + r.id + '">' + r.role_name + '</option>');
+            });
+
+            var stateSelect = $('#state_id');
+            (res.states || []).forEach(function(s) {
+                stateSelect.append('<option value="' + s.id + '">' + s.state_name + '</option>');
+            });
+
+            var rmSelect = $('#area_manager_id');
+            (res.reportingManagers || []).forEach(function(rm) {
+                rmSelect.append('<option value="' + rm.id + '">' + rm.fullname + ' (' + rm.role_name + ')</option>');
+            });
+        }
+    });
+}
+
+function loadDistricts(selectedDistrictId) {
+    var stateId = $('#state_id').val();
+    var distSelect = $('#district_id');
+    distSelect.empty().append('<option value="0">-- Select District --</option>');
+    if (!stateId || stateId === '0') return;
+
+    $.post('/api/users/get_districts', { state_id: stateId }, function(res) {
+        if (res.status === 'success' && res.data) {
+            res.data.forEach(function(d) {
+                distSelect.append('<option value="' + d.id + '">' + d.district_name + '</option>');
+            });
+            if (selectedDistrictId) {
+                distSelect.val(selectedDistrictId);
+            }
+        }
+    });
+}
+
+function debounceSearch() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(loadUsers, 280);
+}
+
+function loadUsers() {
+    var params = {
+        search: $('#filterSearch').val(),
+        role_id: $('#filterRole').val(),
+        status: $('#filterStatus').val(),
+        employment_type: $('#filterEmploymentType').val()
+    };
+
+    $('#userTableBody').html('<tr><td colspan="8" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading users...</td></tr>');
+
+    $.post('/api/users/list', params, function(res) {
+        if (res.status === 'success') {
+            usersData = res.data || [];
+            updateStats(usersData);
+            currentPage = 1;
+            renderTablePage();
+        } else {
+            $('#userTableBody').html('<tr><td colspan="8" class="text-center py-4 text-danger">' + (res.message || 'Failed to load users') + '</td></tr>');
+        }
+    }).fail(function() {
+        $('#userTableBody').html('<tr><td colspan="8" class="text-center py-4 text-danger">Network error connecting to API.</td></tr>');
+    });
+}
+
+function updateStats(list) {
+    var total = list.length;
+    var active = 0, inactive = 0, salary = 0, freelancer = 0;
+    list.forEach(function(u) {
+        if (u.status === 'active') active++; else inactive++;
+        if (u.employment_type === 'freelancer') freelancer++; else salary++;
+    });
+    $('#statTotalUsers').text(total);
+    $('#statActiveUsers').text(active);
+    $('#statInactiveUsers').text(inactive);
+    $('#statSalaryUsers').text(salary);
+    $('#statFreelanceUsers').text(freelancer);
+}
+
+function renderTablePage() {
+    var total = usersData.length;
+    var start = (currentPage - 1) * pageSize;
+    var end = Math.min(start + pageSize, total);
+    var pageData = usersData.slice(start, end);
+
+    if (total === 0) {
+        $('#userTableBody').html('<tr><td colspan="8" class="text-center py-4 text-muted"><i class="fa-solid fa-folder-open me-2"></i> No users matching criteria.</td></tr>');
+        $('#userRecordCount').text('Showing 0 of 0 users');
+        $('#userPagination').empty();
+        return;
+    }
+
+    var html = '';
+    pageData.forEach(function(u, idx) {
+        var rowNum = start + idx + 1;
+        var initial = (u.fullname || u.username || 'U').charAt(0).toUpperCase();
+        var statusBadge = u.status === 'active'
+            ? '<span class="badge-status-active"><i class="fa-solid fa-circle-check"></i> Active</span>'
+            : '<span class="badge-status-inactive"><i class="fa-solid fa-circle-xmark"></i> Inactive</span>';
+
+        var contact = [];
+        if (u.email) contact.push('<small><i class="fa-solid fa-envelope text-muted me-1"></i>' + escapeHTML(u.email) + '</small>');
+        if (u.official_mobile) contact.push('<small><i class="fa-solid fa-phone text-muted me-1"></i>' + escapeHTML(u.official_mobile) + '</small>');
+        if (u.personal_mobile && u.personal_mobile !== u.official_mobile) contact.push('<small class="muted"><i class="fa-solid fa-mobile-screen me-1"></i>' + escapeHTML(u.personal_mobile) + '</small>');
+
+        var locationText = (u.district_name !== '--' ? u.district_name : '') + (u.state_name !== '--' ? (u.district_name !== '--' ? ', ' : '') + u.state_name : '');
+        if (!locationText) locationText = u.working_location || '--';
+
+        html += '<tr>' +
+            '<td class="text-muted fw-bold">' + rowNum + '</td>' +
+            '<td><div class="d-flex align-items-center gap-2">' +
+                '<div class="user-avatar-circle">' + initial + '</div>' +
+                '<div><strong class="d-block">' + escapeHTML(u.fullname) + '</strong><span class="muted">@' + escapeHTML(u.username) + '</span></div>' +
+            '</div></td>' +
+            '<td><span class="badge-role">' + escapeHTML(u.role_name) + '</span></td>' +
+            '<td><span class="badge-type text-capitalize">' + escapeHTML(u.employment_type || 'salary') + '</span></td>' +
+            '<td><span class="muted"><i class="fa-solid fa-location-dot me-1 text-primary"></i>' + escapeHTML(locationText) + '</span></td>' +
+            '<td>' + (contact.length ? contact.join('<br>') : '<span class="muted">--</span>') + '</td>' +
+            '<td>' + statusBadge + '</td>' +
+            '<td class="text-end">' +
+                '<div class="btn-group btn-group-sm">' +
+                    '<button class="btn btn-outline-primary" title="Edit User" onclick="editUser(' + u.id + ')"><i class="fa-solid fa-pen-to-square"></i></button>' +
+                    '<button class="btn ' + (u.status === 'active' ? 'btn-outline-warning' : 'btn-outline-success') + '" title="Toggle Status" onclick="toggleStatus(' + u.id + ')"><i class="fa-solid fa-power-off"></i></button>' +
+                    (u.failed_login_count > 0 ? '<button class="btn btn-outline-danger" title="Unlock Failed Logins" onclick="resetFailedLogins(' + u.id + ')"><i class="fa-solid fa-lock-open"></i></button>' : '') +
+                    '<button class="btn btn-outline-danger" title="Delete User" onclick="deleteUser(' + u.id + ')"><i class="fa-solid fa-trash-can"></i></button>' +
+                '</div>' +
+            '</td>' +
+        '</tr>';
+    });
+
+    $('#userTableBody').html(html);
+    $('#userRecordCount').text('Showing ' + (start + 1) + '-' + end + ' of ' + total + ' users');
+    renderPagination(total);
+}
+
+function renderPagination(total) {
+    var totalPages = Math.ceil(total / pageSize);
+    var p = $('#userPagination');
+    p.empty();
+    if (totalPages <= 1) return;
+
+    p.append('<li class="page-item ' + (currentPage === 1 ? 'disabled' : '') + '"><a class="page-link" href="javascript:void(0)" onclick="goToPage(' + (currentPage - 1) + ')">&laquo;</a></li>');
+    for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            p.append('<li class="page-item ' + (i === currentPage ? 'active' : '') + '"><a class="page-link" href="javascript:void(0)" onclick="goToPage(' + i + ')">' + i + '</a></li>');
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            p.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
+        }
+    }
+    p.append('<li class="page-item ' + (currentPage === totalPages ? 'disabled' : '') + '"><a class="page-link" href="javascript:void(0)" onclick="goToPage(' + (currentPage + 1) + ')">&raquo;</a></li>');
+}
+
+function goToPage(page) {
+    var totalPages = Math.ceil(usersData.length / pageSize);
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderTablePage();
+}
+
+function openAddUserModal() {
+    $('#userModalTitle').html('<i class="fa-solid fa-user-plus me-2"></i> Add New User');
+    $('#userForm')[0].reset();
+    $('#user_id').val('0');
+    $('#district_id').empty().append('<option value="0">-- Select District --</option>');
+    $('#password').prop('required', true);
+    $('#passwordLabel').text('Password *');
+    $('#passwordHelp').hide();
+    userModalObj.show();
+}
+
+function editUser(id) {
+    $.post('/api/users/get_details', { id: id }, function(res) {
+        if (res.status === 'success' && res.data) {
+            var u = res.data;
+            $('#userModalTitle').html('<i class="fa-solid fa-user-pen me-2"></i> Edit User: ' + escapeHTML(u.fullname));
+            $('#user_id').val(u.id);
+            $('#fullname').val(u.fullname);
+            $('#username').val(u.username);
+            $('#role_id').val(u.role_id);
+            $('#area_manager_id').val(u.area_manager_id || '0');
+            $('#employment_type').val(u.employment_type || 'salary');
+            $('#official_mobile').val(u.official_mobile || '');
+            $('#personal_mobile').val(u.personal_mobile || '');
+            $('#email').val(u.email || '');
+            $('#state_id').val(u.state_id || '0');
+            loadDistricts(u.district_id);
+            $('#status').val(u.status || 'active');
+            $('#working_location').val(u.working_location || '');
+            $('#allowed_ip_address').val(u.allowed_ip_address || '');
+            $('#permanent_address').val(u.permanent_address || '');
+            $('#password').val('').prop('required', false);
+            $('#passwordLabel').text('Change Password');
+            $('#passwordHelp').show();
+            userModalObj.show();
+        } else {
+            Swal.fire('Error', res.message || 'Failed to fetch user details', 'error');
+        }
+    });
+}
+
+function saveUser() {
+    var formData = $('#userForm').serialize();
+    $('#saveUserBtn').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...');
+    $.post('/api/users/save', formData, function(res) {
+        $('#saveUserBtn').prop('disabled', false).html('<i class="fa-solid fa-save me-1"></i> Save User');
+        if (res.status === 'success') {
+            userModalObj.hide();
+            Swal.fire({ icon: 'success', title: 'Success', text: res.message, timer: 1500, showConfirmButton: false });
+            loadUsers();
+        } else {
+            Swal.fire('Validation Error', res.message || 'Failed to save user', 'error');
+        }
+    }).fail(function() {
+        $('#saveUserBtn').prop('disabled', false).html('<i class="fa-solid fa-save me-1"></i> Save User');
+        Swal.fire('Error', 'Network or server error saving user.', 'error');
+    });
+}
+
+function toggleStatus(id) {
+    Swal.fire({
+        title: 'Toggle User Status?',
+        text: 'This will activate/deactivate the user access immediately.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, proceed',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.post('/api/users/toggle_status', { id: id }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Updated', text: res.message, timer: 1200, showConfirmButton: false });
+                    loadUsers();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+function resetFailedLogins(id) {
+    $.post('/api/users/reset_failed_logins', { id: id }, function(res) {
+        if (res.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Unlocked', text: res.message, timer: 1200, showConfirmButton: false });
+            loadUsers();
+        } else {
+            Swal.fire('Error', res.message, 'error');
+        }
+    });
+}
+
+function deleteUser(id) {
+    Swal.fire({
+        title: 'Delete this user?',
+        text: 'User will be marked as inactive and soft deleted.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.post('/api/users/delete', { id: id }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Deleted', text: res.message, timer: 1200, showConfirmButton: false });
+                    loadUsers();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+function escapeHTML(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Audit Logs | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .stats-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: var(--shadow);
+    }
+    .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+
+    .table-container-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .filter-bar {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        background: #fdfdfd;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .pro-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .pro-table th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+    }
+    .pro-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+        vertical-align: middle;
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .pro-table tr:hover td { background: #fbfcfe; }
+
+    .action-badge { 
+        font-size: 11px; 
+        font-weight: 700; 
+        padding: 3px 8px; 
+        border-radius: 6px; 
+        text-transform: uppercase; 
+        letter-spacing: .04em; 
+    }
+    .badge-create { background: #dcfce7; color: #15803d; }
+    .badge-update { background: #eff6ff; color: #1d4ed8; }
+    .badge-delete { background: #fee2e2; color: #b91c1c; }
+    .badge-verdict { background: #f3e8ff; color: #6b21a8; }
+    .badge-login { background: #e0f2fe; color: #0369a1; }
+    .badge-page { background: #f1f5f9; color: #475569; }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Navigation Suite Bar -->
+            <div class="suite-nav-bar">
+                <a href="/settings/audit_logs" class="suite-nav-item active"><i class="fa-solid fa-clipboard-list"></i> System Audit Logs</a>
+                <a href="/menu_manager" class="suite-nav-item"><i class="fa-solid fa-bars-staggered"></i> Menu Manager</a>
+                <a href="/permission_manager" class="suite-nav-item"><i class="fa-solid fa-shield-halved"></i> Permission Manager</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-clipboard-list text-primary me-2"></i> System Audit Logs</h4>
+                    <span class="muted">Security tracking, user action trails, data modifications, and database archiving</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" onclick="openUserAnalyticsModal()"><i class="fa-solid fa-chart-pie me-1"></i> User Insights</button>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" onclick="openRestoreModal()"><i class="fa-solid fa-clock-rotate-left me-1"></i> Restores & Backups</button>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="clearLogsPrompt()"><i class="fa-solid fa-file-zipper me-1"></i> Backup & Clear</button>
+                    <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-sm" onclick="exportExcel()"><i class="fa-solid fa-file-excel me-1"></i> Export Excel</button>
+                </div>
+            </div>
+
+            <!-- Stats KPI Cards -->
+            <div class="stats-card-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Active Logs</div>
+                    <div class="stat-val" id="statTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--brand)">Filtered Records</div>
+                    <div class="stat-val" style="color:var(--brand)" id="statFiltered">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--green)">Today's Activity</div>
+                    <div class="stat-val" style="color:var(--green)" id="statToday">0</div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container-card">
+                <div class="filter-bar">
+                    <div class="input-group" style="max-width: 240px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="filterSearch" class="form-control border-start-0" placeholder="Search Claim / User..." onkeyup="onFilterChange()">
+                    </div>
+                    <div style="min-width: 170px;">
+                        <select id="filterModule" class="form-select" onchange="onFilterChange()">
+                            <option value="">All Modules</option>
+                            <option value="Cases">Cases</option>
+                            <option value="Dispatch">Dispatch</option>
+                            <option value="Users">Users</option>
+                            <option value="Attendance">Attendance</option>
+                            <option value="Settings">Settings</option>
+                            <option value="Navigation">Navigation</option>
+                        </select>
+                    </div>
+                    <div style="min-width: 150px;">
+                        <select id="filterAction" class="form-select" onchange="onFilterChange()">
+                            <option value="">All Actions</option>
+                            <option value="CREATE">CREATE</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="PAGE_VIEW">PAGE_VIEW</option>
+                        </select>
+                    </div>
+                    <div style="min-width: 140px;">
+                        <input type="month" id="filterMonth" class="form-control" onchange="onFilterChange()">
+                    </div>
+                    <div class="ms-auto text-muted small fw-semibold" id="recordsSummary">
+                        Showing 0 of 0 entries
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70px;">Log ID</th>
+                                <th>Date & Time</th>
+                                <th>User & Role</th>
+                                <th>Module</th>
+                                <th>Action</th>
+                                <th>Claim Number</th>
+                                <th>Description / Change Details</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2 d-block"></i>
+                                    <span class="muted fw-semibold">Loading Audit Trails...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+                    <span class="small muted" id="pageInfo">Page 1</span>
+                    <nav><ul class="pagination pagination-sm m-0" id="paginationContainer"></ul></nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            {{FOOTER_PARTIAL}}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: User Analytics -->
+<div class="modal fade" id="userAnalyticsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-chart-pie me-2 text-warning"></i> User Activity Breakdown</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase">Select Staff Member</label>
+                    <select id="analyticsUserSelect" class="form-select fw-semibold" onchange="fetchUserAnalytics()">
+                        <option value="">-- Choose User --</option>
+                    </select>
+                </div>
+                <div id="analyticsContent" style="display: none;">
+                    <div class="alert alert-light border d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <strong class="d-block text-dark" id="an_userName">Name</strong>
+                            <small class="text-muted" id="an_userRole">Role</small>
+                        </div>
+                        <span class="badge bg-primary fs-6" id="an_totalActions">0 Actions</span>
+                    </div>
+
+                    <h6 class="fw-bold small text-muted text-uppercase mb-2">Recent 50 Activities:</h6>
+                    <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="bg-light sticky-top">
+                                <tr><th>Time</th><th>Action</th><th>Claim</th><th>Description</th></tr>
+                            </thead>
+                            <tbody id="an_logsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Backups & Restores -->
+<div class="modal fade" id="backupsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-clock-rotate-left me-2 text-warning"></i> Archived Log Backups (ZIP)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="bg-light sticky-top">
+                            <tr><th>Archive File</th><th>Records</th><th>Date Span</th><th>Backed Up At</th><th class="text-end">Actions</th></tr>
+                        </thead>
+                        <tbody id="backupsBody">
+                            <tr><td colspan="5" class="text-center py-4 text-muted">Loading backup archives...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let currentPage = 1;
+const pageSize = 25;
+let userAnalyticsModal = null;
+let backupsModal = null;
+
+function loadAuditLogs() {
+    $('#logsTableBody').html(`
+        <tr>
+            <td colspan="8" class="text-center py-5">
+                <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2 d-block"></i>
+                <span class="muted fw-semibold">Loading Audit Trails...</span>
+            </td>
+        </tr>
+    `);
+
+    let params = {
+        page: currentPage,
+        limit: pageSize,
+        search: $('#filterSearch').val() || '',
+        module_name: $('#filterModule').val() || '',
+        action_type: $('#filterAction').val() || '',
+        month: $('#filterMonth').val() || ''
+    };
+
+    $.getJSON('/api/audit_logs/list', params, function(res) {
+        if (res.status === 'success') {
+            renderTable(res.logs || [], res.pagination);
+            if (res.stats) {
+                $('#statTotal').text(res.stats.total || 0);
+                $('#statFiltered').text(res.stats.filtered || 0);
+                $('#statToday').text(res.stats.today || 0);
+            }
+        } else {
+            $('#logsTableBody').html(`<tr><td colspan="8" class="text-center py-4 text-danger fw-bold">${res.message || 'Error'}</td></tr>`);
+        }
+    }).fail(function() {
+        $('#logsTableBody').html(`<tr><td colspan="8" class="text-center py-4 text-danger fw-bold">Failed to load logs.</td></tr>`);
+    });
+}
+
+function renderTable(logs, pagination) {
+    if (!logs || logs.length === 0) {
+        $('#logsTableBody').html(`<tr><td colspan="8" class="text-center py-5 text-muted fw-bold"><i class="fa-solid fa-clipboard-check fa-2x mb-2 d-block"></i> No audit logs found.</td></tr>`);
+        $('#recordsSummary').text('Showing 0 of 0 entries');
+        $('#pageInfo').text('Page 1 of 1');
+        $('#paginationContainer').html('');
+        return;
+    }
+
+    let startIdx = (pagination.current_page - 1) * pagination.limit;
+    let html = '';
+
+    logs.forEach((r, idx) => {
+        let badgeClass = 'badge-page';
+        let act = (r.action_label || r.action_type || '').toUpperCase();
+        if (act === 'CREATE') badgeClass = 'badge-create';
+        else if (act === 'UPDATE') badgeClass = 'badge-update';
+        else if (act === 'DELETE') badgeClass = 'badge-delete';
+        else if (act === 'VERDICT') badgeClass = 'badge-verdict';
+        else if (act === 'LOGIN') badgeClass = 'badge-login';
+
+        html += `
+            <tr>
+                <td class="fw-bold text-muted">#${r.id}</td>
+                <td class="text-nowrap small text-muted">${r.created_at}</td>
+                <td>
+                    <strong class="text-dark d-block">${r.resolved_user_name || r.user_name || 'System'}</strong>
+                    <span class="muted small">${r.resolved_user_role || r.user_role || '-'}</span>
+                </td>
+                <td><span class="badge bg-light text-dark border fw-bold">${r.module_label || r.module_name}</span></td>
+                <td><span class="action-badge ${badgeClass}">${act}</span></td>
+                <td><strong class="text-primary">${r.claim_number || '-'}</strong></td>
+                <td style="max-width: 320px; word-break: break-word;">${r.description}</td>
+                <td class="small text-muted">${r.ip_address || '-'}</td>
+            </tr>
+        `;
+    });
+
+    $('#logsTableBody').html(html);
+    $('#recordsSummary').text(`Showing ${startIdx + 1} to ${startIdx + logs.length} of ${pagination.total_records} entries`);
+    $('#pageInfo').text(`Page ${pagination.current_page} of ${pagination.total_pages}`);
+    renderPagination(pagination);
+}
+
+function renderPagination(p) {
+    if (p.total_pages <= 1) {
+        $('#paginationContainer').html('');
+        return;
+    }
+    let html = '';
+    html += `<li class="page-item ${p.current_page === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(1)">«</a></li>`;
+    html += `<li class="page-item ${p.current_page === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.current_page - 1})">‹</a></li>`;
+    
+    let startPage = Math.max(1, p.current_page - 2);
+    let endPage = Math.min(p.total_pages, p.current_page + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<li class="page-item ${i === p.current_page ? 'active' : ''}"><a class="page-link" onclick="goToPage(${i})">${i}</a></li>`;
+    }
+
+    html += `<li class="page-item ${p.current_page === p.total_pages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.current_page + 1})">›</a></li>`;
+    html += `<li class="page-item ${p.current_page === p.total_pages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.total_pages})">»</a></li>`;
+    $('#paginationContainer').html(html);
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadAuditLogs();
+}
+
+function onFilterChange() {
+    currentPage = 1;
+    loadAuditLogs();
+}
+
+function exportExcel() {
+    let search = $('#filterSearch').val() || '';
+    let module = $('#filterModule').val() || '';
+    let action = $('#filterAction').val() || '';
+    let month = $('#filterMonth').val() || '';
+
+    window.location.href = `/settings/audit_logs?export_excel=1&search=${encodeURIComponent(search)}&module_name=${encodeURIComponent(module)}&action_type=${encodeURIComponent(action)}&month=${encodeURIComponent(month)}`;
+}
+
+function openUserAnalyticsModal() {
+    $.getJSON('/api/users/list', { page: 1, limit: 100 }, function(res) {
+        if (res.status === 'success' && res.data) {
+            let html = '<option value="">-- Choose User --</option>';
+            res.data.forEach(u => html += `<option value="${u.id}">${u.fullname}</option>`);
+            $('#analyticsUserSelect').html(html);
+        }
+    });
+    $('#analyticsContent').hide();
+    userAnalyticsModal.show();
+}
+
+function fetchUserAnalytics() {
+    let uid = $('#analyticsUserSelect').val();
+    if (!uid) { $('#analyticsContent').hide(); return; }
+
+    $.getJSON('/api/audit_logs/user_summary', { user_id: uid }, function(res) {
+        if (res.status === 'success' && res.user) {
+            $('#an_userName').text(res.user.name);
+            $('#an_userRole').text(res.user.role);
+            $('#an_totalActions').text(res.user.total_actions + ' Actions');
+
+            let rows = '';
+            (res.logs || []).forEach(l => {
+                rows += `<tr>
+                    <td class="small text-muted">${l.created_at_fmt}</td>
+                    <td><span class="badge bg-light text-dark border">${l.action_label}</span></td>
+                    <td class="small fw-bold">${l.claim_number || '-'}</td>
+                    <td class="small" style="max-width:200px; word-break:break-word;">${l.description}</td>
+                </tr>`;
+            });
+            $('#an_logsBody').html(rows || '<tr><td colspan="4" class="text-center text-muted">No recent logs</td></tr>');
+            $('#analyticsContent').show();
+        }
+    });
+}
+
+function openRestoreModal() {
+    $.getJSON('/api/audit_logs/backups', function(res) {
+        if (res.status === 'success') {
+            let html = '';
+            (res.data || []).forEach(b => {
+                html += `<tr>
+                    <td class="fw-bold">${b.file_name}</td>
+                    <td><span class="badge bg-primary">${b.record_count}</span></td>
+                    <td class="small text-muted">${b.min_date} to ${b.max_date}</td>
+                    <td class="small text-muted">${b.created_at}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-success me-1" onclick="restoreBackup(${b.id})"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteBackup(${b.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            $('#backupsBody').html(html || '<tr><td colspan="5" class="text-center py-4 text-muted">No archives found.</td></tr>');
+        }
+    });
+    backupsModal.show();
+}
+
+function restoreBackup(id) {
+    Swal.fire({
+        title: 'Restore Backup Archive?',
+        text: 'This will restore all archived log entries back into the live audit database.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Restore'
+    }).then(result => {
+        if (result.isConfirmed) {
+            $.post('/api/audit_logs/restore', { id: id }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire('Restored!', res.message, 'success');
+                    loadAuditLogs();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+function deleteBackup(id) {
+    Swal.fire({
+        title: 'Delete Backup ZIP?',
+        text: 'This will permanently remove this ZIP archive from the server.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Delete'
+    }).then(result => {
+        if (result.isConfirmed) {
+            $.post('/api/audit_logs/delete_backup', { id: id }, function(res) {
+                if (res.status === 'success') {
+                    openRestoreModal();
+                }
+            });
+        }
+    });
+}
+
+function clearLogsPrompt() {
+    Swal.fire({
+        title: 'Archive & Purge Logs',
+        text: 'Enter the age threshold in days (e.g. 90 days). Older logs will be zipped safely to disk and purged from active MySQL.',
+        input: 'number',
+        inputValue: 90,
+        showCancelButton: true,
+        confirmButtonText: 'Backup & Clear'
+    }).then(result => {
+        if (result.isConfirmed && result.value) {
+            $.post('/api/audit_logs/clear', { days: result.value }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire('Done!', res.message, 'success');
+                    loadAuditLogs();
+                } else {
+                    Swal.fire('Notice', res.message, 'info');
+                }
+            });
+        }
+    });
+}
+
+$(document).ready(function() {
+    userAnalyticsModal = new bootstrap.Modal(document.getElementById('userAnalyticsModal'));
+    backupsModal = new bootstrap.Modal(document.getElementById('backupsModal'));
+    loadAuditLogs();
+});
+</script>
+</body>
+</html>

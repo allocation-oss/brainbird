@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letters & Report Formats | Brain Bird</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        :root { --brand-primary: #2563eb; --neutral-bg: #f1f5f9; --neutral-border: #e2e8f0; --text-dark: #0f172a; --text-muted: #64748b; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--neutral-bg); color: var(--text-dark); margin: 0; }
+        .app-wrapper { display: flex; min-height: 100vh; position: relative; }
+        
+        /* Floating Side Notch Button */
+        .sidebar-hover-notch { position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: 22px; height: 60px; background-color: var(--brand-primary); color: #ffffff; border-radius: 0 12px 12px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1035; box-shadow: 2px 0 10px rgba(37,99,235,0.3); }
+        
+        /* Sliding Sidebar Container */
+        .app-sidebar { width: 260px; background-color: #ffffff; border-right: 1px solid var(--neutral-border); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 1040; transform: translateX(-260px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 24px rgba(0,0,0,0.12); }
+        
+        /* Slide-in Trigger on Hover */
+        .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+        
+        .sidebar-brand { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--neutral-border); }
+        .sidebar-brand img { max-height: 38px; object-fit: contain; }
+        .sidebar-brand .title { color: var(--text-dark); font-size: 0.95rem; font-weight: 800; }
+        .sidebar-menu { padding: 20px 14px; flex-grow: 1; overflow-y: auto; text-align: left; }
+        .menu-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; padding: 0 12px 10px; display: block; }
+        .app-sidebar a { text-decoration: none !important; color: inherit; }
+        
+        /* Parent Links */
+        .nav-item-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text-dark); font-size: 0.85rem; font-weight: 600; border-radius: 12px; margin-bottom: 4px; transition: 0.2s; }
+        .nav-item-link i:not(.ms-auto) { width: 20px; text-align: center; }
+        .nav-item-link:hover, .nav-item-link.active { background-color: var(--brand-primary); color: #ffffff !important; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+        .nav-item-link:hover i, .nav-item-link.active i { color: #ffffff !important; }
+        
+        /* Submenu Accordion Fix */
+        .app-sidebar ul, .app-sidebar ol { list-style: none !important; padding-left: 0; margin: 0; }
+        .app-sidebar [id^="sub_"].show, 
+        .app-sidebar .sidebar-submenu.show, 
+        .app-sidebar .submenu-list.show, 
+        .app-sidebar ul.sub-menu.show, 
+        .app-sidebar .collapse.show { 
+            display: flex !important; 
+            flex-direction: column !important; 
+            padding-left: 12px !important; 
+            margin: 4px 0 8px 16px !important; 
+            border-left: 2px solid var(--neutral-border) !important; 
+        }
+        
+        .app-sidebar [id^="sub_"] a, 
+        .app-sidebar .sidebar-submenu a, 
+        .app-sidebar .submenu-list a, 
+        .app-sidebar ul.sub-menu a, 
+        .app-sidebar .nav-submenu-link { 
+            display: flex !important; 
+            align-items: center !important; 
+            justify-content: flex-start !important; 
+            gap: 10px !important; 
+            padding: 7px 10px !important; 
+            color: var(--text-muted) !important; 
+            font-size: 0.80rem !important; 
+            font-weight: 600 !important; 
+            border-radius: 8px !important; 
+            margin-bottom: 3px !important; 
+            transition: all 0.2s ease !important; 
+            text-decoration: none !important; 
+            white-space: nowrap !important; 
+            width: 100% !important; 
+            box-sizing: border-box !important; 
+        }
+        
+        .app-sidebar [id^="sub_"] a i, 
+        .app-sidebar .sidebar-submenu i, 
+        .app-sidebar .submenu-list i, 
+        .app-sidebar ul.sub-menu i, 
+        .app-sidebar .nav-submenu-link i { 
+            font-size: 0.75rem !important; 
+            width: 16px !important; 
+            text-align: center !important; 
+            color: var(--text-muted) !important; 
+            flex-shrink: 0 !important; 
+        }
+        
+        .app-sidebar [id^="sub_"] a:hover, 
+        .app-sidebar .sidebar-submenu a:hover, 
+        .app-sidebar .submenu-list a:hover, 
+        .app-sidebar ul.sub-menu a:hover { 
+            background-color: #eff6ff !important; 
+            color: var(--brand-primary) !important; 
+        }
+        
+        .app-sidebar [id^="sub_"] a:hover i, 
+        .app-sidebar .sidebar-submenu a:hover i { color: var(--brand-primary) !important; }
+        
+        .app-sidebar [id^="sub_"] a.active, 
+        .app-sidebar .sidebar-submenu a.active { 
+            background-color: #dbeafe !important; 
+            color: var(--brand-primary) !important; 
+            font-weight: 700 !important; 
+        }
+
+        /* Full Width Main Layout */
+        .app-main { margin-left: 0; flex-grow: 1; display: flex; flex-direction: column; width: 100%; }
+        .app-content { padding: 20px 16px; flex-grow: 1; }
+        .variable-badge { cursor: pointer; transition: 0.2s; font-family: monospace; font-size: 11px; margin-bottom: 4px; padding: 6px 10px; border: 1px dashed rgba(255,255,255,0.5); }
+        .variable-badge:hover { background-color: #1d4ed8 !important; border-color: #ffffff; transform: scale(1.05); }
+        
+        /* Nav Tabs Custom Styling */
+        .nav-tabs-custom { border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .nav-tabs-custom .nav-link { border: none; font-weight: 700; color: #64748b; padding: 12px 20px; font-size: 0.95rem; border-bottom: 3px solid transparent; transition: all 0.3s ease; }
+        .nav-tabs-custom .nav-link:hover { color: var(--brand-primary); }
+        .nav-tabs-custom .nav-link.active { background: transparent; color: var(--brand-primary); border-bottom-color: var(--brand-primary); }
+
+        .table-responsive { overflow-x: auto; border-radius: 12px; border: 1px solid var(--neutral-border); }
+        .table th { background-color: #f8fafc; font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
+        .table td { vertical-align: middle; font-size: 0.85rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <div class="sidebar-hover-notch"><i class="fa-solid fa-chevron-right"></i></div>
+    {{SIDEBAR_PARTIAL}}
+
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+<div class="suite-nav-bar" style="display:flex;align-items:center;gap:8px;background:#ffffff;padding:6px 10px;border-radius:12px;border:1px solid #dce2e7;margin-bottom:20px;overflow-x:auto;">
+    <a href="/letters-manager/manage" class="suite-nav-item active" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#ffffff;background:#2563eb;text-decoration:none;border-radius:8px;box-shadow:0 4px 12px rgba(37,99,235,.25);"><i class="fa-solid fa-file-word"></i> Template Formats</a>
+    <a href="/letters-manager/generate" class="suite-nav-item" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#6b7785;text-decoration:none;border-radius:8px;"><i class="fa-solid fa-print"></i> Generate Authorization Letter</a>
+</div>
+            <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-4 shadow-sm border-start border-primary border-5">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark"><i class="fa-solid fa-file-word text-primary me-2"></i> {{ pageTitle }}</h4>
+                    <p class="text-muted m-0 small">Upload and link MS Word formats for Letters & Reports</p>
+                </div>
+                <a href="/dashboard" class="btn btn-light border fw-bold text-dark rounded-pill px-3 shadow-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <!-- Nav Tabs for Letters vs Reports -->
+                <ul class="nav nav-tabs nav-tabs-custom" id="formatTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="letters-tab" data-bs-toggle="tab" data-bs-target="#letters-pane" type="button" role="tab"><i class="fa-solid fa-envelope-open-text me-2"></i> Authority Letters</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane" type="button" role="tab"><i class="fa-solid fa-file-invoice me-2"></i> Investigation Reports</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="formatTabsContent">
+                    
+                    <!-- TAB 1: Authority Letters (Original Logic) -->
+                    <div class="tab-pane fade show active" id="letters-pane" role="tabpanel">
+                        <div class="input-group input-group-sm mb-3" style="max-width: 320px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="companySearchLetter" class="form-control border-start-0 fw-semibold" placeholder="Search Insurance Company..." onkeyup="filterCompany('companySearchLetter', 'company-row-letter')">
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle m-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 80px;">#</th>
+                                        <th>Insurance Company Name</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-end" style="width: 250px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading insurer templates...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Investigation Reports (New Logic) -->
+                    <div class="tab-pane fade" id="reports-pane" role="tabpanel">
+                        <div class="input-group input-group-sm mb-3" style="max-width: 320px;">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" id="companySearchReport" class="form-control border-start-0 fw-semibold" placeholder="Search Insurance Company..." onkeyup="filterCompany('companySearchReport', 'company-row-report')">
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle m-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th style="width: 80px;">#</th>
+                                        <th>Insurance Company Name</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="text-end" style="width: 250px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="4" class="text-center py-4 text-muted">Loading report templates...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </main>
+</div>
+
+<!-- Unified Upload Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white rounded-top-4">
+                <h5 class="modal-title fw-bold" id="modalMainTitle"><i class="fa-solid fa-file-word me-2 text-primary"></i> Upload Template: <span id="modalCompanyName" class="text-warning"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                
+                <div class="alert border-info mb-4 shadow-sm bg-white" id="modalInstructionsBox" style="border-left: 5px solid var(--brand-primary);">
+                    <h6 class="fw-bold text-dark"><i class="fa-solid fa-circle-info me-2 text-primary"></i> Supported Dynamic Variables</h6>
+                    <p class="small m-0 mb-3 text-muted">Click any variable below to copy it. Paste exactly this format into your Word Document. Our system will automatically fetch database values and replace them during generation.</p>
+                    
+                    <div class="d-flex flex-wrap gap-2" id="variablesContainer">
+                        <!-- Filled by JS depending on mode -->
+                    </div>
+                </div>
+
+                <form id="uploadForm" class="bg-white p-3 border rounded shadow-sm" onsubmit="event.preventDefault(); uploadTemplate();">
+                    <input type="hidden" id="currentInsurerId">
+                    <input type="hidden" id="currentUploadMode"> <!-- 'letter' or 'report' -->
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold text-dark mb-1">Select .docx File <span class="text-danger">*</span></label>
+                        <input type="file" id="wordTemplateFile" accept=".docx" class="form-control form-control-lg border-primary shadow-sm" required>
+                    </div>
+                    
+                    <div class="text-end mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-secondary fw-bold px-4 rounded-pill me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success fw-bold px-5 rounded-pill shadow-sm" id="uploadBtn">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload Format
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    // Variables for Authority Letters
+    const letterVariables = [
+        '{CLAIM_NO}', '{FO_NAME}', '{PATIENT_NAME}', '{HOSPITAL_NAME}', 
+        '{HOSPITAL_ADDRESS}', '{DOA}', '{DOD}', '{CURRENT_DATE}'
+    ];
+
+    // Variables for Investigation Reports
+    const reportVariables = [
+        '{CLAIM_NO}', '{POLICY_NO}', '{PATIENT_NAME}', '{PATIENT_AGE}', 
+        '{POLICY_HOLDER}', '{TRIGGER_REASON}', '{POLICY_PERIOD_START}', 
+        '{FIRST_POLICY_INCEPTION_DATE}', '{ALLOCATION_DATE}', '{DOA}', '{DOD}', 
+        '{DOJ}', '{DIAGNOSIS}', '{CLAIM_AMOUNT}', '{INSURED_CITY}', '{INSURED_STATE}', 
+        '{HOSPITAL_NAME}', '{HOSPITAL_CITY}', '{HOSPITAL_STATE}', '{HOSPITAL_ADDRESS}'
+    ];
+
+    function filterCompany(inputId, rowClass) {
+        let q = $('#' + inputId).val().toLowerCase().trim();
+        $('.' + rowClass).each(function() {
+            let name = $(this).attr('data-name');
+            if (name.indexOf(q) !== -1) { $(this).show(); } else { $(this).hide(); }
+        });
+    }
+
+    function copyVar(val) {
+        navigator.clipboard.writeText(val);
+        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: val + ' copied!', showConfirmButton: false, timer: 1500});
+    }
+
+    function openUploadModal(insurerId, companyName, mode) {
+        $('#currentInsurerId').val(insurerId); 
+        $('#currentUploadMode').val(mode);
+        $('#modalCompanyName').text(companyName);
+        $('#wordTemplateFile').val('');
+        
+        let varHtml = '';
+        if(mode === 'letter') {
+            $('#modalMainTitle').html(`<i class="fa-solid fa-envelope-open-text me-2 text-primary"></i> Upload Authority Letter: <span class="text-warning">${companyName}</span>`);
+            letterVariables.forEach(v => {
+                varHtml += `<span class="badge bg-primary variable-badge" onclick="copyVar('${v}')">${v}</span>`;
+            });
+        } else {
+            $('#modalMainTitle').html(`<i class="fa-solid fa-file-invoice me-2 text-primary"></i> Upload Investigation Report: <span class="text-warning">${companyName}</span>`);
+            reportVariables.forEach(v => {
+                varHtml += `<span class="badge bg-primary variable-badge" onclick="copyVar('${v}')">${v}</span>`;
+            });
+        }
+        
+        $('#variablesContainer').html(varHtml);
+        $('#uploadModal').modal('show');
+    }
+
+    function uploadTemplate() {
+        let insurerId = $('#currentInsurerId').val();
+        let mode = $('#currentUploadMode').val();
+        let fileInput = document.getElementById('wordTemplateFile');
+        let file = fileInput.files[0];
+
+        if(!file) { 
+            Swal.fire('Warning', 'Please select a file to upload.', 'warning'); 
+            return; 
+        }
+
+        let formData = new FormData();
+        formData.append('insurer_id', insurerId);
+        formData.append('template_file', file);
+
+        let endpointUrl = (mode === 'letter') ? '/api/letters/save' : '/api/reports_manager/save';
+
+        let btn = $('#uploadBtn');
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Uploading...').prop('disabled', true);
+
+        $.ajax({
+            url: endpointUrl,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                btn.html('<i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload Format').prop('disabled', false);
+                if(res.status === 'success') {
+                    Swal.fire({toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 1500});
+                    $('#uploadModal').modal('hide'); 
+                    setTimeout(() => location.reload(), 1500); 
+                } else { 
+                    Swal.fire('Error', res.message, 'error'); 
+                }
+            },
+            error: function() {
+                btn.html('<i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload Format').prop('disabled', false);
+                Swal.fire('Error', 'Server connection failed during upload.', 'error');
+            }
+        });
+    }
+</script>
+</body>
+</html>

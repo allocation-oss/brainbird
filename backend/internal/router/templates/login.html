@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f7">
+  <title>Sign in | Brain Bird</title>
+  <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme:light; --canvas:#f4f6f7; --surface:#fff; --ink:#202a35; --muted:#6b7785; --line:#dce2e7; --brand:#326b63; --brand-dark:#28574f; --danger:#a63d40; }
+    * { box-sizing:border-box; }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; color:var(--ink); background:var(--canvas); font:14px/1.5 'Plus Jakarta Sans',sans-serif; }
+    .login { width:min(420px,100%); }
+    .brand { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+    .brand img { width:48px; height:48px; object-fit:contain; border-radius:7px; }
+    .brand-name { font-weight:800; font-size:14px; }
+    .brand-caption { color:var(--muted); font-size:11px; }
+    .panel { padding:30px; border:1px solid var(--line); border-radius:8px; background:var(--surface); box-shadow:0 8px 28px rgba(25,39,52,.06); }
+    h1 { margin:0 0 5px; font-size:25px; line-height:1.25; }
+    .intro { margin:0 0 24px; color:var(--muted); font-size:12px; }
+    .field { margin-bottom:16px; }
+    label { display:block; margin-bottom:6px; font-size:11px; font-weight:700; }
+    input[type=email],input[type=password] { width:100%; height:42px; padding:0 11px; border:1px solid #cbd3d9; border-radius:5px; background:#fff; color:var(--ink); font:inherit; }
+    input:focus { outline:3px solid rgba(50,107,99,.14); border-color:var(--brand); }
+    .options { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:3px 0 20px; font-size:11px; }
+    .remember { display:flex; align-items:center; gap:7px; color:var(--muted); font-weight:500; }
+    input[type=checkbox] { accent-color:var(--brand); }
+    a { color:var(--brand-dark); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    button { width:100%; height:42px; border:0; border-radius:5px; background:var(--brand); color:#fff; font-weight:750; cursor:pointer; }
+    button:hover { background:var(--brand-dark); }
+    button:disabled { opacity:.65; cursor:wait; }
+    .error { display:none; margin-top:14px; padding:10px 11px; border:1px solid #efd4d4; border-radius:5px; background:#fff7f7; color:var(--danger); font-size:11px; }
+    footer { margin-top:14px; color:var(--muted); text-align:center; font-size:10px; }
+    @media(max-width:480px) { .panel { padding:24px 20px; } }
+  </style>
+</head>
+<body>
+  <main class="login">
+    <header class="brand"><img src="/assets/branding/logo.png" alt="Brain Bird"><div><div class="brand-name">Brain Bird</div><div class="brand-caption">Operations portal</div></div></header>
+    <section class="panel" aria-labelledby="loginTitle">
+      <h1 id="loginTitle">Sign in</h1>
+      <p class="intro">Use your work account to access the portal.</p>
+      <form id="loginForm" autocomplete="on">
+        <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="username" required autofocus></div>
+        <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required></div>
+        <div class="options"><label class="remember"><input id="remember" name="remember" type="checkbox"> Remember me</label><a href="mailto:support@brainbird.com">Need help?</a></div>
+        <button id="submitButton" type="submit">Sign in</button>
+        <div id="errorBox" class="error" role="alert" aria-live="polite"></div>
+      </form>
+    </section>
+    <footer>© Brain Bird</footer>
+  </main>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      var button = document.getElementById('submitButton');
+      var errorBox = document.getElementById('errorBox');
+      errorBox.textContent = '';
+      errorBox.style.display = 'none';
+      button.disabled = true;
+      try {
+        var response = await fetch('/api/v1/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+          email:document.getElementById('email').value,
+          password:document.getElementById('password').value,
+          remember:document.getElementById('remember').checked
+        }) });
+        var text = await response.text();
+        var payload;
+        try { payload = text ? JSON.parse(text) : {}; } catch (error) { payload = {error:text || 'Sign in failed.'}; }
+        if (!response.ok) throw new Error(payload.error || 'Sign in failed. Check your details.');
+        location.href = payload.redirect || '/dashboard';
+      } catch (error) {
+        errorBox.textContent = error.message;
+        errorBox.style.display = 'block';
+      } finally { button.disabled = false; }
+    });
+  </script>
+</body>
+</html>

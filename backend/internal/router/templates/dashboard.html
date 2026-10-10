@@ -1,0 +1,3241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f6f7">
+  <title>Dashboard | Brain Bird</title>
+  <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root { color-scheme:light; --canvas:#f4f6f7; --surface:#fff; --ink:#202a35; --muted:#6b7785; --line:#dce2e7; --brand:#2563eb; --teal:#14b8a6; --green:#16845b; --amber:#aa6900; --red:#b33b42; --shadow:0 8px 28px rgba(25,39,52,.06); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:var(--canvas); color:var(--ink); font:14px/1.5 'Plus Jakarta Sans',sans-serif; }
+    button,input,select { font:inherit; }
+    strong,b { font-weight:600; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    a { color:inherit; text-decoration:none; }
+    .app-wrapper { min-height:100vh; }
+    .app-sidebar { position:fixed; z-index:1040; inset:0 auto 0 0; width:260px; display:flex; flex-direction:column; transform:translateX(-260px); transition:transform .24s ease; background:var(--surface); border-right:1px solid var(--line); box-shadow:4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open,.app-sidebar:hover,.sidebar-hover-notch:hover + .app-sidebar { transform:translateX(0); }
+    .sidebar-hover-notch { position:fixed; z-index:1041; top:50%; left:0; width:22px; height:58px; transform:translateY(-50%); border:0; border-radius:0 9px 9px 0; color:#fff; background:var(--brand); cursor:pointer; }
+    .sidebar-brand { min-height:70px; display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); }
+    .sidebar-brand img { width:40px; height:40px; object-fit:contain; border-radius:7px; }
+    .brand-title { font-weight:700; font-size:14px; }
+    .brand-caption,.muted { color:var(--muted); font-size:12px; }
+    .sidebar-menu { padding:16px 12px; overflow:auto; flex:1; }
+    .menu-label { padding:0 10px 8px; color:var(--muted); font-size:10px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; }
+    .nav-item-link,.nav-subitem-link { width:100%; display:flex; align-items:center; gap:11px; border:0; border-radius:7px; text-align:left; color:var(--ink); background:transparent; font-weight:600; cursor:pointer; }
+    .nav-item-link { min-height:42px; padding:9px 11px; margin-bottom:3px; font-size:13px; }
+    .nav-subitem-link { min-height:34px; padding:7px 10px 7px 38px; color:var(--muted); font-size:12px; }
+    .nav-item-link:hover,.nav-subitem-link:hover { color:var(--brand); background:#eef4ff; }
+    .nav-item-link.active { color:var(--brand); background:#eaf1ff; }
+    .nav-icon { width:17px; text-align:center; color:var(--muted); }
+    .nav-children { display:none; padding:0 0 5px; }
+    .nav-group.expanded .nav-children { display:block; }
+    .sidebar-footer { border-top:1px solid var(--line); padding:14px 16px; color:var(--muted); font-size:11px; }
+    .app-main { min-height:100vh; display:flex; flex-direction:column; }
+    .app-header { position:sticky; z-index:1020; top:0; min-height:70px; display:flex; justify-content:space-between; align-items:center; gap:20px; padding:10px 28px; background:rgba(255,255,255,.96); border-bottom:1px solid var(--line); }
+    .page-heading { min-width:0; }
+    .eyebrow { margin:0 0 3px; color:var(--brand); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:0; font-size:20px; line-height:1.25; font-weight:650; }
+    .header-actions,.profile { display:flex; align-items:center; gap:12px; }
+    .profile { padding-left:12px; border-left:1px solid var(--line); }
+    .profile-avatar { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; color:#fff; background:var(--brand); font-weight:700; }
+    .profile-copy { display:flex; flex-direction:column; }
+    .profile-name { display:block; font-weight:600; font-size:12px; }
+    .profile-role { display:block; color:var(--muted); font-size:11px; }
+    .icon-button,.secondary-button { min-height:36px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); cursor:pointer; }
+    .icon-button { width:38px; }
+    .secondary-button { padding:0 12px; font-weight:600; font-size:12px; }
+    .icon-button:hover,.secondary-button:hover { border-color:#aab8c7; background:#f9fbfc; }
+    .app-content { width:min(1440px,100%); margin:0 auto; padding:22px 26px 26px; flex:1; }
+    .action-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:18px; }
+    .action-card,.metric-card,.panel { background:rgba(255,255,255,0.85); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%); border:1px solid rgba(226,232,240,0.8); border-radius:14px; box-shadow:0 8px 30px -4px rgba(15,23,42,0.06), inset 0 1px 1px rgba(255,255,255,0.8); }
+    .action-card { min-height:76px; display:flex; align-items:center; gap:13px; padding:13px 15px; }
+    .action-card:hover { border-color:#a9c4f6; transform:translateY(-1px); }
+    .action-card[data-category] { transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease; }
+    .action-card[data-category].selected { border-color:var(--brand); box-shadow:0 0 0 2px rgba(37,99,235,.12); }
+    button.action-card { width:100%; color:inherit; text-align:left; font:inherit; cursor:pointer; }
+    .action-icon { width:40px; height:40px; flex:0 0 40px; display:grid; place-items:center; border-radius:7px; color:var(--brand); background:#eef4ff; }
+    .action-name { font-weight:600; font-size:12px; }
+    .action-description { display:block; margin-top:2px; color:var(--muted); font-size:11px; }
+    .action-count { margin-left:auto; font-size:18px; font-weight:700; }
+
+    /* Tabs placed inside table panel */
+    .table-tabs-row { display:flex; align-items:center; gap:8px; padding:12px 16px; background:#fff; border-bottom:1px solid var(--line); }
+    .tab-button { min-height:38px; display:flex; align-items:center; gap:8px; padding:0 14px; border:1px solid var(--line); border-radius:999px; color:var(--muted); background:#f7f9fa; font-weight:600; white-space:nowrap; cursor:pointer; transition:background .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease; }
+    .tab-button:hover { color:var(--brand); border-color:#b8c9e5; transform:translateY(-1px); }
+    .tab-button.active { color:#fff; background:var(--brand); border-color:var(--brand); box-shadow:0 4px 12px rgba(37,99,235,.24); }
+    .tab-count { min-width:25px; height:21px; display:grid; place-items:center; padding:0 6px; border-radius:999px; color:var(--ink); background:#e5ebf1; font-size:10px; font-variant-numeric:tabular-nums; }
+    .tab-button.active .tab-count { color:var(--brand); background:#fff; }
+    .case-runtime { font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .case-tat-cell { font-variant-numeric:tabular-nums; line-height:1.35; margin-bottom:3px; }
+    .tat-over-info { font-weight:600; white-space:nowrap; }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:16px; }
+    .metric-card { padding:14px 16px; }
+    .metric-card[data-clickable="true"] { cursor:pointer; transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease; }
+    .metric-card[data-clickable="true"]:hover { border-color:#a9c4f6; box-shadow:0 10px 28px rgba(25,39,52,.1); transform:translateY(-2px); }
+    .metric-card[data-clickable="true"]:focus-visible { outline:3px solid rgba(37,99,235,.35); outline-offset:2px; }
+    .metric-label { color:var(--muted); font-size:11px; font-weight:550; }
+    .metric-value { display:block; margin-top:4px; font-size:24px; line-height:1.3; font-weight:700; }
+    .metric-note { color:var(--muted); font-size:10px; }
+    .target-section { margin-bottom:16px; }
+    .target-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .target-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:hidden; border:1px solid var(--line); border-radius:18px; background:#fff; box-shadow:var(--shadow); }
+    .target-metric { min-width:0; overflow:hidden; padding:12px 9px; border-right:1px solid var(--line); }
+    .target-metric:last-child { border-right:0; }
+    .target-metric-title { overflow:hidden; color:var(--muted); font-size:10px; font-weight:600; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; }
+    .target-metric.primary .target-metric-title,.target-metric.primary .target-current { color:var(--target-accent); }
+    .target-metric-value { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 5px; min-width:0; margin-top:4px; }
+    .target-current { font-size:18px; line-height:1.2; font-weight:700; }
+    .target-delta { min-width:0; overflow:hidden; font-size:10px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+    .target-delta.up { color:var(--green); }
+    .target-delta.down { color:var(--red); }
+    .target-previous { display:flex; flex-wrap:wrap; gap:0 4px; margin-top:3px; color:var(--muted); font-size:10px; line-height:1.35; }
+    .target-previous strong { white-space:nowrap; }
+    .target-movement-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; margin-top:12px; }
+    .target-movement { --movement-accent:var(--brand); display:grid; grid-template-columns:minmax(142px,26%) minmax(0,1fr) auto; align-items:center; min-height:50px; overflow:hidden; border:1px solid var(--line); border-radius:999px; background:#fff; box-shadow:var(--shadow); }
+    .target-movement.rm-drop,.target-movement.alm-drop { --movement-accent:var(--red); }
+    .target-movement.rm-growth { --movement-accent:var(--green); }
+    .target-movement-label { min-width:0; padding:0 14px; border-right:1px solid var(--line); color:var(--movement-accent); font-size:12px; font-weight:650; white-space:nowrap; }
+    .target-movement-label i { margin-right:6px; }
+    .movement-viewport { min-width:0; overflow:hidden; }
+    .movement-track { display:flex; width:max-content; animation:target-marquee var(--movement-duration,5s) linear infinite; }
+    .target-movement:hover .movement-track,.target-movement:focus-within .movement-track { animation-play-state:paused; }
+    .movement-item { display:inline-flex; align-items:center; gap:8px; min-width:310px; padding:0 16px; border:0; border-right:1px solid var(--line); color:inherit; background:transparent; text-align:left; cursor:pointer; }
+    .movement-item:hover { background:#f7f9fa; }
+    .movement-item-name { max-width:110px; overflow:hidden; color:var(--movement-accent); font-size:12px; font-weight:650; text-overflow:ellipsis; white-space:nowrap; }
+    .movement-insurances { display:flex; gap:4px; min-width:0; max-width:155px; overflow:hidden; }
+    .movement-insurance { max-width:155px; overflow:hidden; padding:3px 6px; border:1px solid #e0e5e9; border-radius:7px; color:#46515d; background:#f7f9fa; font-size:9px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+    .movement-item-counts { flex:0 0 auto; color:#5f6872; font-size:11px; white-space:nowrap; }
+    .movement-item-counts strong { color:var(--movement-accent); }
+    .movement-view { display:inline-flex; align-items:center; gap:6px; align-self:stretch; padding:0 13px; border:0; border-left:1px solid var(--line); color:var(--movement-accent); background:#fff; font-weight:600; cursor:pointer; }
+    .movement-view:hover { background:#f7f9fa; }
+    .movement-all { align-self:stretch; padding:0 12px; border:0; border-left:1px solid var(--line); color:var(--brand); background:#fff; font-size:11px; font-weight:600; white-space:nowrap; cursor:pointer; }
+    .movement-all:hover { background:#eef4ff; }
+    .target-empty { grid-column:2; padding:0 14px; color:var(--muted); font-size:11px; }
+    @keyframes target-marquee { to { transform:translateX(-50%); } }
+    @media(prefers-reduced-motion:reduce) { .movement-track { animation:none; } .movement-viewport { overflow-x:auto; } }
+    .dashboard-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(260px,.8fr); gap:14px; margin-bottom:16px; }
+    .panel { min-width:0; padding:16px; }
+    .panel-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
+    .panel-header-status { flex-wrap:wrap; gap:8px; }
+    .status-filter-group { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+    .status-filter-input { height:28px; padding:0 6px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fff; font-size:11px; }
+    .status-filter-input:focus { outline:none; border-color:var(--brand); }
+    .status-filter-reset { width:28px; min-height:28px; height:28px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:10px; color:var(--muted); border:1px solid var(--line); border-radius:5px; background:#fff; cursor:pointer; }
+    .status-filter-reset:hover { color:var(--brand); border-color:#aab8c7; background:#f9fbfc; }
+    .panel-title { margin:0; font-size:14px; font-weight:650; }
+    .panel-subtitle { margin:2px 0 0; color:var(--muted); font-size:10px; }
+    .chart { min-height:175px; display:flex; align-items:stretch; gap:8px; padding-top:22px; }
+    .bar-column { position:relative; min-width:0; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:7px; cursor:pointer; }
+    .bar-track { width:100%; height:138px; display:flex; align-items:flex-end; overflow:hidden; background:#f3f6f9; border-radius:4px 4px 2px 2px; transition:background .15s ease; }
+    .bar-column:hover .bar-track { background:#e8edf3; }
+    .bar-fill { width:100%; min-height:2px; background:var(--brand); border-radius:4px 4px 0 0; transition:background .15s ease, filter .15s ease; }
+    .bar-column:hover .bar-fill { background:#1d4ed8; filter:brightness(1.08); }
+    .bar-label { color:var(--muted); font-size:9px; white-space:nowrap; transition:color .15s ease; }
+    .bar-column:hover .bar-label { color:var(--ink); font-weight:600; }
+    .bar-tooltip { position:absolute; top:-4px; left:50%; transform:translate(-50%, -100%); background:#0f172a; color:#fff; padding:3px 7px; border-radius:5px; font-size:10px; font-weight:700; white-space:nowrap; pointer-events:none; opacity:0; visibility:hidden; transition:opacity .15s ease, transform .15s ease; z-index:20; box-shadow:0 4px 12px rgba(15,23,42,.22); }
+    .bar-tooltip::after { content:''; position:absolute; top:100%; left:50%; margin-left:-4px; border-width:4px; border-style:solid; border-color:#0f172a transparent transparent transparent; }
+    .bar-column:hover .bar-tooltip, .bar-column:focus .bar-tooltip { opacity:1; visibility:visible; transform:translate(-50%, -100%) translateY(-2px); }
+    .segment-content { display:flex; align-items:center; justify-content:space-around; gap:14px; min-height:160px; }
+    .donut-shell { position:relative; width:140px; height:140px; flex:0 0 140px; }
+    .donut-svg { width:100%; height:100%; overflow:visible; transform:rotate(-90deg); }
+    .donut-track { fill:none; stroke:#e9eef2; stroke-width:16; }
+    .donut-segment { fill:none; stroke-width:16; cursor:pointer; transition:stroke-width .15s ease,opacity .15s ease; }
+    .donut-segment:hover,.donut-segment:focus { stroke-width:20; opacity:.86; outline:none; }
+    .donut-hole { position:absolute; inset:0; display:grid; place-content:center; text-align:center; pointer-events:none; }
+    .donut-total { font-weight:700; font-size:20px; }
+    .donut-caption { color:var(--muted); font-size:9px; }
+    .legend { display:grid; gap:8px; min-width:0; max-height:155px; overflow:auto; }
+    .legend-item { display:flex; justify-content:space-between; align-items:center; gap:10px; color:var(--muted); font-size:10px; border:0; background:transparent; cursor:pointer; }
+    .legend-name { display:flex; align-items:center; gap:7px; min-width:0; }
+    .legend-dot { width:8px; height:8px; flex:0 0 8px; border-radius:50%; }
+    
+    /* Workload Distribution Grid */
+    .workload-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:16px; }
+    .workload-panel { padding:14px 16px 12px; }
+    .workload-search { height:28px; width:130px; padding:0 8px; border:1px solid var(--line); border-radius:5px; font-size:11px; color:var(--ink); background:#fff; transition:border-color .15s ease,width .2s ease; }
+    .workload-search:focus { outline:none; border-color:var(--brand); width:160px; }
+    .workload-table { width:100%; border-collapse:collapse; font-size:11px; }
+    .workload-table th { padding:8px 8px; color:var(--muted); font-size:9px; text-transform:uppercase; letter-spacing:.04em; background:#f8fafb; border-bottom:1px solid var(--line); }
+    .workload-table td { padding:7px 8px; border-top:1px solid #edf0f2; vertical-align:middle; }
+    .workload-table tr:hover td { background:#f9fbfe; }
+    .workload-rank { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; font-size:10px; font-weight:700; color:var(--muted); background:#f0f3f6; }
+    .workload-rank.top-1 { background:#fef3c7; color:#b45309; }
+    .workload-rank.top-2 { background:#f1f5f9; color:#475569; }
+    .workload-rank.top-3 { background:#ffedd5; color:#c2410c; }
+    .workload-name { font-weight:600; color:var(--ink); display:flex; align-items:center; gap:7px; cursor:pointer; }
+    .workload-name:hover { color:var(--brand); }
+    .workload-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; cursor:pointer; transition:all .15s ease; border:none; text-decoration:none; outline:none; }
+    .workload-pill.active { background:linear-gradient(135deg,#eff6ff,#dbeafe); color:var(--brand); border:1px solid #bfdbfe; }
+    .workload-pill.active:hover { background:linear-gradient(135deg,#dbeafe,#bfdbfe); color:#1d4ed8; transform:scale(1.06); box-shadow:0 2px 8px rgba(37,99,235,.22); }
+    .workload-pill.zero { background:#f3f4f6; color:#9ca3af; font-weight:500; border:1px solid #e5e7eb; }
+    .workload-pill.zero:hover { background:#e5e7eb; color:#6b7280; transform:scale(1.04); }
+    .workload-footer { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:8px 0 2px; margin-top:8px; border-top:1px solid var(--line); font-size:10px; color:var(--muted); }
+    @media(max-width:880px) { .workload-grid { grid-template-columns:1fr; } }
+    
+    /* Cascading Filter Panel */
+    .filter-panel { margin-bottom:14px; }
+    .filter-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; align-items:end; }
+    .filter-field label { display:block; margin-bottom:4px; color:var(--muted); font-size:10px; font-weight:600; }
+    .filter-field input,.filter-field select { width:100%; min-width:0; height:35px; padding:0 9px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fff; font-size:11px; }
+    .filter-field select:disabled { background:#f1f4f7; color:#9fa9b5; cursor:not-allowed; }
+    .filter-actions { display:flex; gap:6px; grid-column:span 2; justify-content:flex-end; margin-top:4px; }
+    
+    .table-panel { padding:0; overflow:hidden; }
+    .table-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:15px 16px; border-bottom:1px solid var(--line); }
+    .table-scroll { overflow-x:hidden; overflow-y:visible; width:100%; }
+    table { width:100%; border-collapse:collapse; text-align:left; table-layout:auto; }
+    thead { background:#f5f7f9; }
+    th { padding:8px 7px; color:var(--muted); font-size:9px; letter-spacing:.03em; text-transform:uppercase; line-height:1.3; }
+    td { padding:8px 7px; border-top:1px solid #edf0f2; font-size:11px; vertical-align:middle; overflow-wrap:break-word; word-break:break-word; }
+    .claim-number { color:var(--brand); font-weight:650; cursor:pointer; }
+    .status-badge { display:inline-flex; align-items:center; padding:3px 6px; border-radius:4px; background:#eef4ff; color:var(--brand); font-size:9px; font-weight:600; text-transform:capitalize; white-space:nowrap; }
+    .status-badge.resolved { color:var(--green); background:#eaf6f0; }
+    .status-badge.waiting { color:var(--amber); background:#fff4df; }
+    .status-badge.progress { color:#5e55a4; background:#f0edff; }
+    
+    .remark-cell { display:grid; gap:3px; width:100%; max-width:130px; overflow:hidden; }
+    .remark-preview { display:block; width:100%; overflow:hidden; padding:0; border:0; color:var(--brand); background:transparent; text-align:left; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+    .remark-preview:hover { text-decoration:underline; }
+    .remark-add { justify-self:start; padding:2px 5px; border:1px solid var(--line); border-radius:4px; color:var(--brand); background:#fff; font-size:9px; font-weight:600; cursor:pointer; }
+    .remark-list { display:grid; gap:8px; max-height:220px; overflow:auto; }
+    .remark-entry { padding:8px 10px; border:1px solid var(--line); border-radius:5px; background:#f8fafb; }
+    .remark-entry-head { display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; color:var(--muted); font-size:10px; }
+    .remark-entry-text { margin:0; color:var(--ink); font-size:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .remark-form { margin-top:12px; }
+    .remark-form label { display:block; margin-bottom:5px; font-size:11px; font-weight:600; }
+    .remark-form textarea { width:100%; min-height:90px; padding:9px 10px; border:1px solid var(--line); border-radius:5px; resize:vertical; }
+    .remark-form-footer { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:8px; }
+    .remark-form-message { margin-right:auto; color:var(--red); font-size:11px; }
+
+    .empty-state { padding:30px 12px; color:var(--muted); text-align:center; }
+    .table-footer { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 16px; border-top:1px solid var(--line); color:var(--muted); font-size:10px; }
+    .pagination-controls { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+    .pagination-pages { display:flex; align-items:center; gap:4px; }
+    .pagination-btn { min-width:32px; height:32px; padding:0 10px; border:1px solid var(--line); border-radius:6px; background:#fff; color:var(--ink); font-size:11px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:border-color .15s ease,background .15s ease,color .15s ease; }
+    .pagination-btn:hover:not(:disabled):not(.active) { border-color:#aab8c7; background:#f9fbfc; color:var(--brand); }
+    .pagination-btn.active { background:var(--brand); color:#fff; border-color:var(--brand); box-shadow:0 2px 8px rgba(37,99,235,.22); font-weight:700; cursor:default; }
+    .pagination-btn:disabled { opacity:.42; cursor:not-allowed; }
+    .page-footer { padding:14px 20px; border-top:1px solid var(--line); color:var(--muted); text-align:center; font-size:10px; }
+    .error-banner { display:none; margin-bottom:12px; padding:10px 12px; border:1px solid #efc9cb; border-radius:6px; background:#fff5f5; color:var(--red); font-size:12px; }
+    .copy-toast { position:fixed; z-index:3000; right:20px; bottom:20px; display:flex; align-items:center; gap:9px; max-width:min(360px,calc(100vw - 32px)); padding:11px 15px; border:1px solid #b9e3ce; border-radius:7px; color:#12633e; background:#f0fbf5; box-shadow:0 10px 30px rgba(20,40,30,.18); opacity:0; transform:translateY(8px); pointer-events:none; transition:opacity .18s ease,transform .18s ease; }
+    .copy-toast.visible { opacity:1; transform:translateY(0); }
+    .copy-toast.failed { border-color:#efc9cb; color:var(--red); background:#fff5f5; }
+    
+    .modal-backdrop { position:fixed; z-index:2000; inset:0; display:grid; place-items:center; padding:20px; background:rgba(15,23,42,.45); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+    .modal-backdrop[hidden] { display:none; }
+    .detail-dialog { width:min(760px,100%); max-height:min(82vh,760px); overflow:auto; padding:18px; border:1px solid rgba(255,255,255,0.8); border-radius:18px; background:rgba(255,255,255,0.92); backdrop-filter:blur(24px) saturate(190%); -webkit-backdrop-filter:blur(24px) saturate(190%); box-shadow:0 24px 64px rgba(15,23,42,.2), inset 0 1px 2px rgba(255,255,255,0.9); }
+    .card-results-dialog { width:min(1360px,96vw); max-height:min(90vh,900px); border-radius:18px; background:rgba(255,255,255,0.92); backdrop-filter:blur(24px) saturate(190%); -webkit-backdrop-filter:blur(24px) saturate(190%); border:1px solid rgba(255,255,255,0.8); box-shadow:0 24px 64px rgba(15,23,42,.2), inset 0 1px 2px rgba(255,255,255,0.9); }
+    .card-results-summary { margin:10px 0; color:var(--muted); font-size:12px; }
+    .card-results-table { min-width:1050px; width:100%; border-collapse:collapse; }
+    .card-results-table thead { background:#f5f7f9; }
+    .card-results-table th { padding:8px 7px; color:var(--muted); font-size:9px; letter-spacing:.03em; text-transform:uppercase; line-height:1.3; text-align:left; border-bottom:1px solid var(--line); }
+    .card-results-table td { padding:8px 7px; border-top:1px solid #edf0f2; font-size:11px; vertical-align:middle; overflow-wrap:break-word; word-break:break-word; }
+    /* Single-Row Filter Toolbar in Modal */
+    .modal-filter-toolbar { position:relative; margin:8px 0 10px; padding:6px 10px; background:#f8fafc; border:1px solid var(--line); border-radius:8px; display:flex; align-items:center; gap:6px; }
+    .modal-filter-chips-row { display:flex; align-items:center; gap:4px 6px; flex-wrap:wrap; min-width:0; flex:1; overflow:visible; }
+    .modal-filter-label { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-right:2px; white-space:nowrap; flex-shrink:0; }
+    .filter-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border:1px solid #d1d5db; border-radius:999px; background:#fff; color:#374151; font-size:10.5px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .15s ease; user-select:none; outline:none; line-height:1.4; }
+    .filter-pill:hover { border-color:var(--brand); color:var(--brand); background:#f0f7ff; }
+    .filter-pill.open { border-color:var(--brand); background:#eff6ff; color:var(--brand); box-shadow:0 0 0 2px rgba(37,99,235,.15); }
+    .filter-pill.active { background:#eff6ff; border-color:var(--brand); color:var(--brand); font-weight:700; }
+    .filter-pill .pill-remove { display:inline-flex; align-items:center; justify-content:center; width:13px; height:13px; border-radius:50%; background:rgba(37,99,235,.15); color:var(--brand); font-size:10px; margin-left:2px; line-height:1; transition:all .12s ease; }
+    .filter-pill .pill-remove:hover { background:#dc2626; color:#fff; }
+    .modal-reset-pill { display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border:1px dashed #f87171; border-radius:999px; background:#fff5f5; color:#dc2626; font-size:10.5px; font-weight:600; cursor:pointer; flex-shrink:0; transition:all .15s ease; white-space:nowrap; }
+    .modal-reset-pill:hover { background:#fee2e2; border-color:#dc2626; }
+    .modal-filter-popover { position:absolute; top:calc(100% + 6px); left:12px; z-index:1000; min-width:280px; max-width:360px; padding:12px 14px; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 12px 32px rgba(15,23,42,.16),0 2px 6px rgba(15,23,42,.08); display:none; gap:10px; animation:popoverFadeIn .14s cubic-bezier(0.16,1,0.3,1); }
+    .modal-filter-popover:not([hidden]) { display:grid; }
+    .modal-filter-popover[hidden] { display:none !important; }
+    @keyframes popoverFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+    .popover-header { display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:700; color:var(--ink); border-bottom:1px solid #f1f5f9; padding-bottom:6px; }
+    .popover-body { display:grid; gap:8px; }
+    .popover-slot[hidden] { display:none !important; }
+    .popover-body label { font-size:10px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px; }
+    .popover-body input, .popover-body select { width:100%; height:34px; padding:0 9px; border:1px solid var(--line); border-radius:6px; font-size:11px; color:var(--ink); background:#fff; outline:none; }
+    .popover-body input:focus, .popover-body select:focus { border-color:var(--brand); box-shadow:0 0 0 2px rgba(37,99,235,.12); }
+    .popover-footer { display:flex; align-items:center; justify-content:flex-end; gap:6px; padding-top:6px; border-top:1px solid #f1f5f9; }
+    .card-results-footer { margin-top:12px; padding:10px 4px 4px; border-top:1px solid var(--line); }
+    .dialog-head { position:sticky; top:-18px; display:flex; align-items:center; justify-content:space-between; gap:14px; padding:4px 0 12px; background:#fff; border-bottom:1px solid var(--line); }
+    .dialog-title { margin:0; font-size:16px; }
+    .dialog-body { padding-top:12px; }
+    .dialog-table { width:100%; border-collapse:collapse; }
+    .dialog-table th,.dialog-table td { padding:9px; border-bottom:1px solid #edf0f2; text-align:left; font-size:11px; vertical-align:top; }
+    .dialog-table th { width:155px; color:var(--muted); font-weight:600; }
+    .case-flow-container { margin-bottom:18px; padding:14px; border:1px solid var(--line); border-radius:8px; background:#f8fafc; }
+    .case-flow-title { font-size:11px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+    .case-flow-steps { display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1fr; align-items:start; gap:6px; }
+    .flow-step { display:flex; flex-direction:column; align-items:center; text-align:center; min-width:0; }
+    .flow-icon { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:13px; margin-bottom:5px; border:2px solid #cbd5e1; background:#fff; color:var(--muted); }
+    .flow-step.completed .flow-icon { background:#eaf6f0; color:#16845b; border-color:#16845b; }
+    .flow-step.closed-step .flow-icon { background:#16845b; color:#fff; border-color:#16845b; }
+    .flow-step.current .flow-icon { background:#fff4df; color:#aa6900; border-color:#aa6900; }
+    .flow-connector { width:100%; height:2px; background:#dce2e7; margin-top:16px; }
+    .flow-connector.active { background:#16845b; }
+    .flow-content strong { display:block; font-size:11px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .flow-meta { margin:0 0 3px; font-size:9.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .flow-badge { display:inline-block; font-size:9px; font-weight:600; padding:2px 5px; border-radius:4px; background:#eef4ff; color:var(--brand); white-space:nowrap; }
+    .flow-badge.success { background:#eaf6f0; color:#16845b; }
+    .flow-badge.pending { background:#fff4df; color:#aa6900; }
+    @media (max-width:640px) { .case-flow-steps { grid-template-columns:1fr; gap:10px; } .flow-connector { display:none; } }
+    .copy-button { width:22px; height:22px; margin-right:3px; padding:0; border:1px solid var(--line); border-radius:4px; color:var(--brand); background:#fff; cursor:pointer; font-size:10px; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; }
+    .manager-list { color:var(--muted); font-size:10px; line-height:1.5; word-break:break-word; }
+    .manager-list b { color:var(--ink); }
+    .row-actions { display:flex; flex-direction:column; gap:3px; min-width:62px; }
+    .row-action-button { min-height:24px; padding:2px 6px; border:1px solid #d5e2fb; border-radius:4px; color:var(--brand); background:#eef4ff; font-size:9.5px; font-weight:600; cursor:pointer; white-space:nowrap; text-align:center; }
+    .row-action-button:hover { color:#fff; background:var(--brand); }
+    .row-action-button.mail { color:#0f766e; background:#f0fdf4; border-color:#bbf7d0; }
+    .row-action-button.mail:hover { color:#fff; background:#16845b; }
+    .manager-mail-link { border:0; background:transparent; color:var(--brand); cursor:pointer; padding:0 3px; font-size:11px; }
+    .manager-mail-link:hover { color:var(--brand-dark); }
+    .loading { opacity:.6; pointer-events:none; }
+    .direct-close-dialog { width:min(860px,100%); max-height:90vh; overflow:auto; padding:0; border:1px solid var(--line); border-radius:8px; background:#fff; box-shadow:0 20px 70px rgba(15,23,42,.22); }
+    .direct-close-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 18px; color:#fff; background:#202a35; }
+    .direct-close-header h2 { margin:0; font-size:16px; }
+    .direct-close-form { padding:16px 20px 18px; }
+    .direct-close-options { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; padding:12px 14px; border:1px solid #aeb8c1; border-radius:7px; background:#e8ebee; }
+    .direct-close-options p { margin:2px 0 0; color:var(--muted); font-size:11px; }
+    .mode-options,.employment-options { display:flex; align-items:center; gap:12px; }
+    .mode-options label,.employment-options label { display:flex; align-items:center; gap:5px; font-weight:600; white-space:nowrap; cursor:pointer; }
+    .direct-close-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .direct-close-grid[hidden],.modal-field[hidden],#denialPartsField[hidden] { display:none; }
+    .direct-close-section { min-width:0; padding:14px; border:1px solid var(--line); border-radius:7px; background:#f8fafb; }
+    .direct-close-section h3 { margin:0 0 10px; font-size:13px; font-weight:600; }
+    .direct-close-section input:not([type=radio]):not([type=checkbox]),.direct-close-section select,.direct-close-section textarea { width:100%; min-height:38px; padding:8px 10px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fff; }
+    .direct-close-section textarea { min-height:68px; resize:vertical; }
+    .fo-assignment { margin-bottom:10px; padding:10px; border:1px solid #dce2e7; border-radius:6px; background:#fff; }
+    .fo-assignment-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:7px; color:var(--muted); font-size:10px; font-weight:600; }
+    .employment-options { margin-bottom:8px; font-size:11px; }
+    .parts-label { display:block; margin:9px 0 5px; font-size:11px; font-weight:600; }
+    .parts-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+    .parts-grid label { display:flex; align-items:center; gap:6px; font-size:12px; }
+    .denial-registration-fields { display:grid; gap:8px; margin-top:10px; }
+    .denial-registration-fields[hidden] { display:none; }
+    .denial-registration-field { display:grid; grid-template-columns:minmax(110px,32%) minmax(0,1fr); align-items:center; gap:8px; }
+    .denial-registration-field label { color:var(--muted); font-size:11px; font-weight:600; }
+    .denial-registration-field input { width:100%; min-width:0; height:36px; padding:0 9px; border:1px solid var(--line); border-radius:5px; }
+    .modal-field { margin-top:10px; }
+    .modal-field label { display:block; margin-bottom:4px; font-size:10px; font-weight:600; }
+    .status-verdict-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .direct-close-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+    .direct-close-submit { min-height:36px; padding:0 14px; border:0; border-radius:5px; color:#fff; background:var(--brand); font-weight:600; cursor:pointer; }
+    .danger-text { color:var(--red); }
+
+    /* ========================================================
+       PRO-LEVEL RESPONSIVE CARD TRANSFORMATION FOR SMALL SCREENS
+       Transforms 9-column tables into modern pro-level cards
+       ======================================================== */
+    @media (max-width: 900px) {
+      .table-panel .table-scroll,
+      .card-results-dialog .table-scroll {
+        overflow-x: visible !important;
+        padding: 4px 2px;
+      }
+      .table-panel table,
+      .table-panel tbody,
+      .card-results-table,
+      .card-results-table tbody {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      .table-panel thead,
+      .card-results-table thead {
+        display: none !important;
+      }
+      .table-panel tbody tr,
+      .card-results-table tbody tr {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 14px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(15,23,42,.05);
+        transition: all .18s cubic-bezier(0.16,1,0.3,1);
+        position: relative;
+      }
+      .table-panel tbody tr:hover,
+      .card-results-table tbody tr:hover {
+        border-color: var(--brand);
+        box-shadow: 0 6px 20px rgba(37,99,235,.12);
+        transform: translateY(-1px);
+      }
+      .table-panel tbody td,
+      .card-results-table tbody td {
+        display: block !important;
+        padding: 0 !important;
+        border: none !important;
+        font-size: 11.5px;
+      }
+
+      /* Empty state handling */
+      .table-panel tbody tr:has(.empty-state),
+      .card-results-table tbody tr:has(.empty-state) {
+        display: block !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .table-panel tbody td.empty-state,
+      .card-results-table tbody td.empty-state {
+        grid-column: 1 / -1 !important;
+        text-align: center !important;
+      }
+      .table-panel tbody td.empty-state::before,
+      .card-results-table tbody td.empty-state::before {
+        display: none !important;
+      }
+
+      /* Card Header Bar: Claim # */
+      .table-panel tbody td:nth-child(1),
+      .card-results-table tbody td:nth-child(1) {
+        grid-column: 1 / -1;
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 9px !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .table-panel tbody td:nth-child(1) .claim-number,
+      .card-results-table tbody td:nth-child(1) .claim-number {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--brand);
+      }
+
+      /* Card Field: Patient */
+      .table-panel tbody td:nth-child(2),
+      .card-results-table tbody td:nth-child(2) {
+        grid-column: 1;
+      }
+      .table-panel tbody td:nth-child(2)::before,
+      .card-results-table tbody td:nth-child(2)::before {
+        content: "Patient";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: Insurance & Category */
+      .table-panel tbody td:nth-child(3),
+      .card-results-table tbody td:nth-child(3) {
+        grid-column: 2;
+      }
+      .table-panel tbody td:nth-child(3)::before,
+      .card-results-table tbody td:nth-child(3)::before {
+        content: "Insurance & Category";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: Hospital / Location */
+      .table-panel tbody td:nth-child(4),
+      .card-results-table tbody td:nth-child(4) {
+        grid-column: 1;
+      }
+      .table-panel tbody td:nth-child(4)::before,
+      .card-results-table tbody td:nth-child(4)::before {
+        content: "Hospital / Location";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: Dates */
+      .table-panel tbody td:nth-child(5),
+      .card-results-table tbody td:nth-child(5) {
+        grid-column: 2;
+      }
+      .table-panel tbody td:nth-child(5)::before,
+      .card-results-table tbody td:nth-child(5)::before {
+        content: "Allocated / Closed";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: TAT & Status */
+      .table-panel tbody td:nth-child(6),
+      .card-results-table tbody td:nth-child(6) {
+        grid-column: 1;
+      }
+      .table-panel tbody td:nth-child(6)::before,
+      .card-results-table tbody td:nth-child(6)::before {
+        content: "TAT & Status";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: Managers */
+      .table-panel tbody td:nth-child(7),
+      .card-results-table tbody td:nth-child(7) {
+        grid-column: 2;
+      }
+      .table-panel tbody td:nth-child(7)::before,
+      .card-results-table tbody td:nth-child(7)::before {
+        content: "Managers";
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+      }
+
+      /* Card Field: Remark */
+      .table-panel tbody td:nth-child(8),
+      .card-results-table tbody td:nth-child(8) {
+        grid-column: 1 / -1;
+        padding-top: 8px !important;
+        border-top: 1px dashed #e2e8f0 !important;
+      }
+      .table-panel tbody td:nth-child(8) .remark-cell,
+      .card-results-table tbody td:nth-child(8) .remark-cell {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+
+      /* Card Field: Action Buttons */
+      .table-panel tbody td:nth-child(9),
+      .card-results-table tbody td:nth-child(9) {
+        grid-column: 1 / -1;
+        padding-top: 10px !important;
+        border-top: 1px solid #f1f5f9 !important;
+      }
+      .table-panel tbody td:nth-child(9) .row-actions,
+      .card-results-table tbody td:nth-child(9) .row-actions {
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .table-panel tbody td:nth-child(9) .row-action-button,
+      .card-results-table tbody td:nth-child(9) .row-action-button {
+        min-height: 28px;
+        padding: 4px 10px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .table-panel tbody tr,
+      .card-results-table tbody tr {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 12px;
+      }
+      .table-panel tbody td:nth-child(2),
+      .table-panel tbody td:nth-child(3),
+      .table-panel tbody td:nth-child(4),
+      .table-panel tbody td:nth-child(5),
+      .table-panel tbody td:nth-child(6),
+      .table-panel tbody td:nth-child(7),
+      .card-results-table tbody td:nth-child(2),
+      .card-results-table tbody td:nth-child(3),
+      .card-results-table tbody td:nth-child(4),
+      .card-results-table tbody td:nth-child(5),
+      .card-results-table tbody td:nth-child(6),
+      .card-results-table tbody td:nth-child(7) {
+        grid-column: 1;
+      }
+      .card-results-dialog {
+        width: 98vw;
+        padding: 10px;
+      }
+      .table-tabs-row {
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .tab-button {
+        padding: 5px 9px;
+        font-size: 11px;
+      }
+      .workload-panel .table-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+    
+    @media(max-width:1050px) { .action-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .filter-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .filter-actions { grid-column:span 2; } .target-grid { grid-template-columns:1fr; } }
+    @media(max-width:760px) { .app-header { padding:10px 16px; } .app-content { padding:16px 12px 20px; } .dashboard-grid,.direct-close-grid,.target-movement-grid { grid-template-columns:1fr; } .summary-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .profile-copy { display:none; } }
+    @media(max-width:520px) { .action-grid { grid-template-columns:1fr 1fr; gap:8px; } .action-card { min-height:68px; padding:10px; gap:8px; } .action-icon { width:34px; height:34px; flex-basis:34px; } .action-count { font-size:15px; } .filter-grid { grid-template-columns:1fr; } .filter-actions { grid-column:span 1; } .header-actions { gap:6px; } .header-actions .secondary-button { padding:0 8px; } .segment-content { justify-content:center; } .donut-shell { width:118px; height:118px; flex-basis:118px; } .target-summary { grid-template-columns:repeat(2,minmax(0,1fr)); border-radius:10px; } .target-metric:nth-child(2) { border-right:0; } .target-metric:nth-child(-n+2) { border-bottom:1px solid var(--line); } .target-metric-title { font-size:9px; } .target-previous { font-size:9px; } .target-movement { grid-template-columns:106px minmax(0,1fr); border-radius:12px; } .target-movement-label { padding:0 8px; font-size:10px; white-space:normal; } .movement-item { min-width:250px; padding:0 10px; } .movement-item-name { max-width:80px; } .movement-insurances { max-width:100px; } .movement-insurance { max-width:100px; } .movement-item-counts { font-size:10px; } .movement-view { padding:0 8px; } }
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+  {{SIDEBAR_PARTIAL}}
+  <main class="app-main">
+    {{HEADER_PARTIAL}}
+    <section class="app-content">
+      <div id="errorBanner" class="error-banner" role="alert"></div>
+      
+      <!-- Top Action Cards -->
+      <section class="action-grid" aria-label="Case categories">
+        <a class="action-card" id="addCaseLink" href="/cases/add"><span class="action-icon"><i class="fa-solid fa-folder-plus"></i></span><span><span class="action-name">Add new case</span><span class="action-description">Register claim</span></span><span class="action-count">+</span></a>
+        <button class="action-card" type="button" data-category="reimbursement"><span class="action-icon"><i class="fa-solid fa-file-invoice-dollar"></i></span><span><span class="action-name">Reimbursement</span><span class="action-description">Live cases</span></span><span class="action-count" id="reimbursementCount">0</span></button>
+        <button class="action-card" type="button" data-category="cashless"><span class="action-icon"><i class="fa-solid fa-hospital-user"></i></span><span><span class="action-name">Cashless</span><span class="action-description">Live cases</span></span><span class="action-count" id="cashlessCount">0</span></button>
+        <button class="action-card" type="button" data-category="other"><span class="action-icon"><i class="fa-solid fa-hand-holding-medical"></i></span><span><span class="action-name">Other benefits</span><span class="action-description">Live cases</span></span><span class="action-count" id="otherCount">0</span></button>
+      </section>
+
+      <!-- Summary Metrics Grid -->
+      <section class="summary-grid" aria-label="Case summary">
+        <article class="metric-card" data-clickable="true" data-detail="total" role="button" tabindex="0" aria-label="Show total cases"><span class="metric-label">Total cases</span><strong class="metric-value" id="totalCases">0</strong><span class="metric-note">Visible in your assigned scope</span></article>
+        <article class="metric-card" data-clickable="true" data-detail="open" role="button" tabindex="0" aria-label="Show open cases"><span class="metric-label">Open cases</span><strong class="metric-value" id="openCases">0</strong><span class="metric-note">Awaiting field assignment</span></article>
+        <article class="metric-card" data-clickable="true" data-detail="completed" role="button" tabindex="0" aria-label="Show cases completed today"><span class="metric-label">Completed today</span><strong class="metric-value" id="resolvedToday">0</strong><span class="metric-note">From database records</span></article>
+        <article class="metric-card" data-clickable="true" data-detail="overdue" role="button" tabindex="0" aria-label="Show overdue cases"><span class="metric-label">Overdue cases</span><strong class="metric-value" id="riskCases">0</strong><span class="metric-note">Past configured TAT</span></article>
+      </section>
+
+      <section class="target-section" aria-label="Target tracking">
+        <div id="targetCards" class="target-grid"></div>
+        <div id="targetMovements" class="target-movement-grid"></div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="dashboard-grid">
+        <article class="panel"><div class="panel-header"><div><h2 class="panel-title">Case volume</h2><p class="panel-subtitle">Monthly cases from allocation and creation dates</p></div><a class="secondary-button" href="/analytics">Analytics</a></div><div class="chart" id="trendChart"></div></article>
+        <article class="panel"><div class="panel-header panel-header-status"><div><h2 class="panel-title">Case status</h2><p class="panel-subtitle">Hover for counts; select a segment for cases</p></div><div class="status-filter-group" aria-label="Filter case status by month or date"><input type="month" id="statusFilterMonth" class="status-filter-input" title="Filter by month" aria-label="Filter by month"><input type="date" id="statusFilterDate" class="status-filter-input" title="Filter by exact date" aria-label="Filter by exact date"><button type="button" class="status-filter-reset" id="statusFilterReset" title="Reset date/month filter" aria-label="Reset date/month filter"><i class="fa-solid fa-rotate-left"></i></button></div></div><div class="segment-content"><div class="donut-shell"><svg class="donut-svg" id="statusDonut" viewBox="0 0 120 120" role="img" aria-label="Case status distribution"><circle class="donut-track" cx="60" cy="60" r="46"></circle></svg><div class="donut-hole"><strong class="donut-total" id="statusTotal">0</strong><span class="donut-caption">cases</span></div></div><div class="legend" id="statusLegend"></div></div></article>
+      </section>
+
+      <!-- Company Wise & Field Officer (FO) Wise Open Cases Section -->
+      <section class="workload-grid" aria-label="Open cases distribution">
+        <article class="panel workload-panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title"><i class="fa-solid fa-building" style="color:var(--brand);margin-right:6px;"></i> Company Wise Open Cases</h2>
+              <p class="panel-subtitle">Total open cases breakdown by company / insurance</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="search" id="companySearchInput" class="workload-search" placeholder="Search company..." aria-label="Search company">
+              <span class="badge" id="companyTotalBadge" style="background:#eef4ff;color:var(--brand);padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;">0 companies</span>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="workload-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;text-align:center;">#</th>
+                  <th>Company Name</th>
+                  <th style="text-align:right;width:120px;">Open Cases</th>
+                </tr>
+              </thead>
+              <tbody id="companyOpenTableBody">
+                <tr><td colspan="3" class="empty-state">Loading company data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer workload-footer">
+            <span id="companyPageInfo">Showing 0 of 0</span>
+            <div class="pagination-controls" id="companyPagination"></div>
+          </div>
+        </article>
+
+        <article class="panel workload-panel">
+          <div class="panel-header" style="flex-wrap:wrap;gap:8px;">
+            <div>
+              <h2 class="panel-title"><i class="fa-solid fa-map-location-dot" style="color:var(--brand);margin-right:6px;"></i> Field State Wise Open Cases</h2>
+              <p class="panel-subtitle">Geographic distribution of active open cases across states</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <input type="search" id="foSearchInput" class="workload-search" placeholder="Search state..." aria-label="Search State">
+              <span class="badge" id="foTotalBadge" style="background:#eef4ff;color:var(--brand);padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;">0 states</span>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table class="workload-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;text-align:center;">#</th>
+                  <th>State / Territory</th>
+                  <th style="text-align:right;width:120px;">Open Cases</th>
+                </tr>
+              </thead>
+              <tbody id="foOpenTableBody">
+                <tr><td colspan="3" class="empty-state">Loading State data...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer workload-footer">
+            <span id="foPageInfo">Showing 0 of 0</span>
+            <div class="pagination-controls" id="foPagination"></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Cascading Filter Panel -->
+      <section class="panel filter-panel">
+        <div class="panel-header"><div><h2 class="panel-title">Find a case</h2><p class="panel-subtitle">Filter the records visible to your account</p></div></div>
+        <form class="filter-grid" id="filterForm">
+          <div class="filter-field"><label for="filterLimit">Limit</label><select id="filterLimit" name="limit"><option>25</option><option>50</option><option>100</option></select></div>
+          <div class="filter-field"><label for="filterInsurance">Insurance</label><select id="filterInsurance" name="insurance_id"><option value="">All insurances</option></select></div>
+          <div class="filter-field"><label for="filterClaim">Claim / patient</label><input id="filterClaim" name="claim_number" type="search" placeholder="Search claim or patient"></div>
+          <div class="filter-field"><label for="filterType">Type</label><select id="filterType" name="type_id" disabled><option value="">Select insurance first</option></select></div>
+          <div class="filter-field"><label for="filterSubType">Sub type</label><select id="filterSubType" name="sub_type_id" disabled><option value="">Select type first</option></select></div>
+          <div class="filter-field"><label for="filterMonth">Month</label><input id="filterMonth" name="filter_month_year" type="month"></div>
+          <div class="filter-field"><label for="filterDate">Exact date</label><input id="filterDate" name="allocation_date" type="date"></div>
+
+          <div class="filter-field"><label for="filterHospital">Hospital name</label><input id="filterHospital" name="hospital_name" type="search" placeholder="Hospital name"></div>
+          <div class="filter-field"><label for="filterState">State</label><select id="filterState" name="state_id"><option value="">All states</option></select></div>
+          <div class="filter-field"><label for="filterCity">City / district</label><select id="filterCity" name="city_id" disabled><option value="">Select state first</option></select></div>
+          <div class="filter-field"><label for="filterAreaManager">Area manager (AM)</label><select id="filterAreaManager" name="am_id"><option value="">All area managers</option></select></div>
+          <div class="filter-field"><label for="filterAllocationManager">Allocation manager (ALM)</label><select id="filterAllocationManager" name="alloc_mgr_id"><option value="">All allocation managers</option></select></div>
+
+          <div class="filter-actions">
+            <button class="secondary-button" id="emailAreaManager" type="button" title="Email selected Area Manager"><i class="fa-solid fa-envelope"></i> Mail to AM</button>
+            <button class="secondary-button" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Apply</button>
+            <button class="icon-button" id="resetFilters" type="reset" title="Clear filters"><i class="fa-solid fa-rotate-left"></i></button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Table Panel with Tabs Integrated Above Headers -->
+      <section class="panel table-panel">
+        <div class="table-tabs-row" aria-label="Case status filter">
+          <button class="tab-button active" data-status="total" type="button"><i class="fa-solid fa-layer-group"></i> Total <span class="tab-count" id="totalTabCount">0</span></button>
+          <button class="tab-button" data-status="open" type="button"><i class="fa-solid fa-folder-open"></i> Open <span class="tab-count" id="openTabCount">0</span></button>
+          <button class="tab-button" data-status="completed" type="button"><i class="fa-solid fa-circle-check"></i> Completed <span class="tab-count" id="completedTabCount">0</span></button>
+        </div>
+        <div class="table-heading">
+          <div><h2 class="panel-title">Case register</h2><p class="panel-subtitle">Latest matching cases in system</p></div>
+          <button class="secondary-button" id="exportCases" type="button"><i class="fa-solid fa-file-arrow-down"></i> Export</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Claim #</th>
+                <th>Patient</th>
+                <th>Insurance &amp; category</th>
+                <th>City / hospital</th>
+                <th>Allocated / Closing date</th>
+                <th>Time / TAT</th>
+                <th>Managers</th>
+                <th>Remark</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="caseRows">
+              <tr><td colspan="9" class="empty-state">Loading live cases…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer">
+          <span id="resultSummary">Loading</span>
+          <div class="pagination-controls" id="paginationControls" aria-label="Table pagination">
+            <button class="pagination-btn" id="firstPage" type="button" title="First page">First</button>
+            <button class="pagination-btn" id="previousPage" type="button" title="Previous page">Prev</button>
+            <div class="pagination-pages" id="paginationPages"></div>
+            <button class="pagination-btn" id="nextPage" type="button" title="Next page">Next</button>
+            <button class="pagination-btn" id="lastPage" type="button" title="Last page">Last</button>
+          </div>
+        </div>
+      </section>
+    </section>
+    {{FOOTER_PARTIAL}}
+  </main>
+</div>
+
+<!-- Details & Remark Modal -->
+<div class="modal-backdrop" id="detailModal" hidden>
+  <section class="detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <header class="dialog-head"><h2 class="dialog-title" id="detailTitle">Case details</h2><button class="icon-button" id="closeDetailModal" type="button" aria-label="Close details"><i class="fa-solid fa-xmark"></i></button></header>
+    <div class="dialog-body" id="detailBody"></div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="cardResultsModal" hidden>
+  <section class="detail-dialog card-results-dialog" role="dialog" aria-modal="true" aria-labelledby="cardResultsTitle">
+    <header class="dialog-head">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <h2 class="dialog-title" id="cardResultsTitle">Cases</h2>
+        <span id="cardResultsBadge" style="background:#eef4ff;color:var(--brand);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;"></span>
+      </div>
+      <button class="icon-button" id="closeCardResultsModal" type="button" aria-label="Close case results"><i class="fa-solid fa-xmark"></i></button>
+    </header>
+
+    <!-- Modal Filter Single-Row Toolbar -->
+    <div class="modal-filter-toolbar" id="modalFilterToolbar">
+      <div class="modal-filter-chips-row" id="modalFilterChipsRow">
+        <span class="modal-filter-label"><i class="fa-solid fa-sliders"></i> Filter:</span>
+        <button type="button" class="filter-pill" id="pillClaim" data-filter="claim"><i class="fa-solid fa-magnifying-glass"></i> <span class="pill-title">Claim / Patient</span></button>
+        <button type="button" class="filter-pill" id="pillHospital" data-filter="hospital"><i class="fa-regular fa-hospital"></i> <span class="pill-title">Hospital</span></button>
+        <button type="button" class="filter-pill" id="pillInsurance" data-filter="insurance"><i class="fa-regular fa-building"></i> <span class="pill-title">Insurance</span></button>
+        <button type="button" class="filter-pill" id="pillFO" data-filter="fo"><i class="fa-solid fa-user-shield"></i> <span class="pill-title">Field Officer</span></button>
+        <button type="button" class="filter-pill" id="pillType" data-filter="type"><i class="fa-solid fa-tags"></i> <span class="pill-title">Type</span></button>
+        <button type="button" class="filter-pill" id="pillSubType" data-filter="subtype"><i class="fa-solid fa-tag"></i> <span class="pill-title">Sub Type</span></button>
+        <button type="button" class="filter-pill" id="pillState" data-filter="state"><i class="fa-solid fa-map-location-dot"></i> <span class="pill-title">State</span></button>
+        <button type="button" class="filter-pill" id="pillCity" data-filter="city"><i class="fa-solid fa-city"></i> <span class="pill-title">City</span></button>
+        <button type="button" class="filter-pill" id="pillDate" data-filter="date"><i class="fa-regular fa-calendar"></i> <span class="pill-title">Date / Month</span></button>
+        <button type="button" class="filter-pill" id="pillAM" data-filter="am"><i class="fa-solid fa-user-tie"></i> <span class="pill-title">Area Manager</span></button>
+        <button type="button" class="filter-pill" id="pillALM" data-filter="alm"><i class="fa-solid fa-user-check"></i> <span class="pill-title">Allocation Mgr</span></button>
+        <button type="button" class="filter-pill" id="pillLimit" data-filter="limit"><i class="fa-solid fa-list-ol"></i> <span class="pill-title">Limit (25)</span></button>
+        <button type="button" class="modal-reset-pill" id="modalResetFilters" title="Clear all filters" style="display:none;"><i class="fa-solid fa-rotate-left"></i> Reset All</button>
+      </div>
+
+      <!-- Popover Floating Dropdown -->
+      <div class="modal-filter-popover" id="modalFilterPopover" hidden>
+        <div class="popover-header">
+          <span id="popoverTitle">Filter</span>
+          <button type="button" class="icon-button" id="closePopover" style="width:20px;height:20px;font-size:10px;" aria-label="Close popover"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="popover-body" id="popoverBody">
+          <div class="popover-slot" data-slot="claim" hidden>
+            <label for="modalFilterClaim">Search claim # or patient name</label>
+            <input id="modalFilterClaim" name="claim_number" type="search" placeholder="Type claim # or patient name...">
+          </div>
+          <div class="popover-slot" data-slot="hospital" hidden>
+            <label for="modalFilterHospital">Hospital Name</label>
+            <input id="modalFilterHospital" name="hospital_name" type="search" placeholder="Type hospital name...">
+          </div>
+          <div class="popover-slot" data-slot="insurance" hidden>
+            <label for="modalFilterInsurance">Insurance Company</label>
+            <select id="modalFilterInsurance" name="insurance_id"><option value="">All insurances</option></select>
+          </div>
+          <div class="popover-slot" data-slot="fo" hidden>
+            <label for="modalFilterFO">Field Officer (FO)</label>
+            <select id="modalFilterFO" name="fo_id"><option value="">All field officers</option></select>
+          </div>
+          <div class="popover-slot" data-slot="type" hidden>
+            <label for="modalFilterType">Case Type</label>
+            <select id="modalFilterType" name="type_id" disabled><option value="">Select insurance first</option></select>
+          </div>
+          <div class="popover-slot" data-slot="subtype" hidden>
+            <label for="modalFilterSubType">Case Sub Type</label>
+            <select id="modalFilterSubType" name="sub_type_id" disabled><option value="">Select type first</option></select>
+          </div>
+          <div class="popover-slot" data-slot="state" hidden>
+            <label for="modalFilterState">State</label>
+            <select id="modalFilterState" name="state_id"><option value="">All states</option></select>
+          </div>
+          <div class="popover-slot" data-slot="city" hidden>
+            <label for="modalFilterCity">City / District</label>
+            <select id="modalFilterCity" name="city_id" disabled><option value="">Select state first</option></select>
+          </div>
+          <div class="popover-slot" data-slot="date" hidden>
+            <label for="modalFilterMonth">Month</label>
+            <input id="modalFilterMonth" name="filter_month_year" type="month" style="margin-bottom:8px;">
+            <label for="modalFilterDate">Exact Allocation Date</label>
+            <input id="modalFilterDate" name="allocation_date" type="date">
+          </div>
+          <div class="popover-slot" data-slot="am" hidden>
+            <label for="modalFilterAreaManager">Area Manager (AM)</label>
+            <select id="modalFilterAreaManager" name="am_id"><option value="">All area managers</option></select>
+          </div>
+          <div class="popover-slot" data-slot="alm" hidden>
+            <label for="modalFilterAllocManager">Allocation Manager (ALM)</label>
+            <select id="modalFilterAllocManager" name="alloc_mgr_id"><option value="">All allocation managers</option></select>
+          </div>
+          <div class="popover-slot" data-slot="limit" hidden>
+            <label for="modalFilterLimit">Records Per Page</label>
+            <select id="modalFilterLimit" name="limit">
+              <option value="25" selected>25 records</option>
+              <option value="50">50 records</option>
+              <option value="100">100 records</option>
+            </select>
+          </div>
+        </div>
+        <div class="popover-footer">
+          <button type="button" class="secondary-button" id="popoverClear" style="height:28px;padding:0 8px;font-size:11px;">Clear</button>
+          <button type="button" class="secondary-button" id="popoverApply" style="height:28px;padding:0 12px;font-size:11px;background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700;">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-body" id="cardResultsBody"></div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="directCloseModal" hidden>
+  <section class="direct-close-dialog" role="dialog" aria-modal="true" aria-labelledby="directCloseTitle">
+    <header class="direct-close-header"><h2 id="directCloseTitle"><i class="fa-solid fa-bolt"></i> DIRECT CASE CLOSE</h2><button class="icon-button" id="closeDirectCloseModal" type="button" aria-label="Close direct case close"><i class="fa-solid fa-xmark"></i></button></header>
+    <form class="direct-close-form" id="directCloseForm">
+      <div class="error-banner" id="directCloseError" role="alert"></div>
+      <div class="direct-close-options">
+        <div><strong><i class="fa-solid fa-sliders"></i> Direct Close Options</strong><p>Select an option to bypass standard processing.</p></div>
+        <div class="mode-options">
+          <label><input type="radio" name="closeMode" value="withdraw"> Withdraw</label>
+          <label class="danger-text"><input type="radio" name="closeMode" value="denial"> Denial</label>
+        </div>
+      </div>
+      <div class="modal-field" id="denialPartsField" hidden>
+        <label><i class="fa-solid fa-circle-dot"></i> Denied part(s)</label>
+        <div class="parts-grid" id="denialPartsGrid">
+          <label><input type="checkbox" name="denialPart" value="hospital"> Hospital</label>
+          <label><input type="checkbox" name="denialPart" value="patient"> Patient</label>
+          <label><input type="checkbox" name="denialPart" value="pharmacy"> Pharmacy</label>
+          <label><input type="checkbox" name="denialPart" value="pathology"> Pathology</label>
+          <label><input type="checkbox" name="denialPart" value="doctor"> Doctor</label>
+        </div>
+        <div id="denialRegistrationFields" class="denial-registration-fields" hidden></div>
+      </div>
+      <div class="direct-close-grid" id="denialOptions" hidden>
+        <section class="direct-close-section">
+          <h3><i class="fa-solid fa-person-biking" style="color:var(--green)"></i> FIELD OFFICER (FO)</h3>
+          <div id="foAssignments"></div>
+          <button class="secondary-button" id="addFOAssignment" type="button"><i class="fa-solid fa-plus"></i> Add FO Assignment</button>
+        </section>
+        <section class="direct-close-section">
+          <h3><i class="fa-solid fa-file-pen" style="color:var(--brand)"></i> REPORT MAKER (RM)</h3>
+          <div class="employment-options">
+            <label><input type="radio" name="rmEmployment" value="salary" checked> Salary</label>
+            <label><input type="radio" name="rmEmployment" value="freelancer"> Freelancer</label>
+          </div>
+          <select id="reportMakerSelect" aria-label="Choose report maker"><option value="">-- Choose RM --</option></select>
+          <div class="modal-field">
+            <label for="directCloseStatus">VERDICT &amp; STATUS</label>
+            <div class="status-verdict-row">
+              <select id="directCloseStatus" name="status" required><option value="">-- Status --</option><option value="REJECTED">REJECTED</option><option value="PAYABLE">PAYABLE</option><option value="QUERY">QUERY</option><option value="INCONCLUSIVE">INCONCLUSIVE</option></select>
+              <input id="directCloseVerdict" name="verdict" type="text" maxlength="255" placeholder="Verdict (e.g. Genuine)">
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="modal-field" id="directCloseRemarksField"><label for="directCloseRemarks">REMARKS (OPTIONAL)</label><textarea id="directCloseRemarks" name="remarks" placeholder="Choose Withdraw or Denial first..."></textarea></div>
+      <footer class="direct-close-footer">
+        <button class="secondary-button" id="cancelDirectClose" type="button">Cancel</button>
+        <button class="direct-close-submit" id="submitDirectClose" type="submit"><i class="fa-solid fa-check"></i> Close case</button>
+      </footer>
+    </form>
+  </section>
+</div>
+
+<div class="copy-toast" id="copyToast" role="status" aria-live="polite"><i class="fa-solid fa-check"></i><span id="copyToastMessage"></span></div>
+
+<script>
+(function () {
+  var dashboard = null;
+  var dashboardTargets = null;
+  var layout = null;
+  var currentPage = 1;
+  var currentStatus = 'total';
+  var currentCategory = '';
+  var currentOverdue = false;
+  var currentCompletedToday = false;
+  var filterInputTimer = null;
+  var caseResultsRequestID = 0;
+  var cardResultsRequestID = 0;
+  var currentCardResultsQuery = null;
+  var cardResultsCurrentPage = 1;
+  var cardResultsTotalPages = 1;
+  var cardResultsPageSize = 25;
+  var pageSize = 25;
+  var totalPages = 1;
+  var rows = [];
+  var directCloseOptions = null;
+  var directCloseCase = null;
+  var nextFOAssignmentID = 0;
+  var colors = ['#2563eb','#14b8a6','#b33b42','#aa6900','#64748b','#94a3b8','#8b5cf6'];
+  var banner = document.getElementById('errorBanner');
+
+  var companyOpenCases = [];
+  var companyCurrentPage = 1;
+  var companyPageSize = 10;
+  var companySearchQuery = '';
+
+  var foOpenCases = [];
+  var foCurrentPage = 1;
+  var foPageSize = 10;
+  var foSearchQuery = '';
+  var foTypeFilter = 'all';
+
+  var currentWorkloadContext = null;
+  var cardResultsCases = [];
+  var filterOptions = null;
+  var fallbackSidebarModules = [
+    { id: 1, module_name: 'Dashboard', module_slug: 'dashboard', icon: 'fa-solid fa-gauge-high', submenus: [] },
+    { id: 2, module_name: 'Cases', module_slug: 'cases', icon: 'fa-solid fa-folder-open', submenus: [] },
+    { id: 3, module_name: 'Database', module_slug: 'database', icon: 'fa-solid fa-database', submenus: [] },
+    { id: 4, module_name: 'Analytics', module_slug: 'analytics', icon: 'fa-solid fa-chart-column', submenus: [] },
+    { id: 5, module_name: 'Reports', module_slug: 'reports', icon: 'fa-solid fa-clipboard-list', submenus: [] }
+  ];
+
+  function showError(message) { banner.textContent = message; banner.style.display = 'block'; }
+  function clearError() { banner.textContent = ''; banner.style.display = 'none'; }
+  function escapeHTML(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, function (character) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]; }); }
+
+  function menuURL(slug) {
+    if (!slug || slug === '#' || slug.charAt(0) === '#') return '#';
+    if (slug.charAt(0) === '/') return slug;
+    return '/' + slug.replace(/^\/+/, '');
+  }
+
+  function addMenuItem(menu, parent) {
+    var group = document.createElement('div');
+    group.className = 'nav-group';
+    var link = document.createElement(menu.submenus && menu.submenus.length ? 'button' : 'a');
+    link.className = parent ? 'nav-subitem-link' : 'nav-item-link';
+    if (link.tagName === 'A') link.href = menuURL(menu.module_slug);
+    else link.type = 'button';
+    if (menuURL(menu.module_slug) === location.pathname || (menu.module_slug === 'dashboard' && location.pathname === '/dashboard')) link.classList.add('active');
+    var icon = document.createElement('i');
+    icon.className = 'nav-icon ' + (menu.icon || 'fa-solid fa-circle');
+    var label = document.createElement('span');
+    label.textContent = menu.module_name || '';
+    link.append(icon, label);
+    if (menu.submenus && menu.submenus.length) {
+      group.classList.add('nav-group');
+      link.addEventListener('click', function () { group.classList.toggle('expanded'); });
+    }
+    group.appendChild(link);
+    if (menu.submenus && menu.submenus.length) {
+      var children = document.createElement('div');
+      children.className = 'nav-children';
+      menu.submenus.forEach(function (child) { children.appendChild(addMenuItem(child, true)); });
+      group.appendChild(children);
+    }
+    return group;
+  }
+
+  function renderLayout(data) {
+    layout = data || {};
+    var profile = layout.userProfile || {};
+    var settings = layout.appSettings || {};
+    var sidebarModules = (layout.sidebarModules && layout.sidebarModules.length) ? layout.sidebarModules : fallbackSidebarModules;
+    document.getElementById('companyName').textContent = settings.company_name || 'Brain Bird';
+    document.getElementById('profileName').textContent = profile.fullname || profile.username || 'Account';
+    document.getElementById('profileRole').textContent = 'Role ' + (profile.role_id || '');
+    document.getElementById('profileAvatar').textContent = (profile.fullname || profile.username || 'B').trim().charAt(0).toUpperCase();
+    document.getElementById('sidebarFooter').textContent = settings.app_version ? 'Version ' + settings.app_version : 'Operations portal';
+    document.getElementById('pageFooter').textContent = (settings.company_name || 'Brain Bird') + ' · Operations portal · Publisher: ' + (settings.developed_by || 'Avinash Pandey');
+    var permissions = layout.permissions || {};
+    if (!permissions.can_add) document.getElementById('addCaseLink').hidden = true;
+    var nav = document.getElementById('sidebarMenu');
+    nav.textContent = '';
+    sidebarModules.forEach(function (menu) { nav.appendChild(addMenuItem(menu, false)); });
+
+  }
+
+  function setDropdownOptions(select, placeholder, options) {
+    select.replaceChildren(new Option(placeholder, ''));
+    (options || []).forEach(function (option) {
+      var item = new Option(option.name, option.id);
+      if (option.email) item.dataset.email = option.email;
+      select.add(item);
+    });
+  }
+
+  function updateAreaManagerEmailButton() {
+    var select = document.getElementById('filterAreaManager');
+    var button = document.getElementById('emailAreaManager');
+    if (!button || !select) return;
+    var option = select.options[select.selectedIndex];
+    var hasEmail = !!(option && option.dataset.email);
+    button.title = hasEmail ? 'Email ' + option.textContent : 'Email Area Manager (select an AM first)';
+  }
+
+  function populateFilterOptions(options) {
+    filterOptions = options || {};
+    setDropdownOptions(document.getElementById('filterInsurance'), 'All insurances', filterOptions.insurances);
+    setDropdownOptions(document.getElementById('filterState'), 'All states', filterOptions.states);
+    setDropdownOptions(document.getElementById('filterAreaManager'), 'All area managers', filterOptions.areaManagers);
+    setDropdownOptions(document.getElementById('filterAllocationManager'), 'All allocation managers', filterOptions.allocationManagers);
+    updateAreaManagerEmailButton();
+    setDropdownOptions(document.getElementById('filterType'), 'Select insurance first', []);
+    setDropdownOptions(document.getElementById('filterSubType'), 'Select type first', []);
+    setDropdownOptions(document.getElementById('filterCity'), 'Select state first', []);
+    document.getElementById('filterType').disabled = true;
+    document.getElementById('filterSubType').disabled = true;
+    document.getElementById('filterCity').disabled = true;
+
+    // Populate modal filters
+    setDropdownOptions(document.getElementById('modalFilterInsurance'), 'All insurances', filterOptions.insurances);
+    setDropdownOptions(document.getElementById('modalFilterState'), 'All states', filterOptions.states);
+    setDropdownOptions(document.getElementById('modalFilterAreaManager'), 'All area managers', filterOptions.areaManagers);
+    setDropdownOptions(document.getElementById('modalFilterAllocManager'), 'All allocation managers', filterOptions.allocationManagers);
+    var foOptions = filterOptions.fieldOfficers || [];
+    if (!foOptions.length && foOpenCases.length) {
+      foOptions = foOpenCases.filter(function (f) { return f.id && f.id !== 0; }).map(function (f) { return { id: f.id, name: f.name }; });
+    }
+    setDropdownOptions(document.getElementById('modalFilterFO'), 'All field officers', foOptions);
+    setDropdownOptions(document.getElementById('modalFilterType'), 'Select insurance first', []);
+    setDropdownOptions(document.getElementById('modalFilterSubType'), 'Select type first', []);
+    setDropdownOptions(document.getElementById('modalFilterCity'), 'Select state first', []);
+    if (document.getElementById('modalFilterType')) document.getElementById('modalFilterType').disabled = true;
+    if (document.getElementById('modalFilterSubType')) document.getElementById('modalFilterSubType').disabled = true;
+    if (document.getElementById('modalFilterCity')) document.getElementById('modalFilterCity').disabled = true;
+  }
+
+  // Cascading Logic: State -> City
+  document.getElementById('filterState').addEventListener('change', function() {
+    var stateId = this.value;
+    var citySelect = document.getElementById('filterCity');
+    if (!stateId) {
+      citySelect.disabled = true;
+      setDropdownOptions(citySelect, 'Select state first', []);
+      return;
+    }
+    var filteredCities = (filterOptions.cities || []).filter(function(city) { return String(city.parentId) === String(stateId); });
+    citySelect.disabled = false;
+    setDropdownOptions(citySelect, 'All cities', filteredCities);
+  });
+
+  // Cascading Logic: Insurance -> Type -> SubType
+  document.getElementById('filterInsurance').addEventListener('change', function() {
+    var insuranceId = this.value;
+    var typeSelect = document.getElementById('filterType');
+    var filteredTypes = (filterOptions.types || []).filter(function(type) { return String(type.parentId) === String(insuranceId); });
+    typeSelect.disabled = !insuranceId;
+    setDropdownOptions(typeSelect, insuranceId ? 'All types' : 'Select insurance first', filteredTypes);
+    var subSelect = document.getElementById('filterSubType');
+    subSelect.disabled = true;
+    setDropdownOptions(subSelect, 'Select type first', []);
+  });
+
+  document.getElementById('filterType').addEventListener('change', function() {
+    var typeId = this.value;
+    var subSelect = document.getElementById('filterSubType');
+    if (!typeId) {
+      subSelect.disabled = true;
+      setDropdownOptions(subSelect, 'Select type first', []);
+      return;
+    }
+    var filteredSubTypes = (filterOptions.subTypes || []).filter(function(subType) { return String(subType.parentId) === String(typeId); });
+    subSelect.disabled = false;
+    setDropdownOptions(subSelect, 'All sub types', filteredSubTypes);
+  });
+
+  // Modal Cascading Logic: State -> City
+  var modalFilterStateEl = document.getElementById('modalFilterState');
+  if (modalFilterStateEl) {
+    modalFilterStateEl.addEventListener('change', function() {
+      var stateId = this.value;
+      var citySelect = document.getElementById('modalFilterCity');
+      if (!citySelect) return;
+      if (!stateId) {
+        citySelect.disabled = true;
+        setDropdownOptions(citySelect, 'Select state first', []);
+      } else {
+        var filteredCities = (filterOptions.cities || []).filter(function(city) { return String(city.parentId) === String(stateId); });
+        citySelect.disabled = false;
+        setDropdownOptions(citySelect, 'All cities', filteredCities);
+      }
+      if (typeof updateModalFilterPill === 'function') {
+        updateModalFilterPill('state');
+        updateModalFilterPill('city');
+      }
+    });
+  }
+
+  // Modal Cascading Logic: Insurance -> Type -> SubType
+  var modalFilterInsuranceEl = document.getElementById('modalFilterInsurance');
+  if (modalFilterInsuranceEl) {
+    modalFilterInsuranceEl.addEventListener('change', function() {
+      var insuranceId = this.value;
+      var typeSelect = document.getElementById('modalFilterType');
+      if (typeSelect) {
+        var filteredTypes = (filterOptions.types || []).filter(function(type) { return String(type.parentId) === String(insuranceId); });
+        typeSelect.disabled = !insuranceId;
+        setDropdownOptions(typeSelect, insuranceId ? 'All types' : 'Select insurance first', filteredTypes);
+      }
+      var subSelect = document.getElementById('modalFilterSubType');
+      if (subSelect) {
+        subSelect.disabled = true;
+        setDropdownOptions(subSelect, 'Select type first', []);
+      }
+      if (typeof updateModalFilterPill === 'function') {
+        updateModalFilterPill('insurance');
+        updateModalFilterPill('type');
+        updateModalFilterPill('subtype');
+      }
+    });
+  }
+
+  var modalFilterTypeEl = document.getElementById('modalFilterType');
+  if (modalFilterTypeEl) {
+    modalFilterTypeEl.addEventListener('change', function() {
+      var typeId = this.value;
+      var subSelect = document.getElementById('modalFilterSubType');
+      if (!subSelect) return;
+      if (!typeId) {
+        subSelect.disabled = true;
+        setDropdownOptions(subSelect, 'Select type first', []);
+      } else {
+        var filteredSubTypes = (filterOptions.subTypes || []).filter(function(subType) { return String(subType.parentId) === String(typeId); });
+        subSelect.disabled = false;
+        setDropdownOptions(subSelect, 'All sub types', filteredSubTypes);
+      }
+      if (typeof updateModalFilterPill === 'function') {
+        updateModalFilterPill('type');
+        updateModalFilterPill('subtype');
+      }
+    });
+  }
+
+  function renderSummary(summary) {
+    document.getElementById('totalCases').textContent = Number(summary.totalCases || 0).toLocaleString();
+    document.getElementById('openCases').textContent = Number(summary.openCases || 0).toLocaleString();
+    document.getElementById('resolvedToday').textContent = Number(summary.resolvedToday || 0).toLocaleString();
+    document.getElementById('riskCases').textContent = Number(summary.riskCases || 0).toLocaleString();
+    document.getElementById('totalTabCount').textContent = Number(summary.totalCases || 0).toLocaleString();
+    document.getElementById('openTabCount').textContent = Number(summary.openCases || 0).toLocaleString();
+    document.getElementById('completedTabCount').textContent = Number(summary.completedCases || 0).toLocaleString();
+    document.getElementById('reimbursementCount').textContent = Number(summary.reimbursementCases || 0).toLocaleString();
+    document.getElementById('cashlessCount').textContent = Number(summary.cashlessCases || 0).toLocaleString();
+    document.getElementById('otherCount').textContent = Number(summary.otherCases || 0).toLocaleString();
+  }
+
+  function renderTargets(payload) {
+    var targetCards = document.getElementById('targetCards');
+    if (!targetCards) return;
+    function metric(title, current, previous, primary, accent) {
+      var delta = Number(current || 0) - Number(previous || 0);
+      var percent = Number(previous || 0) ? Math.abs(delta / Number(previous) * 100).toFixed(1) : '0.0';
+      var movementClass = delta >= 0 ? 'up' : 'down';
+      var movementIcon = delta >= 0 ? 'fa-caret-up' : 'fa-caret-down';
+      var change = (delta >= 0 ? '+' : '−') + Math.abs(delta).toLocaleString() + ' (' + (delta >= 0 ? '+' : '−') + percent + '%)';
+      return '<div class="target-metric' + (primary ? ' primary' : '') + '"' + (primary ? ' style="--target-accent:' + accent + '"' : '') + '><div class="target-metric-title">' + escapeHTML(title) + '</div><div class="target-metric-value"><strong class="target-current">' + Number(current || 0).toLocaleString() + '</strong><span class="target-delta ' + movementClass + '"><i class="fa-solid ' + movementIcon + '"></i> ' + escapeHTML(change) + '</span></div><div class="target-previous">Curr: <strong>' + Number(current || 0).toLocaleString() + '</strong> | Prev MTD: <strong>' + Number(previous || 0).toLocaleString() + '</strong></div></div>';
+    }
+    function targetSummary(title, totals, type) {
+      var primary = type === 'closure' ? '#16845b' : '#2563eb';
+      return '<article class="target-summary" aria-label="' + escapeHTML(title) + '">' +
+        metric(title, totals.current, totals.previousMtd, true, primary) +
+        metric('Reimb ' + (type === 'closure' ? 'closed' : 'alloc'), totals.reimbursement, totals.reimbursementPreviousMtd, false) +
+        metric('Cashless ' + (type === 'closure' ? 'closed' : 'alloc'), totals.cashless, totals.cashlessPreviousMtd, false) +
+        metric('Other ' + (type === 'closure' ? 'closed' : 'alloc'), totals.other, totals.otherPreviousMtd, false) +
+      '</article>';
+    }
+    targetCards.innerHTML = targetSummary('Closure target', payload.closure || {}, 'closure') + targetSummary('Allocation target', payload.allocation || {}, 'allocation');
+
+    var movementGroups = [
+      { label: 'RM drops (MTD)', key: 'reportMakers', role: 'rm_id', direction: 'drop', cls: 'rm-drop', icon: 'fa-chart-simple' },
+      { label: 'ALM drops (MTD)', key: 'allocationManagers', role: 'alloc_mgr_id', direction: 'drop', cls: 'alm-drop', icon: 'fa-chart-simple' },
+      { label: 'RM growth (MTD)', key: 'reportMakers', role: 'rm_id', direction: 'growth', cls: 'rm-growth', icon: 'fa-chart-line' },
+      { label: 'ALM growth (MTD)', key: 'allocationManagers', role: 'alloc_mgr_id', direction: 'growth', cls: 'alm-growth', icon: 'fa-chart-line' }
+    ];
+    document.getElementById('targetMovements').innerHTML = movementGroups.map(function (group) {
+      var people = payload[group.key] || [];
+      var candidates = people.filter(function (person) { return group.direction === 'drop' ? Number(person.delta || 0) < 0 : Number(person.delta || 0) > 0; });
+      candidates.sort(function (first, second) { return group.direction === 'drop' ? Number(first.delta) - Number(second.delta) : Number(second.delta) - Number(first.delta); });
+      function movementItems(clone) {
+        return candidates.map(function (person) {
+          var insuranceMarkup = String(person.insurance || '').split(',').filter(Boolean).slice(0, 5).map(function (insurance) {
+            return '<span class="movement-insurance" title="' + escapeHTML(insurance.trim()) + '">' + escapeHTML(insurance.trim()) + '</span>';
+          }).join('');
+          return '<button class="movement-item" type="button" data-movement-id="' + Number(person.id || 0) + '" data-movement-role="' + group.role + '" data-movement-name="' + escapeHTML(person.name || '') + '"' + (clone ? ' tabindex="-1" aria-hidden="true"' : '') + '><strong class="movement-item-name">' + escapeHTML(person.name || '—') + '</strong><span class="movement-insurances">' + insuranceMarkup + '</span><span class="movement-item-counts">Curr: <strong>' + Number(person.current || 0).toLocaleString() + '</strong> | Prev MTD: <strong>' + Number(person.previous || 0).toLocaleString() + '</strong></span><span class="movement-view">View <i class="fa-solid fa-chevron-right"></i></span></button>';
+        }).join('');
+      }
+      var duration = group.role === 'alloc_mgr_id' ? Math.min(360, Math.max(180, candidates.length * 20)) : Math.min(150, Math.max(45, candidates.length * 8));
+      var personMarkup = candidates.length ? '<div class="movement-viewport"><div class="movement-track" style="--movement-duration:' + duration + 's">' + movementItems(false) + movementItems(true) + '</div></div>' : '<span class="target-empty">No ' + group.direction + ' this month</span>';
+      return '<article class="target-movement ' + group.cls + '"><strong class="target-movement-label"><i class="fa-solid ' + group.icon + '"></i>' + escapeHTML(group.label) + '</strong>' + personMarkup + '<button class="movement-all" type="button" data-ranking-key="' + group.key + '" data-ranking-direction="' + group.direction + '" data-ranking-title="' + escapeHTML(group.label) + '">View all</button></article>';
+    }).join('');
+  }
+
+  function renderTrend(data) {
+    var values = data.trend || [];
+    var labels = data.trendLabels || [];
+    var maximum = Math.max.apply(null, values.concat([1]));
+    document.getElementById('trendChart').innerHTML = values.map(function (value, index) {
+      var count = Number(value || 0);
+      var height = count > 0 ? Math.max(4, Math.round((count / maximum) * 100)) : 2;
+      var countFormatted = count.toLocaleString();
+      var countText = countFormatted + (count === 1 ? ' case' : ' cases');
+      var label = escapeHTML(labels[index] || '');
+      return '<div class="bar-column" tabindex="0" title="' + label + ': ' + countText + '">' +
+        '<div class="bar-tooltip">' + countText + '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="height:' + height + '%"></div></div>' +
+        '<span class="bar-label">' + label + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderSegments(segments) {
+    var total = segments.reduce(function (sum, item) { return sum + Number(item.value || 0); }, 0);
+    var circumference = 2 * Math.PI * 46;
+    var offset = 0;
+    var svg = document.getElementById('statusDonut');
+    svg.querySelectorAll('.donut-segment').forEach(function (slice) { slice.remove(); });
+    segments.forEach(function (item, index) {
+      var value = Number(item.value || 0);
+      var length = total ? value / total * circumference : 0;
+      var percent = total ? Math.round(value / total * 100) : 0;
+      var color = item.color || colors[index % colors.length];
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('class', 'donut-segment');
+      circle.setAttribute('cx', '60');
+      circle.setAttribute('cy', '60');
+      circle.setAttribute('r', '46');
+      circle.setAttribute('stroke', color);
+      circle.setAttribute('stroke-dasharray', length + ' ' + (circumference - length));
+      circle.setAttribute('stroke-dashoffset', String(-offset));
+      circle.setAttribute('data-status', String(item.name || '').toLowerCase());
+      circle.setAttribute('tabindex', '0');
+      circle.setAttribute('role', 'button');
+      circle.setAttribute('aria-label', item.name + ': ' + value.toLocaleString() + ' cases, ' + percent + '%');
+      var tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      tooltip.textContent = item.name + ': ' + value.toLocaleString() + ' cases (' + percent + '%)';
+      circle.appendChild(tooltip);
+      svg.appendChild(circle);
+      offset += length;
+    });
+    document.getElementById('statusTotal').textContent = total.toLocaleString();
+    document.getElementById('statusLegend').innerHTML = segments.map(function (item, index) {
+      var value = Number(item.value || 0);
+      var share = total ? Math.round(value / total * 100) : 0;
+      return '<button class="legend-item" type="button" data-status-detail="' + escapeHTML(String(item.name || '').toLowerCase()) + '" title="Open ' + escapeHTML(item.name) + ' case details"><span class="legend-name"><i class="legend-dot" style="background:' + (item.color || colors[index % colors.length]) + '"></i>' + escapeHTML(item.name) + '</span><strong>' + value.toLocaleString() + ' · ' + share + '%</strong></button>';
+    }).join('') || '<span class="muted">No cases in this scope</span>';
+  }
+
+  function durationLabel(seconds) {
+    var value = Math.max(0, Number(seconds || 0));
+    var days = Math.floor(value / 86400);
+    var hours = Math.floor((value % 86400) / 3600);
+    var minutes = Math.floor((value % 3600) / 60);
+    return (days ? days + 'd ' : '') + hours + 'h ' + String(minutes).padStart(2, '0') + 'm';
+  }
+
+  function liveDurationLabel(seconds) {
+    var value = Math.max(0, Number(seconds || 0));
+    var days = Math.floor(value / 86400);
+    var hours = Math.floor((value % 86400) / 3600);
+    var minutes = Math.floor((value % 3600) / 60);
+    var remainingSeconds = Math.floor(value % 60);
+    return (days ? days + 'd ' : '') + hours + 'h ' + String(minutes).padStart(2, '0') + 'm ' + String(remainingSeconds).padStart(2, '0') + 's';
+  }
+
+  function getTATTextColor(overSeconds) {
+    if (overSeconds <= 0) {
+      return '#16845b'; // Green for on-time / within TAT
+    }
+    var overDays = overSeconds / 86400;
+    var ratio = Math.min(1, Math.max(0, overDays / 5));
+    // Transitions from yellow/amber (hue 45) to dark red (hue 0, lightness 26%) as overdue days increase
+    var hue = Math.round(45 - (ratio * 45));
+    var lightness = Math.round(38 - (ratio * 12));
+    return 'hsl(' + hue + ', 95%, ' + lightness + '%)';
+  }
+
+  function updateRunningTimers() {
+    var now = Date.now();
+    document.querySelectorAll('.case-runtime[data-running="true"]').forEach(function (timer) {
+      var elapsed = Number(timer.dataset.elapsedSeconds || 0) + Math.floor((now - Number(timer.dataset.startedAt || now)) / 1000);
+      var tatHours = Number(timer.dataset.tatHours || 48);
+      var tatSeconds = tatHours * 3600;
+      var overSeconds = elapsed - tatSeconds;
+      timer.textContent = liveDurationLabel(elapsed);
+      var cell = timer.closest('.case-tat-cell');
+      if (cell) {
+        cell.style.color = getTATTextColor(overSeconds);
+        var info = cell.querySelector('.tat-over-info');
+        if (info) {
+          info.textContent = overSeconds > 0 ? ('(+' + durationLabel(overSeconds) + ' over)') : '(On time)';
+        }
+      }
+    });
+  }
+
+  function caseFlowMarkup(row) {
+    var isClosed = Boolean(row.closedAt || row.status === 'resolved' || row.status === 'completed');
+    var verdict = row.verdict || (isClosed ? 'RESOLVED' : '');
+    return '<div class="case-flow-container">' +
+      '<div class="case-flow-title"><i class="fa-solid fa-timeline"></i> Case Processing Flow &amp; Lifecycle</div>' +
+      '<div class="case-flow-steps">' +
+        '<div class="flow-step completed">' +
+          '<div class="flow-icon"><i class="fa-solid fa-file-circle-plus"></i></div>' +
+          '<div class="flow-content"><strong>1. Allocated</strong><p class="flow-meta">' + escapeHTML(row.allocatedAt || '—') + '</p><span class="flow-badge">AM: ' + escapeHTML(row.areaManager || 'Assigned') + '</span></div>' +
+        '</div>' +
+        '<div class="flow-connector active"></div>' +
+        '<div class="flow-step completed">' +
+          '<div class="flow-icon"><i class="fa-solid fa-hospital-user"></i></div>' +
+          '<div class="flow-content"><strong>2. Investigation</strong><p class="flow-meta">' + escapeHTML(row.hospital || 'Hospital verification') + '</p><span class="flow-badge">FO: ' + escapeHTML(row.fieldOfficer || 'Assigned') + '</span></div>' +
+        '</div>' +
+        '<div class="flow-connector active"></div>' +
+        '<div class="flow-step completed">' +
+          '<div class="flow-icon"><i class="fa-solid fa-file-lines"></i></div>' +
+          '<div class="flow-content"><strong>3. Report &amp; QC</strong><p class="flow-meta">Verification &amp; findings</p><span class="flow-badge">RM: ' + escapeHTML(row.reportMaker || 'Assigned') + '</span></div>' +
+        '</div>' +
+        '<div class="flow-connector ' + (isClosed ? 'active' : '') + '"></div>' +
+        '<div class="flow-step ' + (isClosed ? 'completed closed-step' : 'current') + '">' +
+          '<div class="flow-icon">' + (isClosed ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-clock"></i>') + '</div>' +
+          '<div class="flow-content"><strong>4. Closure &amp; Verdict</strong><p class="flow-meta">' + (isClosed ? escapeHTML(row.closedAt || 'Closed') : 'In progress') + '</p><span class="flow-badge ' + (isClosed ? 'success' : 'pending') + '">' + escapeHTML(verdict || row.status || 'Active') + '</span></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function caseDetailsMarkup(row) {
+    var flow = caseFlowMarkup(row);
+    var fields = [
+      ['Claim number', row.claimNumber || row.id], ['Patient', row.patient], ['Insurance', row.insurance],
+      ['Category / Case type', row.caseType], ['Sub type', row.subType], ['Hospital', row.hospital],
+      ['City / state', [row.city, row.state].filter(Boolean).join(', ')], ['Allocated date', row.allocatedAt],
+      ['Closing date', row.closedAt || '—'],
+      ['Time / TAT', durationLabel(row.elapsedSeconds) + ' / ' + (row.tatHours || 48) + 'h'],
+      ['Area manager', (row.areaManager || '—') + (row.areaManagerEmail ? ' (' + row.areaManagerEmail + ')' : '')], ['Case manager', row.caseManager], ['Allocation manager', row.allocationManager],
+      ['Field officer', row.fieldOfficer], ['Report maker', row.reportMaker], ['Status', row.status],
+      ['Case verdict', row.verdict || '—'],
+      ['Final Remark', row.finalRemark || row.remark || 'N/A'], ['AI risk', row.priority]
+    ];
+    var table = '<table class="dialog-table"><tbody>' + fields.map(function (field) {
+      return '<tr><th>' + escapeHTML(field[0]) + '</th><td>' + escapeHTML(field[1] || '—') + '</td></tr>';
+    }).join('') + '</tbody></table>';
+    return flow + table;
+  }
+
+  function showCaseDetails(row) {
+    document.getElementById('detailTitle').textContent = 'Claim ' + (row.claimNumber || row.id || 'details');
+    document.getElementById('detailBody').innerHTML = caseDetailsMarkup(row);
+    document.getElementById('detailModal').hidden = false;
+  }
+
+  function showRemarkModal(row) {
+    var remarks = row.remarks || [];
+    var remarkMarkup = remarks.length ? remarks.map(function (item) {
+      return '<article class="remark-entry"><div class="remark-entry-head"><strong>' + escapeHTML(item.author || 'Team member') + '</strong><time>' + escapeHTML(item.updatedAt || '') + '</time></div><p class="remark-entry-text">' + escapeHTML(item.remark) + '</p></article>';
+    }).join('') : '<p class="muted">No remarks yet.</p>';
+    document.getElementById('detailTitle').textContent = 'Remarks - ' + (row.claimNumber || row.id);
+    document.getElementById('detailBody').innerHTML = '<div class="remark-list">' + remarkMarkup + '</div>' +
+      '<form class="remark-form" id="caseRemarkForm" data-case-id="' + Number(row.caseId || 0) + '">' +
+      '<label for="caseRemarkInput">Add or edit your remark</label><textarea id="caseRemarkInput" name="remark" maxlength="5000" required placeholder="Write a case remark...">' + escapeHTML(row.ownRemark || '') + '</textarea>' +
+      '<div class="remark-form-footer"><span class="remark-form-message" id="caseRemarkMessage" role="alert"></span><button class="direct-close-submit" type="submit">Save remark</button></div></form>';
+    document.getElementById('detailModal').hidden = false;
+  }
+
+  function assigneeOptions(users, employmentType, placeholder) {
+    return '<option value="">' + placeholder + '</option>' + (users || []).filter(function (user) {
+      return user.employmentType === employmentType;
+    }).map(function (user) {
+      return '<option value="' + user.id + '">' + escapeHTML(user.name) + '</option>';
+    }).join('');
+  }
+
+  function addFOAssignmentCard() {
+    var assignmentID = nextFOAssignmentID++;
+    var markup = '<div class="fo-assignment" data-fo-assignment="' + assignmentID + '">' +
+      '<div class="fo-assignment-head"><span>Field officer assignment</span>' + (assignmentID ? '<button class="icon-button" type="button" data-remove-fo="' + assignmentID + '" aria-label="Remove assignment"><i class="fa-solid fa-trash"></i></button>' : '') + '</div>' +
+      '<div class="employment-options">' +
+        '<label><input type="radio" name="foEmployment' + assignmentID + '" value="salary" checked> Salary</label>' +
+        '<label><input type="radio" name="foEmployment' + assignmentID + '" value="freelancer"> Freelancer</label>' +
+      '</div>' +
+      '<select class="fo-assignee" aria-label="Choose field officer"><option value="">-- Choose FO --</option></select>' +
+      '<span class="parts-label">Select Parts for this FO:</span>' +
+      '<div class="parts-grid">' +
+        '<label><input type="checkbox" class="select-all-parts"> Select All Parts</label>' +
+        '<span></span>' +
+        '<label><input type="checkbox" name="foPart" value="hospital"> Hospital</label>' +
+        '<label><input type="checkbox" name="foPart" value="patient"> Patient</label>' +
+        '<label><input type="checkbox" name="foPart" value="pharmacy"> Pharmacy</label>' +
+        '<label><input type="checkbox" name="foPart" value="pathology"> Pathology</label>' +
+        '<label><input type="checkbox" name="foPart" value="doctor"> Doctor</label>' +
+      '</div></div>';
+    document.getElementById('foAssignments').insertAdjacentHTML('beforeend', markup);
+    var card = document.querySelector('[data-fo-assignment="' + assignmentID + '"]');
+    card.querySelector('.fo-assignee').innerHTML = assigneeOptions(directCloseOptions ? directCloseOptions.fieldOfficers : [], 'salary', '-- Choose FO --');
+  }
+
+  function renderDenialRegistrationFields() {
+    var container = document.getElementById('denialRegistrationFields');
+    var values = {};
+    container.querySelectorAll('input[data-part]').forEach(function (input) { values[input.dataset.part] = input.value; });
+    var partLabels = {hospital:'Hospital registration no.', patient:'Patient registration no. / ID', pharmacy:'Pharmacy registration no.', pathology:'Pathology registration no.', doctor:'Doctor registration no.'};
+    var selectedParts = Array.from(document.querySelectorAll('#denialPartsGrid input[name="denialPart"]:checked')).map(function (input) { return input.value; });
+    container.replaceChildren();
+    container.hidden = selectedParts.length === 0;
+    selectedParts.forEach(function (part) {
+      var field = document.createElement('div');
+      field.className = 'denial-registration-field';
+      var label = document.createElement('label');
+      label.htmlFor = 'denialRegistration-' + part;
+      label.textContent = partLabels[part] || 'Registration no.';
+      var input = document.createElement('input');
+      input.id = label.htmlFor;
+      input.name = 'deniedPartRegistration';
+      input.dataset.part = part;
+      input.type = 'text';
+      input.maxLength = 100;
+      input.required = true;
+      input.value = values[part] || '';
+      input.placeholder = 'Enter registration no. / ID';
+      field.append(label, input);
+      container.appendChild(field);
+    });
+  }
+
+  function refreshDirectCloseStatus() {
+    var selectedMode = document.querySelector('input[name="closeMode"]:checked');
+    var mode = selectedMode ? selectedMode.value : '';
+    var status = document.getElementById('directCloseStatus');
+    var verdict = document.getElementById('directCloseVerdict');
+    var isWithdraw = mode === 'withdraw';
+    var isDenial = mode === 'denial';
+    if (isWithdraw) {
+      document.querySelectorAll('#denialPartsGrid input[name="denialPart"]').forEach(function (input) { input.checked = false; });
+    }
+    renderDenialRegistrationFields();
+    document.getElementById('denialPartsField').hidden = !isDenial;
+    document.getElementById('denialOptions').hidden = isWithdraw;
+    document.getElementById('directCloseRemarksField').hidden = isWithdraw;
+    document.getElementById('denialPartsGrid').querySelectorAll('input').forEach(function (input) { input.disabled = !isDenial; });
+    document.getElementById('denialOptions').querySelectorAll('select, input, button').forEach(function (control) { control.disabled = isWithdraw; });
+    status.disabled = isWithdraw;
+    status.required = !isWithdraw;
+    status.value = isWithdraw ? '' : (status.value || 'REJECTED');
+    verdict.disabled = isWithdraw;
+    verdict.required = false;
+    verdict.placeholder = 'Verdict (optional)';
+    document.getElementById('directCloseRemarks').placeholder = 'Remarks (optional)...';
+    if (isWithdraw) document.getElementById('directCloseRemarks').value = '';
+  }
+
+  async function openDirectCloseModal(row) {
+    directCloseCase = row;
+    document.getElementById('directCloseForm').reset();
+    document.getElementById('directCloseError').style.display = 'none';
+    document.getElementById('directCloseTitle').innerHTML = '<i class="fa-solid fa-bolt"></i> DIRECT CASE CLOSE · ' + escapeHTML(row.claimNumber || row.id);
+    document.getElementById('foAssignments').textContent = '';
+    document.getElementById('denialRegistrationFields').replaceChildren();
+    nextFOAssignmentID = 0;
+    addFOAssignmentCard();
+    document.getElementById('reportMakerSelect').innerHTML = assigneeOptions(directCloseOptions ? directCloseOptions.reportMakers : [], 'salary', '-- Choose RM --');
+    refreshDirectCloseStatus();
+    document.getElementById('directCloseModal').hidden = false;
+
+    if (!directCloseOptions) {
+      try {
+        directCloseOptions = await fetchJSON('/api/v1/dashboard/direct-close/options');
+        if (!directCloseCase || directCloseCase.caseId !== row.caseId) return;
+        var rmEmployment = document.querySelector('input[name="rmEmployment"]:checked');
+        document.getElementById('reportMakerSelect').innerHTML = assigneeOptions(directCloseOptions.reportMakers, rmEmployment ? rmEmployment.value : 'salary', '-- Choose RM --');
+        document.querySelectorAll('#foAssignments .fo-assignment').forEach(function (card) {
+          var employment = card.querySelector('input[type="radio"]:checked');
+          card.querySelector('.fo-assignee').innerHTML = assigneeOptions(directCloseOptions.fieldOfficers, employment ? employment.value : 'salary', '-- Choose FO --');
+        });
+      } catch (error) {
+        if (directCloseCase && directCloseCase.caseId === row.caseId) showDirectCloseError(error.message);
+      }
+    }
+  }
+
+  function closeDirectCloseModal() {
+    document.getElementById('directCloseModal').hidden = true;
+    directCloseCase = null;
+  }
+
+  function showDirectCloseError(message) {
+    var error = document.getElementById('directCloseError');
+    error.textContent = message;
+    error.style.display = 'block';
+  }
+
+  async function submitDirectClose(event) {
+    event.preventDefault();
+    if (!directCloseCase) return;
+    var selectedMode = document.querySelector('input[name="closeMode"]:checked');
+    var mode = selectedMode ? selectedMode.value : 'close';
+    var assignments = [];
+    var usedParts = new Set();
+    var hasInvalidAssignment = false;
+    var denialParts = mode === 'withdraw' ? [] : Array.from(document.querySelectorAll('input[name="denialPart"]:checked')).map(function (input) { return input.value; });
+    var deniedPartRegistrations = Array.from(document.querySelectorAll('#denialRegistrationFields input[data-part]')).map(function (input) {
+      return {part:input.dataset.part, uniqueId:input.value.trim()};
+    });
+
+    if (mode === 'denial' && denialParts.length === 0) {
+      showDirectCloseError('Select the denied part(s) before closing this case.');
+      return;
+    }
+    if (denialParts.some(function (part) {
+      return !deniedPartRegistrations.some(function (item) { return item.part === part && item.uniqueId !== ''; });
+    })) {
+      showDirectCloseError('Enter a registration number or ID for every denied part.');
+      return;
+    }
+
+    if (mode !== 'withdraw') {
+      document.querySelectorAll('#foAssignments .fo-assignment').forEach(function (card) {
+        var parts = Array.from(card.querySelectorAll('input[name="foPart"]:checked')).map(function (input) { return input.value; });
+        if (!parts.length) return;
+        var fieldOfficerID = Number(card.querySelector('.fo-assignee').value);
+        if (!fieldOfficerID || parts.some(function (part) { if (usedParts.has(part)) return true; usedParts.add(part); return false; })) {
+          hasInvalidAssignment = true;
+          return;
+        }
+        assignments.push({fieldOfficerId: fieldOfficerID, parts: parts});
+      });
+      if (hasInvalidAssignment) {
+        showDirectCloseError('Choose an FO for each selected part and assign each part only once.');
+        return;
+      }
+    }
+
+    var submitButton = document.getElementById('submitDirectClose');
+    submitButton.disabled = true;
+    document.getElementById('directCloseError').style.display = 'none';
+    try {
+      await fetchJSON('/api/v1/cases/' + encodeURIComponent(directCloseCase.caseId) + '/direct-close', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          mode: mode,
+          status: mode === 'withdraw' ? 'WITHDRAW' : (document.getElementById('directCloseStatus').value || 'REJECTED'),
+          verdict: document.getElementById('directCloseVerdict').value,
+          remarks: document.getElementById('directCloseRemarks').value,
+          assignments: assignments,
+          reportMakerId: mode === 'withdraw' ? 0 : Number(document.getElementById('reportMakerSelect').value || 0),
+          deniedParts: denialParts,
+          deniedPartRegistrations: deniedPartRegistrations
+        })
+      });
+      closeDirectCloseModal();
+      await loadPage();
+    } catch (error) {
+      showDirectCloseError(error.message);
+    } finally {
+      submitButton.disabled = false;
+    }
+  }
+
+  var copyToastTimeout = null;
+
+  function showCopyToast(message, succeeded) {
+    var toast = document.getElementById('copyToast');
+    toast.classList.toggle('failed', !succeeded);
+    toast.querySelector('i').className = succeeded ? 'fa-solid fa-check' : 'fa-solid fa-triangle-exclamation';
+    document.getElementById('copyToastMessage').textContent = message;
+    toast.classList.add('visible');
+    clearTimeout(copyToastTimeout);
+    copyToastTimeout = setTimeout(function () { toast.classList.remove('visible'); }, 2400);
+  }
+
+  async function copyText(value, description) {
+    var succeeded = false;
+    try {
+      await navigator.clipboard.writeText(value);
+      succeeded = true;
+    } catch (error) {
+      try {
+        var input = document.createElement('textarea');
+        input.value = value;
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        succeeded = document.execCommand('copy');
+        input.remove();
+      } catch (copyError) {
+        succeeded = false;
+      }
+    }
+    showCopyToast(succeeded ? (description || 'Copied to clipboard') : 'Copy failed. Check clipboard permissions.', succeeded);
+  }
+
+  function fullCaseText(row) {
+    var insurance = String(row.insurance || 'N/A').slice(0, 10);
+    var location = [row.city, row.state].filter(Boolean).join(', ') || 'N/A';
+    return [row.claimNumber || row.id, insurance, row.subType || row.caseType, row.hospital || 'N/A', location, durationLabel(row.elapsedSeconds)].join('//');
+  }
+
+  function statusClass(row) {
+    if (row.status === 'resolved' || row.status === 'completed') return 'status-badge resolved';
+    if (row.status === 'waiting') return 'status-badge waiting';
+    if (row.status === 'progress' || row.status === 'open') return 'status-badge progress';
+    return 'status-badge';
+  }
+
+  function renderCases(payload) {
+    rows = payload.cases || [];
+    var tabCounts = payload.tabCounts || {};
+    document.getElementById('totalTabCount').textContent = Number(tabCounts.total || 0).toLocaleString();
+    document.getElementById('openTabCount').textContent = Number(tabCounts.open || 0).toLocaleString();
+    document.getElementById('completedTabCount').textContent = Number(tabCounts.completed || 0).toLocaleString();
+    var tbody = document.getElementById('caseRows');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No matching cases found.</td></tr>';
+    } else {
+      tbody.innerHTML = rows.map(function (row, idx) {
+        var managers = [['AM',row.areaManager],['ICM',row.caseManager],['ALM',row.allocationManager],['FO',row.fieldOfficer],['RM',row.reportMaker]];
+        var managerMarkup = managers.filter(function (entry) { return entry[1]; }).map(function (entry) {
+          if (entry[0] === 'AM' && row.areaManager && row.areaManager !== 'Unassigned') {
+            return '<span><b>AM:</b> ' + escapeHTML(entry[1]) + ' <button class="manager-mail-link" type="button" data-mail-index="' + idx + '" title="Email Area Manager ' + escapeHTML(row.areaManager) + '"><i class="fa-solid fa-envelope"></i></button></span>';
+          }
+          return '<span><b>' + entry[0] + ':</b> ' + escapeHTML(entry[1]) + '</span>';
+        }).join('<br>') || '—';
+        var remarks = row.remarks || [];
+        var remarkText = row.ownRemark || (remarks.length ? remarks.map(function (item) { return item.author + ': ' + item.remark; }).join(' · ') : 'No remark');
+        var tatHours = Number(row.tatHours || 48);
+        var elapsed = Number(row.elapsedSeconds || 0);
+        var overSeconds = elapsed - (tatHours * 3600);
+        var tatColor = getTATTextColor(overSeconds);
+        var isRunning = String(row.status !== 'resolved' && row.status !== 'completed');
+        var overText = overSeconds > 0 ? ('(+' + durationLabel(overSeconds) + ' over)') : '(On time)';
+
+        return '<tr>' +
+          '<td><button class="copy-button" type="button" data-copy-full="' + idx + '" title="Copy full details"><i class="fa-regular fa-copy"></i></button><span class="claim-number" data-claim-index="' + idx + '" title="Double-click to copy claim number">' + escapeHTML(row.claimNumber || row.id) + '</span></td>' +
+          '<td>' + escapeHTML(row.patient || '—') + '</td>' +
+          '<td>' + escapeHTML(row.insurance || '—') + '<br><span class="muted">' + escapeHTML(row.caseType || '—') + ' · ' + escapeHTML(row.subType || '—') + '</span></td>' +
+          '<td>' + escapeHTML([row.hospital,row.city,row.state].filter(Boolean).join(', ') || '—') + '</td>' +
+          '<td><div>' + escapeHTML(row.allocatedAt || '—') + '</div>' + (row.closedAt ? '<div class="tat-over-info" style="font-size:10px; color:#16845b; font-weight:600; margin-top:2px; white-space:nowrap;"><i class="fa-solid fa-circle-check"></i> Closed: ' + escapeHTML(row.closedAt) + '</div>' : '') + '</td>' +
+          '<td><div class="case-tat-cell" style="color:' + tatColor + '; font-weight:600;"><span class="case-runtime" data-elapsed-seconds="' + elapsed + '" data-tat-hours="' + tatHours + '" data-started-at="' + Date.now() + '" data-running="' + isRunning + '">' + escapeHTML(liveDurationLabel(elapsed)) + '</span> / ' + tatHours + 'h<br><span class="tat-over-info" style="font-size:10px;">' + escapeHTML(overText) + '</span></div><span class="' + statusClass(row) + '">' + escapeHTML(row.status) + '</span></td>' +
+          '<td><div class="manager-list">' + managerMarkup + '</div></td>' +
+          '<td><div class="remark-cell"><button class="remark-preview" type="button" data-remark-index="' + idx + '" title="' + escapeHTML(remarkText) + '">' + escapeHTML(remarkText) + '</button><button class="remark-add" type="button" data-remark-index="' + idx + '"><i class="fa-solid fa-pen"></i> ' + (row.ownRemark ? 'Edit remark' : 'Add remark') + '</button></div></td>' +
+          '<td><div class="row-actions">' +
+            (Boolean(row.closedAt || row.status === 'resolved' || row.status === 'completed')
+              ? '<button class="row-action-button view" type="button" data-view-index="' + idx + '"><i class="fa-solid fa-eye"></i> View</button>'
+              : '<button class="row-action-button view" type="button" data-view-index="' + idx + '"><i class="fa-solid fa-eye"></i> View</button>' +
+                '<button class="row-action-button action" type="button" data-action-index="' + idx + '"><i class="fa-solid fa-bolt"></i> Action</button>' +
+                '<button class="row-action-button report" type="button" data-report-index="' + idx + '"><i class="fa-solid fa-file-word"></i> Report</button>'
+            ) +
+          '</div></td>' +
+        '</tr>';
+      }).join('');
+    }
+    var totalCases = Number(payload.total || rows.length || 0);
+    totalPages = Math.max(1, Math.ceil(totalCases / pageSize));
+    document.getElementById('resultSummary').textContent = 'Showing ' + rows.length + ' of ' + totalCases.toLocaleString() + ' cases';
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(total) {
+    var firstBtn = document.getElementById('firstPage');
+    var prevBtn = document.getElementById('previousPage');
+    var nextBtn = document.getElementById('nextPage');
+    var lastBtn = document.getElementById('lastPage');
+    var pagesContainer = document.getElementById('paginationPages');
+    if (firstBtn) firstBtn.disabled = currentPage <= 1;
+    if (prevBtn) prevBtn.disabled = currentPage <= 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= total;
+    if (lastBtn) lastBtn.disabled = currentPage >= total;
+    if (!pagesContainer) return;
+    var maxButtons = 7;
+    var startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    var endPage = startPage + maxButtons - 1;
+    if (endPage > total) {
+      endPage = total;
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    var html = '';
+    for (var p = startPage; p <= endPage; p++) {
+      var isActive = p === currentPage;
+      html += '<button type="button" class="pagination-btn' + (isActive ? ' active' : '') + '" data-page="' + p + '"' + (isActive ? ' aria-current="page"' : '') + '>' + p + '</button>';
+    }
+    pagesContainer.innerHTML = html;
+  }
+
+  async function fetchJSON(url, options) {
+    var response = await fetch(url, options || {});
+    var text = await response.text();
+    var payload;
+    try { payload = text ? JSON.parse(text) : {}; } catch (error) { throw new Error(text || 'Server returned an unreadable response.'); }
+    if (!response.ok) throw new Error(payload.error || 'Request failed.');
+    return payload;
+  }
+
+  function buildCaseQuery() {
+    var form = new URLSearchParams(new FormData(document.getElementById('filterForm')));
+    form.set('tab_status', currentStatus);
+    form.set('page', String(currentPage));
+    if (currentCategory) form.set('category', currentCategory);
+    if (currentOverdue) form.set('overdue', '1');
+    if (currentCompletedToday) form.set('completed_today', '1');
+    return form;
+  }
+
+  function buildWorkloadPagination(currentPage, totalPages, containerId, onSelectPage) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+
+    var html = '';
+    html += '<button type="button" class="pagination-btn" data-page="' + (currentPage - 1) + '" ' + (currentPage === 1 ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : '') + ' title="Previous page"><i class="fa-solid fa-chevron-left"></i> Prev</button>';
+
+    var pages = [];
+    if (totalPages <= 7) {
+      for (var p = 1; p <= totalPages; p++) pages.push(p);
+    } else {
+      if (currentPage <= 4) {
+        pages = [1, 2, 3, 4, 5, '...', totalPages];
+      } else if (currentPage >= totalPages - 3) {
+        pages = [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+      } else {
+        pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+      }
+    }
+
+    pages.forEach(function (page) {
+      if (page === '...') {
+        html += '<span style="padding:0 4px;color:var(--muted);font-weight:700;">…</span>';
+      } else {
+        var isAct = page === currentPage;
+        html += '<button type="button" class="pagination-btn' + (isAct ? ' active' : '') + '" data-page="' + page + '">' + page + '</button>';
+      }
+    });
+
+    html += '<button type="button" class="pagination-btn" data-page="' + (currentPage + 1) + '" ' + (currentPage === totalPages ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : '') + ' title="Next page">Next <i class="fa-solid fa-chevron-right"></i></button>';
+    html += '<button type="button" class="pagination-btn" data-page="' + totalPages + '" ' + (currentPage === totalPages ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : '') + ' title="Last page">Last <i class="fa-solid fa-angles-right"></i></button>';
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('button[data-page]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (this.disabled) return;
+        var p = parseInt(this.getAttribute('data-page'), 10);
+        if (!isNaN(p) && p >= 1 && p <= totalPages && p !== currentPage) {
+          onSelectPage(p);
+        }
+      });
+    });
+  }
+
+  function renderCompanyWorkload(data) {
+    if (data) companyOpenCases = data;
+    var filtered = companyOpenCases.slice();
+    if (companySearchQuery) {
+      var q = companySearchQuery.toLowerCase();
+      filtered = filtered.filter(function (item) {
+        return (item.name || '').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+
+    filtered.sort(function (a, b) {
+      if (b.openCases !== a.openCases) return b.openCases - a.openCases;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    var totalItems = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(totalItems / companyPageSize));
+    if (companyCurrentPage > totalPages) companyCurrentPage = totalPages;
+    if (companyCurrentPage < 1) companyCurrentPage = 1;
+
+    var start = (companyCurrentPage - 1) * companyPageSize;
+    var end = Math.min(start + companyPageSize, totalItems);
+    var pageItems = filtered.slice(start, end);
+
+    var totalBadge = document.getElementById('companyTotalBadge');
+    if (totalBadge) totalBadge.textContent = totalItems + ' companies';
+
+    var pageInfo = document.getElementById('companyPageInfo');
+    if (pageInfo) {
+      pageInfo.textContent = totalItems > 0 ? ('Showing ' + (start + 1) + '–' + end + ' of ' + totalItems) : 'No companies found';
+    }
+
+    var tbody = document.getElementById('companyOpenTableBody');
+    if (!tbody) return;
+
+    if (!pageItems.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No matching companies found.</td></tr>';
+    } else {
+      var html = '';
+      pageItems.forEach(function (item, idx) {
+        var rank = start + idx + 1;
+        var rankClass = rank === 1 ? 'top-1' : (rank === 2 ? 'top-2' : (rank === 3 ? 'top-3' : ''));
+        var hasCases = item.openCases > 0;
+        var pillClass = hasCases ? 'active' : 'zero';
+        html += '<tr>' +
+          '<td style="text-align:center;"><span class="workload-rank ' + rankClass + '">' + rank + '</span></td>' +
+          '<td><span class="workload-name" data-company-id="' + (item.id || 0) + '" data-company-name="' + escapeHTML(item.name) + '" title="Click to view open cases for ' + escapeHTML(item.name) + '">' +
+            '<i class="fa-regular fa-building" style="color:var(--muted);font-size:11px;"></i> ' +
+            escapeHTML(item.name) +
+          '</span></td>' +
+          '<td style="text-align:right;"><button type="button" class="workload-pill ' + pillClass + '" data-workload-type="company" data-workload-id="' + (item.id || 0) + '" data-workload-name="' + escapeHTML(item.name) + '" title="Click to view ' + item.openCases.toLocaleString() + ' open cases for ' + escapeHTML(item.name) + '"><i class="fa-solid fa-folder-open" style="font-size:9px;"></i> <strong>' + item.openCases.toLocaleString() + '</strong></button></td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      tbody.querySelectorAll('.workload-name[data-company-id], .workload-pill[data-workload-type="company"]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var compId = this.getAttribute('data-workload-id') || this.getAttribute('data-company-id');
+          var compName = this.getAttribute('data-workload-name') || this.getAttribute('data-company-name') || this.innerText.trim();
+          openWorkloadPopup('company', compId, compName);
+        });
+      });
+    }
+
+    buildWorkloadPagination(companyCurrentPage, totalPages, 'companyPagination', function (newPage) {
+      companyCurrentPage = newPage;
+      renderCompanyWorkload();
+    });
+  }
+
+  function renderFOWorkload(data) {
+    if (data) foOpenCases = data;
+
+    var filtered = foOpenCases.slice();
+
+    if (foSearchQuery) {
+      var q = foSearchQuery.toLowerCase();
+      filtered = filtered.filter(function (item) {
+        return (item.name || '').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+
+    filtered.sort(function (a, b) {
+      if (b.openCases !== a.openCases) return b.openCases - a.openCases;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+
+    var totalItems = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(totalItems / foPageSize));
+    if (foCurrentPage > totalPages) foCurrentPage = totalPages;
+    if (foCurrentPage < 1) foCurrentPage = 1;
+
+    var start = (foCurrentPage - 1) * foPageSize;
+    var end = Math.min(start + foPageSize, totalItems);
+    var pageItems = filtered.slice(start, end);
+
+    var totalBadge = document.getElementById('foTotalBadge');
+    if (totalBadge) {
+      totalBadge.textContent = totalItems + ' states';
+    }
+
+    var pageInfo = document.getElementById('foPageInfo');
+    if (pageInfo) {
+      pageInfo.textContent = totalItems > 0 ? ('Showing ' + (start + 1) + '–' + end + ' of ' + totalItems) : 'No states found';
+    }
+
+    var tbody = document.getElementById('foOpenTableBody');
+    if (!tbody) return;
+
+    if (!pageItems.length) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No matching States found.</td></tr>';
+    } else {
+      var html = '';
+      pageItems.forEach(function (item, idx) {
+        var rank = start + idx + 1;
+        var rankClass = rank === 1 ? 'top-1' : (rank === 2 ? 'top-2' : (rank === 3 ? 'top-3' : ''));
+        var hasCases = item.openCases > 0;
+        var pillClass = hasCases ? 'active' : 'zero';
+        var isUnassigned = (item.id === 0 || item.name.indexOf('Unassigned') !== -1 || item.name.indexOf('Other') !== -1);
+        var iconClass = isUnassigned ? 'fa-solid fa-map-pin' : 'fa-solid fa-location-dot';
+        var iconColor = isUnassigned ? 'color:var(--amber);' : 'color:var(--brand);';
+
+        html += '<tr>' +
+          '<td style="text-align:center;"><span class="workload-rank ' + rankClass + '">' + rank + '</span></td>' +
+          '<td><span class="workload-name" data-state-id="' + (item.id || 0) + '" data-state-name="' + escapeHTML(item.name) + '" title="Click to view open cases for ' + escapeHTML(item.name) + '">' +
+            '<i class="' + iconClass + '" style="' + iconColor + 'font-size:11px;margin-right:5px;"></i> ' +
+            escapeHTML(item.name) +
+          '</span></td>' +
+          '<td style="text-align:right;"><button type="button" class="workload-pill ' + pillClass + '" data-workload-type="state" data-workload-id="' + (item.id || 0) + '" data-workload-name="' + escapeHTML(item.name) + '" title="Click to view ' + item.openCases.toLocaleString() + ' open cases for ' + escapeHTML(item.name) + '"><i class="fa-solid fa-folder-open" style="font-size:9px;"></i> <strong>' + item.openCases.toLocaleString() + '</strong></button></td>' +
+        '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      tbody.querySelectorAll('.workload-name[data-state-id], .workload-pill[data-workload-type="state"]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var stateId = this.getAttribute('data-workload-id') || this.getAttribute('data-state-id');
+          var stateName = this.getAttribute('data-workload-name') || this.getAttribute('data-state-name') || this.innerText.trim();
+          openWorkloadPopup('state', stateId, stateName);
+        });
+      });
+    }
+
+    buildWorkloadPagination(foCurrentPage, totalPages, 'foPagination', function (newPage) {
+      foCurrentPage = newPage;
+      renderFOWorkload();
+    });
+  }
+  var renderStateWorkload = renderFOWorkload;
+
+  var modalFilterDefs = {
+    claim: { id: 'pillClaim', title: 'Claim / Patient', icon: 'fa-solid fa-magnifying-glass', defaultLabel: 'Claim / Patient' },
+    hospital: { id: 'pillHospital', title: 'Hospital', icon: 'fa-regular fa-hospital', defaultLabel: 'Hospital' },
+    insurance: { id: 'pillInsurance', title: 'Insurance', icon: 'fa-regular fa-building', defaultLabel: 'Insurance' },
+    fo: { id: 'pillFO', title: 'Field Officer', icon: 'fa-solid fa-user-shield', defaultLabel: 'Field Officer' },
+    type: { id: 'pillType', title: 'Type', icon: 'fa-solid fa-tags', defaultLabel: 'Type' },
+    subtype: { id: 'pillSubType', title: 'Sub Type', icon: 'fa-solid fa-tag', defaultLabel: 'Sub Type' },
+    state: { id: 'pillState', title: 'State', icon: 'fa-solid fa-map-location-dot', defaultLabel: 'State' },
+    city: { id: 'pillCity', title: 'City', icon: 'fa-solid fa-city', defaultLabel: 'City' },
+    date: { id: 'pillDate', title: 'Date / Month', icon: 'fa-regular fa-calendar', defaultLabel: 'Date / Month' },
+    am: { id: 'pillAM', title: 'Area Manager', icon: 'fa-solid fa-user-tie', defaultLabel: 'Area Manager' },
+    alm: { id: 'pillALM', title: 'Allocation Mgr', icon: 'fa-solid fa-user-check', defaultLabel: 'Allocation Mgr' },
+    limit: { id: 'pillLimit', title: 'Limit', icon: 'fa-solid fa-list-ol', defaultLabel: 'Limit (25)' }
+  };
+  var activeModalFilter = null;
+
+  function getModalFilterSummaryValue(k) {
+    if (k === 'claim') {
+      var el = document.getElementById('modalFilterClaim');
+      return el ? el.value.trim() : '';
+    } else if (k === 'hospital') {
+      var el = document.getElementById('modalFilterHospital');
+      return el ? el.value.trim() : '';
+    } else if (k === 'insurance') {
+      var el = document.getElementById('modalFilterInsurance');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'fo') {
+      var el = document.getElementById('modalFilterFO');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'type') {
+      var el = document.getElementById('modalFilterType');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'subtype') {
+      var el = document.getElementById('modalFilterSubType');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'state') {
+      var el = document.getElementById('modalFilterState');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'city') {
+      var el = document.getElementById('modalFilterCity');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'date') {
+      var d = document.getElementById('modalFilterDate');
+      var m = document.getElementById('modalFilterMonth');
+      return (d && d.value) ? d.value : ((m && m.value) ? m.value : '');
+    } else if (k === 'am') {
+      var el = document.getElementById('modalFilterAreaManager');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'alm') {
+      var el = document.getElementById('modalFilterAllocManager');
+      return (el && el.value) ? (el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '') : '';
+    } else if (k === 'limit') {
+      var el = document.getElementById('modalFilterLimit');
+      var v = el ? el.value : '25';
+      return v === '25' ? '' : v;
+    }
+    return '';
+  }
+
+  function updateModalFilterPill(k) {
+    var def = modalFilterDefs[k];
+    if (!def) return;
+    var btn = document.getElementById(def.id);
+    if (!btn) return;
+    var val = getModalFilterSummaryValue(k);
+    if (val) {
+      btn.classList.add('active');
+      var displayVal = val;
+      if (displayVal.length > 18) displayVal = displayVal.substring(0, 16) + '…';
+      btn.innerHTML = '<i class="' + def.icon + '"></i> <span class="pill-title">' + escapeHTML(def.title + ': ' + displayVal) + '</span><span class="pill-remove" data-clear-pill="' + k + '" title="Clear">&times;</span>';
+    } else {
+      btn.classList.remove('active');
+      btn.innerHTML = '<i class="' + def.icon + '"></i> <span class="pill-title">' + escapeHTML(def.defaultLabel) + '</span>';
+    }
+    checkAnyModalFilterActive();
+  }
+
+  function checkAnyModalFilterActive() {
+    var anyActive = false;
+    Object.keys(modalFilterDefs).forEach(function (k) {
+      if (getModalFilterSummaryValue(k)) anyActive = true;
+    });
+    var resetBtn = document.getElementById('modalResetFilters');
+    if (resetBtn) resetBtn.style.display = anyActive ? 'inline-flex' : 'none';
+  }
+
+  function clearModalFilter(k) {
+    if (k === 'claim') {
+      var el = document.getElementById('modalFilterClaim'); if (el) el.value = '';
+    } else if (k === 'hospital') {
+      var el = document.getElementById('modalFilterHospital'); if (el) el.value = '';
+    } else if (k === 'insurance') {
+      var el = document.getElementById('modalFilterInsurance'); if (el) el.value = '';
+      var typeSel = document.getElementById('modalFilterType');
+      if (typeSel) { typeSel.disabled = true; typeSel.value = ''; setDropdownOptions(typeSel, 'Select insurance first', []); }
+      var subSel = document.getElementById('modalFilterSubType');
+      if (subSel) { subSel.disabled = true; subSel.value = ''; setDropdownOptions(subSel, 'Select type first', []); }
+      updateModalFilterPill('type');
+      updateModalFilterPill('subtype');
+    } else if (k === 'fo') {
+      var el = document.getElementById('modalFilterFO'); if (el) el.value = '';
+    } else if (k === 'type') {
+      var el = document.getElementById('modalFilterType'); if (el) el.value = '';
+      var subSel = document.getElementById('modalFilterSubType');
+      if (subSel) { subSel.disabled = true; subSel.value = ''; setDropdownOptions(subSel, 'Select type first', []); }
+      updateModalFilterPill('subtype');
+    } else if (k === 'subtype') {
+      var el = document.getElementById('modalFilterSubType'); if (el) el.value = '';
+    } else if (k === 'state') {
+      var el = document.getElementById('modalFilterState'); if (el) el.value = '';
+      var citySel = document.getElementById('modalFilterCity');
+      if (citySel) { citySel.disabled = true; citySel.value = ''; setDropdownOptions(citySel, 'Select state first', []); }
+      updateModalFilterPill('city');
+    } else if (k === 'city') {
+      var el = document.getElementById('modalFilterCity'); if (el) el.value = '';
+    } else if (k === 'date') {
+      var d = document.getElementById('modalFilterDate'); if (d) d.value = '';
+      var m = document.getElementById('modalFilterMonth'); if (m) m.value = '';
+    } else if (k === 'am') {
+      var el = document.getElementById('modalFilterAreaManager'); if (el) el.value = '';
+    } else if (k === 'alm') {
+      var el = document.getElementById('modalFilterAllocManager'); if (el) el.value = '';
+    } else if (k === 'limit') {
+      var el = document.getElementById('modalFilterLimit'); if (el) el.value = '25';
+    }
+    updateModalFilterPill(k);
+  }
+
+  function resetModalFilterInputs() {
+    ['modalFilterClaim', 'modalFilterHospital', 'modalFilterInsurance', 'modalFilterFO',
+     'modalFilterState', 'modalFilterCity', 'modalFilterMonth', 'modalFilterDate',
+     'modalFilterAreaManager', 'modalFilterAllocManager'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    var typeSel = document.getElementById('modalFilterType');
+    if (typeSel) { typeSel.value = ''; typeSel.disabled = true; setDropdownOptions(typeSel, 'Select insurance first', []); }
+    var subSel = document.getElementById('modalFilterSubType');
+    if (subSel) { subSel.value = ''; subSel.disabled = true; setDropdownOptions(subSel, 'Select type first', []); }
+    var citySel = document.getElementById('modalFilterCity');
+    if (citySel) { citySel.value = ''; citySel.disabled = true; setDropdownOptions(citySel, 'Select state first', []); }
+    var limitEl = document.getElementById('modalFilterLimit');
+    if (limitEl) limitEl.value = '25';
+  }
+
+  function resetAllModalFilters() {
+    resetModalFilterInputs();
+    if (currentWorkloadContext) {
+      if (currentWorkloadContext.type === 'company' && currentWorkloadContext.id) {
+        var ins = document.getElementById('modalFilterInsurance');
+        if (ins) ins.value = String(currentWorkloadContext.id);
+        var typeSel = document.getElementById('modalFilterType');
+        if (typeSel && currentWorkloadContext.id !== '0' && currentWorkloadContext.id !== 0) {
+          var filteredTypes = (filterOptions.types || []).filter(function(t) { return String(t.parentId) === String(currentWorkloadContext.id); });
+          typeSel.disabled = false;
+          setDropdownOptions(typeSel, 'All types', filteredTypes);
+        }
+      } else if (currentWorkloadContext.type === 'fo' && currentWorkloadContext.id) {
+        var fo = document.getElementById('modalFilterFO');
+        if (fo) fo.value = String(currentWorkloadContext.id);
+      } else if (currentWorkloadContext.type === 'am' && currentWorkloadContext.id) {
+        var am = document.getElementById('modalFilterAreaManager');
+        if (am) am.value = String(currentWorkloadContext.id);
+      } else if (currentWorkloadContext.type === 'alm' && currentWorkloadContext.id) {
+        var alm = document.getElementById('modalFilterAllocManager');
+        if (alm) alm.value = String(currentWorkloadContext.id);
+      }
+    }
+    closeModalFilterPopover();
+    Object.keys(modalFilterDefs).forEach(function(k) { updateModalFilterPill(k); });
+    var resetBtn = document.getElementById('modalResetFilters');
+    if (resetBtn) resetBtn.style.display = 'none';
+    loadModalFilteredCases(1);
+  }
+
+  function openModalFilterPopover(filterKey, buttonEl) {
+    var def = modalFilterDefs[filterKey];
+    if (!def) return;
+    activeModalFilter = filterKey;
+
+    document.querySelectorAll('.filter-pill').forEach(function (pill) { pill.classList.remove('open'); });
+    buttonEl.classList.add('open');
+
+    document.getElementById('popoverTitle').textContent = 'Filter by ' + def.title;
+    var popover = document.getElementById('modalFilterPopover');
+    popover.querySelectorAll('.popover-slot').forEach(function (slot) {
+      slot.hidden = slot.getAttribute('data-slot') !== filterKey;
+    });
+
+    popover.hidden = false;
+    popover.style.display = 'grid';
+
+    // Position popover relative to toolbar
+    var toolbar = document.getElementById('modalFilterToolbar');
+    var tRect = toolbar.getBoundingClientRect();
+    var bRect = buttonEl.getBoundingClientRect();
+    var left = bRect.left - tRect.left;
+    var maxLeft = toolbar.clientWidth - 290;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (left < 8) left = 8;
+    popover.style.left = left + 'px';
+
+    // Premium activation: auto-focus and highlight
+    var activeSlot = popover.querySelector('[data-slot="' + filterKey + '"]');
+    if (activeSlot) {
+      var ctrl = activeSlot.querySelector('input:not([type="hidden"]), select');
+      if (ctrl) {
+        setTimeout(function () {
+          ctrl.focus();
+          if (ctrl.tagName === 'INPUT' && (ctrl.type === 'search' || ctrl.type === 'text')) {
+            ctrl.select();
+          }
+        }, 50);
+      }
+    }
+  }
+
+  function closeModalFilterPopover() {
+    activeModalFilter = null;
+    var popover = document.getElementById('modalFilterPopover');
+    if (popover) {
+      popover.hidden = true;
+      popover.style.display = 'none';
+    }
+    document.querySelectorAll('.filter-pill').forEach(function (pill) { pill.classList.remove('open'); });
+  }
+
+  async function openWorkloadPopup(type, id, name) {
+    currentWorkloadContext = { type: type, id: id, name: name };
+    var modal = document.getElementById('cardResultsModal');
+    var titleEl = document.getElementById('cardResultsTitle');
+    var badgeEl = document.getElementById('cardResultsBadge');
+    var body = document.getElementById('cardResultsBody');
+
+    var typeLabel = type === 'company' ? 'Company Wise' : (type === 'state' ? 'State Wise' : 'Field Officer (FO)');
+    var iconClass = type === 'company' ? 'fa-regular fa-building' : (type === 'state' ? 'fa-solid fa-map-location-dot' : 'fa-solid fa-user-shield');
+    titleEl.innerHTML = '<i class="' + iconClass + '" style="color:var(--brand);margin-right:6px;"></i> ' + escapeHTML(name) + ' — Open Cases';
+    badgeEl.textContent = typeLabel;
+
+    var toolbar = document.getElementById('modalFilterToolbar');
+    if (toolbar) toolbar.style.display = 'flex';
+    closeModalFilterPopover();
+    resetModalFilterInputs();
+
+    // HIDE UNNECESSARY FILTERS:
+    // If company wise: REMOVE insurance company dropdown filter (because user already clicked on it)
+    // If FO wise: REMOVE Field Officer dropdown filter (because user already clicked on it)
+    var pillIns = document.getElementById('pillInsurance');
+    var pillFO = document.getElementById('pillFO');
+    var pillAM = document.getElementById('pillAM');
+    var pillALM = document.getElementById('pillALM');
+
+    if (type === 'company') {
+      if (pillIns) pillIns.style.display = 'none';
+      if (pillFO) pillFO.style.display = '';
+      if (pillAM) pillAM.style.display = '';
+      if (pillALM) pillALM.style.display = '';
+
+      var insSelect = document.getElementById('modalFilterInsurance');
+      if (insSelect) insSelect.value = (id && id !== '0' && id !== 0) ? String(id) : '';
+
+      var typeSelect = document.getElementById('modalFilterType');
+      if (typeSelect && id && id !== '0' && id !== 0) {
+        var filteredTypes = (filterOptions.types || []).filter(function(t) { return String(t.parentId) === String(id); });
+        typeSelect.disabled = false;
+        setDropdownOptions(typeSelect, 'All types', filteredTypes);
+      }
+    } else if (type === 'state') {
+      var pillState = document.getElementById('pillState');
+      if (pillState) pillState.style.display = 'none';
+      if (pillIns) pillIns.style.display = '';
+      if (pillFO) pillFO.style.display = '';
+      if (pillAM) pillAM.style.display = '';
+      if (pillALM) pillALM.style.display = '';
+
+      var stateSelect = document.getElementById('modalFilterState');
+      if (stateSelect) stateSelect.value = (id && id !== '0' && id !== 0) ? String(id) : '';
+    } else if (type === 'fo') {
+      if (pillFO) pillFO.style.display = 'none';
+      if (pillIns) pillIns.style.display = '';
+      if (pillAM) pillAM.style.display = '';
+      if (pillALM) pillALM.style.display = '';
+
+      var foSelect = document.getElementById('modalFilterFO');
+      if (foSelect) foSelect.value = (id && id !== '0' && id !== 0) ? String(id) : '';
+    }
+
+    Object.keys(modalFilterDefs).forEach(function (k) {
+      updateModalFilterPill(k);
+    });
+
+    body.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size:22px;margin-bottom:8px;display:block;color:var(--brand);"></i> Loading open cases for ' + escapeHTML(name) + '…</div>';
+    modal.hidden = false;
+
+    await loadModalFilteredCases(1);
+  }
+
+  async function loadModalFilteredCases(page) {
+    var requestID = ++cardResultsRequestID;
+    cardResultsCurrentPage = page || 1;
+    var limitEl = document.getElementById('modalFilterLimit');
+    cardResultsPageSize = Number(limitEl ? limitEl.value : 25);
+
+    var query = new URLSearchParams();
+    query.set('open_cases_only', '1');
+    query.set('tab_status', 'open');
+    query.set('page', String(cardResultsCurrentPage));
+    query.set('limit', String(cardResultsPageSize));
+
+    // Base workload context
+    if (currentWorkloadContext) {
+      if (currentWorkloadContext.type === 'company') {
+        query.set('insurance_id', String(currentWorkloadContext.id !== undefined ? currentWorkloadContext.id : 0));
+      } else if (currentWorkloadContext.type === 'state') {
+        query.set('state_id', String(currentWorkloadContext.id !== undefined ? currentWorkloadContext.id : 0));
+      } else if (currentWorkloadContext.type === 'fo') {
+        query.set('fo_id', String(currentWorkloadContext.id !== undefined ? currentWorkloadContext.id : 0));
+      } else if (currentWorkloadContext.type === 'alm') {
+        query.set('alloc_mgr_id', String(currentWorkloadContext.id !== undefined ? currentWorkloadContext.id : 0));
+        query.set('tab_status', 'total');
+        query.delete('open_cases_only');
+      } else if (currentWorkloadContext.type === 'am') {
+        query.set('am_id', String(currentWorkloadContext.id !== undefined ? currentWorkloadContext.id : 0));
+        query.set('tab_status', 'total');
+        query.delete('open_cases_only');
+      }
+    }
+
+    // Modal filters
+    var claimEl = document.getElementById('modalFilterClaim');
+    if (claimEl && claimEl.value.trim()) query.set('claim_number', claimEl.value.trim());
+
+    var hospEl = document.getElementById('modalFilterHospital');
+    if (hospEl && hospEl.value.trim()) query.set('hospital_name', hospEl.value.trim());
+
+    if (!currentWorkloadContext || currentWorkloadContext.type !== 'company') {
+      var insEl = document.getElementById('modalFilterInsurance');
+      if (insEl && insEl.value) query.set('insurance_id', insEl.value);
+    }
+
+    if (!currentWorkloadContext || currentWorkloadContext.type !== 'fo') {
+      var foEl = document.getElementById('modalFilterFO');
+      if (foEl && foEl.value) query.set('fo_id', foEl.value);
+    }
+
+    var typeEl = document.getElementById('modalFilterType');
+    if (typeEl && typeEl.value) query.set('type_id', typeEl.value);
+
+    var subTypeEl = document.getElementById('modalFilterSubType');
+    if (subTypeEl && subTypeEl.value) query.set('sub_type_id', subTypeEl.value);
+
+    var stateEl = document.getElementById('modalFilterState');
+    if (stateEl && stateEl.value) query.set('state_id', stateEl.value);
+
+    var cityEl = document.getElementById('modalFilterCity');
+    if (cityEl && cityEl.value) query.set('city_id', cityEl.value);
+
+    var monthEl = document.getElementById('modalFilterMonth');
+    if (monthEl && monthEl.value) query.set('filter_month_year', monthEl.value);
+
+    var dateEl = document.getElementById('modalFilterDate');
+    if (dateEl && dateEl.value) query.set('allocation_date', dateEl.value);
+
+    if (!currentWorkloadContext || currentWorkloadContext.type !== 'am') {
+      var amEl = document.getElementById('modalFilterAreaManager');
+      if (amEl && amEl.value) query.set('am_id', amEl.value);
+    }
+
+    if (!currentWorkloadContext || currentWorkloadContext.type !== 'alm') {
+      var almEl = document.getElementById('modalFilterAllocManager');
+      if (almEl && almEl.value) query.set('alloc_mgr_id', almEl.value);
+    }
+
+    currentCardResultsQuery = query;
+    var body = document.getElementById('cardResultsBody');
+    var existingTable = body.querySelector('.table-scroll');
+    if (existingTable) {
+      existingTable.style.opacity = '0.4';
+      existingTable.style.pointerEvents = 'none';
+    } else {
+      body.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size:22px;margin-bottom:8px;display:block;color:var(--brand);"></i> Loading cases…</div>';
+    }
+
+    try {
+      var payload = await fetchJSON('/api/v1/cases?' + query.toString());
+      if (requestID === cardResultsRequestID) {
+        renderCardResults(payload);
+        var dialog = document.querySelector('.card-results-dialog');
+        if (dialog) dialog.scrollTop = 0;
+      }
+    } catch (error) {
+      if (requestID === cardResultsRequestID) {
+        body.innerHTML = '<div class="empty-state" style="color:var(--red);">' + escapeHTML(error.message) + '</div>';
+      }
+    }
+  }
+
+  async function loadFilteredCases() {
+    var requestID = ++caseResultsRequestID;
+    var query = buildCaseQuery();
+    pageSize = Number(query.get('limit') || 25);
+    try {
+      var casesPayload = await fetchJSON('/api/v1/cases?' + query.toString());
+      if (requestID === caseResultsRequestID) renderCases(casesPayload);
+    } catch (error) {
+      if (requestID === caseResultsRequestID) throw error;
+    }
+  }
+
+  function scheduleLiveFilter() {
+    currentPage = 1;
+    clearTimeout(filterInputTimer);
+    filterInputTimer = setTimeout(function () {
+      loadFilteredCases().catch(function (error) { showError(error.message); });
+    }, 250);
+  }
+
+  async function loadPage() {
+    clearError();
+    document.body.classList.add('loading');
+    try {
+      if (!layout) renderLayout(await fetchJSON('/api/v1/dashboard/layout'));
+      if (!filterOptions) populateFilterOptions(await fetchJSON('/api/v1/dashboard/filters'));
+      dashboard = await fetchJSON('/api/v1/dashboard');
+      var targets = await fetchJSON('/api/v1/dashboard/targets');
+      dashboardTargets = targets || {};
+      renderSummary(dashboard.summary || {});
+      renderTargets(targets || {});
+      renderTrend(dashboard);
+      renderCompanyWorkload(dashboard.companyOpenCases || []);
+      renderFOWorkload(dashboard.stateOpenCases || dashboard.foOpenCases || []);
+      var statusMonth = document.getElementById('statusFilterMonth') ? document.getElementById('statusFilterMonth').value : '';
+      var statusDate = document.getElementById('statusFilterDate') ? document.getElementById('statusFilterDate').value : '';
+      if (statusMonth || statusDate) {
+        await reloadCaseStatus();
+      } else {
+        renderSegments(dashboard.segments || []);
+      }
+      await loadFilteredCases();
+    } catch (error) {
+      showError(error.message);
+    } finally {
+      document.body.classList.remove('loading');
+    }
+  }
+
+  function renderCardResults(payload) {
+    var cases = payload.cases || [];
+    cardResultsCases = cases;
+    var body = document.getElementById('cardResultsBody');
+    if (!cases.length) {
+      body.innerHTML = '<div class="empty-state">No matching cases found.</div>';
+      return;
+    }
+    var totalCases = Number(payload.total || cases.length);
+    cardResultsTotalPages = Math.max(1, Math.ceil(totalCases / cardResultsPageSize));
+    var startNum = (cardResultsCurrentPage - 1) * cardResultsPageSize + 1;
+    var endNum = Math.min(totalCases, startNum + cases.length - 1);
+
+    var caseRows = cases.map(function (row, idx) {
+      var managers = [['AM',row.areaManager],['ICM',row.caseManager],['ALM',row.allocationManager],['FO',row.fieldOfficer],['RM',row.reportMaker]];
+      var managerMarkup = managers.filter(function (entry) { return entry[1]; }).map(function (entry) {
+        if (entry[0] === 'AM' && row.areaManager && row.areaManager !== 'Unassigned') {
+          return '<span><b>AM:</b> ' + escapeHTML(entry[1]) + ' <button class="manager-mail-link" type="button" data-modal-mail-index="' + idx + '" title="Email Area Manager ' + escapeHTML(row.areaManager) + '"><i class="fa-solid fa-envelope"></i></button></span>';
+        }
+        return '<span><b>' + entry[0] + ':</b> ' + escapeHTML(entry[1]) + '</span>';
+      }).join('<br>') || '—';
+      var remarks = row.remarks || [];
+      var remarkText = row.ownRemark || (remarks.length ? remarks.map(function (item) { return item.author + ': ' + item.remark; }).join(' · ') : 'No remark');
+      var tatHours = Number(row.tatHours || 48);
+      var elapsed = Number(row.elapsedSeconds || 0);
+      var overSeconds = elapsed - (tatHours * 3600);
+      var tatColor = getTATTextColor(overSeconds);
+      var isRunning = String(row.status !== 'resolved' && row.status !== 'completed');
+      var overText = overSeconds > 0 ? ('(+' + durationLabel(overSeconds) + ' over)') : '(On time)';
+
+      return '<tr>' +
+        '<td><button class="copy-button" type="button" data-modal-copy="' + idx + '" title="Copy full details"><i class="fa-regular fa-copy"></i></button><span class="claim-number" data-modal-claim-index="' + idx + '" title="Click to copy claim number">' + escapeHTML(row.claimNumber || row.id) + '</span></td>' +
+        '<td>' + escapeHTML(row.patient || '—') + '</td>' +
+        '<td>' + escapeHTML(row.insurance || '—') + '<br><span class="muted">' + escapeHTML(row.caseType || '—') + ' · ' + escapeHTML(row.subType || '—') + '</span></td>' +
+        '<td>' + escapeHTML([row.hospital,row.city,row.state].filter(Boolean).join(', ') || '—') + '</td>' +
+        '<td><div>' + escapeHTML(row.allocatedAt || '—') + '</div>' + (row.closedAt ? '<div class="tat-over-info" style="font-size:10px; color:#16845b; font-weight:600; margin-top:2px; white-space:nowrap;"><i class="fa-solid fa-circle-check"></i> Closed: ' + escapeHTML(row.closedAt) + '</div>' : '') + '</td>' +
+        '<td><div class="case-tat-cell" style="color:' + tatColor + '; font-weight:600;"><span class="case-runtime" data-elapsed-seconds="' + elapsed + '" data-tat-hours="' + tatHours + '" data-started-at="' + Date.now() + '" data-running="' + isRunning + '">' + escapeHTML(liveDurationLabel(elapsed)) + '</span> / ' + tatHours + 'h<br><span class="tat-over-info" style="font-size:10px;">' + escapeHTML(overText) + '</span></div><span class="' + statusClass(row) + '">' + escapeHTML(row.status) + '</span></td>' +
+        '<td><div class="manager-list">' + managerMarkup + '</div></td>' +
+        '<td><div class="remark-cell"><button class="remark-preview" type="button" data-modal-remark-index="' + idx + '" title="' + escapeHTML(remarkText) + '">' + escapeHTML(remarkText) + '</button><button class="remark-add" type="button" data-modal-remark-index="' + idx + '"><i class="fa-solid fa-pen"></i> ' + (row.ownRemark ? 'Edit remark' : 'Add remark') + '</button></div></td>' +
+        '<td><div class="row-actions">' +
+          (Boolean(row.closedAt || row.status === 'resolved' || row.status === 'completed')
+            ? '<button class="row-action-button view" type="button" data-modal-view-index="' + idx + '"><i class="fa-solid fa-eye"></i> View</button>'
+            : '<button class="row-action-button view" type="button" data-modal-view-index="' + idx + '"><i class="fa-solid fa-eye"></i> View</button>' +
+              '<button class="row-action-button action" type="button" data-modal-action-index="' + idx + '"><i class="fa-solid fa-bolt"></i> Action</button>' +
+              '<button class="row-action-button report" type="button" data-modal-report-index="' + idx + '"><i class="fa-solid fa-file-word"></i> Report</button>'
+          ) +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+
+    var paginationHTML = '';
+    if (cardResultsTotalPages > 1) {
+      var maxButtons = 7;
+      var startPage = Math.max(1, cardResultsCurrentPage - Math.floor(maxButtons / 2));
+      var endPage = startPage + maxButtons - 1;
+      if (endPage > cardResultsTotalPages) {
+        endPage = cardResultsTotalPages;
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+
+      var pageButtons = '';
+      for (var p = startPage; p <= endPage; p++) {
+        var isActive = p === cardResultsCurrentPage;
+        pageButtons += '<button type="button" class="pagination-btn' + (isActive ? ' active' : '') + '" data-modal-page="' + p + '"' + (isActive ? ' aria-current="page"' : '') + '>' + p + '</button>';
+      }
+
+      var prevDisabled = cardResultsCurrentPage <= 1 ? ' disabled' : '';
+      var nextDisabled = cardResultsCurrentPage >= cardResultsTotalPages ? ' disabled' : '';
+
+      paginationHTML = '<div class="table-footer card-results-footer">' +
+        '<span>Showing ' + startNum.toLocaleString() + '–' + endNum.toLocaleString() + ' of ' + totalCases.toLocaleString() + ' cases</span>' +
+        '<div class="pagination-controls" aria-label="Modal pagination">' +
+          '<button class="pagination-btn" data-modal-page="first" type="button" title="First page"' + prevDisabled + '>First</button>' +
+          '<button class="pagination-btn" data-modal-page="prev" type="button" title="Previous page"' + prevDisabled + '>Prev</button>' +
+          '<div class="pagination-pages">' + pageButtons + '</div>' +
+          '<button class="pagination-btn" data-modal-page="next" type="button" title="Next page"' + nextDisabled + '>Next</button>' +
+          '<button class="pagination-btn" data-modal-page="last" type="button" title="Last page"' + nextDisabled + '>Last</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    body.innerHTML = '<p class="card-results-summary">Showing ' + startNum.toLocaleString() + '–' + endNum.toLocaleString() + ' of ' + totalCases.toLocaleString() + ' cases (Page ' + cardResultsCurrentPage + ' of ' + cardResultsTotalPages + ')</p>' +
+      '<div class="table-scroll"><table class="card-results-table"><thead><tr>' +
+        '<th>Claim #</th>' +
+        '<th>Patient</th>' +
+        '<th>Insurance &amp; category</th>' +
+        '<th>City / hospital</th>' +
+        '<th>Allocated / Closing date</th>' +
+        '<th>Time / TAT</th>' +
+        '<th>Managers</th>' +
+        '<th>Remark</th>' +
+        '<th>Action</th>' +
+      '</tr></thead><tbody>' + caseRows + '</tbody></table></div>' +
+      paginationHTML;
+  }
+
+  async function openCardResults(title, filters, page) {
+    var requestID = ++cardResultsRequestID;
+    cardResultsCurrentPage = page || 1;
+    currentWorkloadContext = null;
+    var toolbar = document.getElementById('modalFilterToolbar');
+    if (toolbar) toolbar.style.display = 'flex';
+    closeModalFilterPopover();
+    resetModalFilterInputs();
+
+    ['pillInsurance', 'pillFO', 'pillAM', 'pillALM'].forEach(function(pid) {
+      var el = document.getElementById(pid);
+      if (el) el.style.display = '';
+    });
+
+    var query = new URLSearchParams(new FormData(document.getElementById('filterForm')));
+    ['category','overdue','completed_today','limit'].forEach(function (name) { query.delete(name); });
+    query.set('tab_status', filters.status || 'total');
+    query.set('page', String(cardResultsCurrentPage));
+    query.set('limit', String(cardResultsPageSize));
+    if (filters.category) query.set('category', filters.category);
+    if (filters.overdue) query.set('overdue', '1');
+    if (filters.completedToday) query.set('completed_today', '1');
+    if (filters.caseStatus) query.set('case_status', filters.caseStatus);
+    if (filters.allocationDate) query.set('allocation_date', filters.allocationDate);
+    if (filters.filterMonth) query.set('filter_month_year', filters.filterMonth);
+
+    Object.keys(modalFilterDefs).forEach(function (k) { updateModalFilterPill(k); });
+
+    currentCardResultsQuery = query;
+
+    document.getElementById('cardResultsTitle').textContent = title;
+    document.getElementById('cardResultsBadge').textContent = 'Dashboard Summary';
+    document.getElementById('cardResultsBody').innerHTML = '<div class="empty-state">Loading cases…</div>';
+    document.getElementById('cardResultsModal').hidden = false;
+    try {
+      var payload = await fetchJSON('/api/v1/cases?' + query.toString());
+      if (requestID === cardResultsRequestID) renderCardResults(payload);
+    } catch (error) {
+      if (requestID === cardResultsRequestID) document.getElementById('cardResultsBody').innerHTML = '<div class="empty-state">' + escapeHTML(error.message) + '</div>';
+    }
+  }
+
+  async function loadCardResultsPage(page) {
+    if (!currentCardResultsQuery) return;
+    var requestID = ++cardResultsRequestID;
+    cardResultsCurrentPage = page;
+    currentCardResultsQuery.set('page', String(page));
+    currentCardResultsQuery.set('limit', String(cardResultsPageSize));
+
+    var body = document.getElementById('cardResultsBody');
+    var existingTable = body.querySelector('.table-scroll');
+    if (existingTable) {
+      existingTable.style.opacity = '0.4';
+      existingTable.style.pointerEvents = 'none';
+    }
+
+    try {
+      var payload = await fetchJSON('/api/v1/cases?' + currentCardResultsQuery.toString());
+      if (requestID === cardResultsRequestID) {
+        renderCardResults(payload);
+        var dialog = document.querySelector('.card-results-dialog');
+        if (dialog) dialog.scrollTop = 0;
+      }
+    } catch (error) {
+      if (requestID === cardResultsRequestID) {
+        showCopyToast(error.message, false);
+        if (existingTable) {
+          existingTable.style.opacity = '1';
+          existingTable.style.pointerEvents = '';
+        }
+      }
+    }
+  }
+
+  async function openMovementCases(button) {
+    var role = button.dataset.movementRole;
+    var moveId = button.dataset.movementId;
+    var moveName = button.dataset.movementName || '';
+
+    currentWorkloadContext = { type: role === 'alloc_mgr_id' ? 'alm' : (role === 'am_id' ? 'am' : 'movement'), id: moveId, name: moveName, role: role };
+
+    var toolbar = document.getElementById('modalFilterToolbar');
+    if (toolbar) toolbar.style.display = 'flex';
+    closeModalFilterPopover();
+    resetModalFilterInputs();
+
+    var pillIns = document.getElementById('pillInsurance');
+    var pillFO = document.getElementById('pillFO');
+    var pillAM = document.getElementById('pillAM');
+    var pillALM = document.getElementById('pillALM');
+
+    if (pillIns) pillIns.style.display = '';
+    if (pillFO) pillFO.style.display = '';
+
+    // Remove redundant role filter
+    if (role === 'alloc_mgr_id') {
+      if (pillALM) pillALM.style.display = 'none';
+      if (pillAM) pillAM.style.display = '';
+      var almSel = document.getElementById('modalFilterAllocManager');
+      if (almSel) almSel.value = moveId || '';
+    } else if (role === 'am_id') {
+      if (pillAM) pillAM.style.display = 'none';
+      if (pillALM) pillALM.style.display = '';
+      var amSel = document.getElementById('modalFilterAreaManager');
+      if (amSel) amSel.value = moveId || '';
+    } else {
+      if (pillAM) pillAM.style.display = '';
+      if (pillALM) pillALM.style.display = '';
+    }
+
+    Object.keys(modalFilterDefs).forEach(function (k) {
+      updateModalFilterPill(k);
+    });
+
+    document.getElementById('cardResultsTitle').textContent = moveName + ' cases';
+    document.getElementById('cardResultsBadge').textContent = 'Movement Cases';
+    document.getElementById('cardResultsBody').innerHTML = '<div class="empty-state">Loading cases...</div>';
+    document.getElementById('cardResultsModal').hidden = false;
+
+    await loadModalFilteredCases(1);
+  }
+
+  function openMovementRanking(button) {
+    var toolbar = document.getElementById('modalFilterToolbar');
+    if (toolbar) toolbar.style.display = 'none';
+    closeModalFilterPopover();
+    var people = (dashboardTargets && dashboardTargets[button.dataset.rankingKey]) || [];
+    var direction = button.dataset.rankingDirection;
+    var ranking = people.filter(function (person) {
+      return direction === 'drop' ? Number(person.delta || 0) < 0 : Number(person.delta || 0) > 0;
+    }).sort(function (first, second) {
+      return direction === 'drop' ? Number(first.delta) - Number(second.delta) : Number(second.delta) - Number(first.delta);
+    });
+    document.getElementById('cardResultsTitle').textContent = button.dataset.rankingTitle + ' ranking';
+    if (!ranking.length) {
+      document.getElementById('cardResultsBody').innerHTML = '<div class="empty-state">No matching movement this month.</div>';
+    } else {
+      var role = button.dataset.rankingKey === 'reportMakers' ? 'rm_id' : 'alloc_mgr_id';
+      var rowsMarkup = ranking.map(function (person, index) {
+        var delta = Number(person.delta || 0);
+        var previous = Number(person.previous || 0);
+        var percentage = previous ? Math.abs(delta / previous * 100).toFixed(1) : '0.0';
+        var change = (delta > 0 ? '+' : '−') + Math.abs(delta).toLocaleString() + ' (' + (delta > 0 ? '+' : '−') + percentage + '%)';
+        return '<tr><td>' + (index + 1) + '</td><td><strong>' + escapeHTML(person.name || '—') + '</strong></td><td>' + escapeHTML(person.insurance || '—') + '</td><td>' + Number(person.current || 0).toLocaleString() + '</td><td>' + previous.toLocaleString() + '</td><td><strong class="target-delta ' + (delta > 0 ? 'up' : 'down') + '">' + escapeHTML(change) + '</strong></td><td><button class="secondary-button ranking-case-button" type="button" data-movement-id="' + Number(person.id || 0) + '" data-movement-role="' + role + '" data-movement-name="' + escapeHTML(person.name || '') + '">Cases</button></td></tr>';
+      }).join('');
+      document.getElementById('cardResultsBody').innerHTML = '<p class="card-results-summary">' + ranking.length + ' managers ranked by ' + (direction === 'drop' ? 'largest drop' : 'largest growth') + '.</p><div class="table-scroll"><table class="card-results-table"><thead><tr><th>Rank</th><th>Manager</th><th>Insurance</th><th>Current MTD</th><th>Previous MTD</th><th>Change</th><th>Cases</th></tr></thead><tbody>' + rowsMarkup + '</tbody></table></div>';
+    }
+    document.getElementById('cardResultsModal').hidden = false;
+  }
+
+  function closeCardResultsModal() {
+    cardResultsRequestID++;
+    closeModalFilterPopover();
+    document.getElementById('cardResultsModal').hidden = true;
+  }
+
+  async function mailAreaManager(row, button) {
+    if (!row) return;
+    var email = row.areaManagerEmail || '';
+    var name = row.areaManager || 'Area Manager';
+    var claim = row.claimNumber || row.id || '';
+
+    if (!email) {
+      var manual = prompt('No email address registered for Area Manager (' + name + '). Please enter an email address to send directly from server (admin@brainbirdconsulting.co.in):', '');
+      if (!manual || !manual.trim()) return;
+      email = manual.trim();
+    }
+
+    var originalHTML = button ? button.innerHTML : '';
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mailing…';
+    }
+
+    try {
+      var res = await fetchJSON('/api/v1/cases/' + encodeURIComponent(row.caseId || row.id) + '/mail-am', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      });
+      showCopyToast(res.message || ('Case #' + claim + ' mailed to ' + name + ' successfully!'), true);
+    } catch (error) {
+      showCopyToast(error.message || 'Failed sending email to Area Manager', false);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.innerHTML = originalHTML;
+      }
+    }
+  }
+
+  function applySummaryCardFilter(detail) {
+    var filters = {status:'total'};
+    var titles = {total:'Total cases', open:'Open cases', completed:'Completed today', overdue:'Overdue cases'};
+    if (detail === 'open') filters.status = 'open';
+    if (detail === 'completed') filters.completedToday = true;
+    if (detail === 'overdue') filters.overdue = true;
+    openCardResults(titles[detail] || 'Cases', filters);
+  }
+
+  // Event Listeners
+  document.querySelectorAll('.action-card[data-category]').forEach(function (card) {
+    card.addEventListener('click', function () {
+      var name = card.querySelector('.action-name').textContent.trim();
+      openCardResults(name + ' cases', {category:card.dataset.category, status:'total'});
+    });
+  });
+
+  document.querySelectorAll('.metric-card[data-detail]').forEach(function (card) {
+    card.addEventListener('click', function () { applySummaryCardFilter(card.dataset.detail); });
+    card.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        applySummaryCardFilter(card.dataset.detail);
+      }
+    });
+  });
+
+  document.getElementById('caseRows').addEventListener('click', function(e) {
+    var target = e.target.closest('button, span, div');
+    if (!target) return;
+
+    if (target.dataset.copyFull !== undefined) {
+      var row = rows[target.dataset.copyFull];
+      if (row) copyText(fullCaseText(row), 'Case details copied');
+    } else if (target.dataset.viewIndex !== undefined) {
+      var row = rows[target.dataset.viewIndex];
+      if (row) showCaseDetails(row);
+    } else if (target.dataset.actionIndex !== undefined) {
+      var row = rows[target.dataset.actionIndex];
+      if (row) openDirectCloseModal(row);
+    } else if (target.dataset.reportIndex !== undefined) {
+      var row = rows[target.dataset.reportIndex];
+      if (row) downloadCaseReport(row);
+    } else if (target.dataset.mailIndex !== undefined) {
+      var row = rows[target.dataset.mailIndex];
+      if (row) mailAreaManager(row, target);
+    } else if (target.dataset.remarkIndex !== undefined) {
+      var row = rows[target.dataset.remarkIndex];
+      if (row) showRemarkModal(row);
+    }
+  });
+
+  document.getElementById('caseRows').addEventListener('dblclick', function (event) {
+    var target = event.target.closest('[data-claim-index]');
+    if (!target) return;
+    var row = rows[target.dataset.claimIndex];
+    if (row) copyText(row.claimNumber || row.id, 'Claim number copied');
+  });
+
+  document.getElementById('closeDetailModal').addEventListener('click', function() {
+    document.getElementById('detailModal').hidden = true;
+  });
+  document.getElementById('detailBody').addEventListener('submit', async function (event) {
+    if (event.target.id !== 'caseRemarkForm') return;
+    event.preventDefault();
+    var form = event.target;
+    var message = document.getElementById('caseRemarkMessage');
+    var button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    message.textContent = '';
+    try {
+      await fetchJSON('/api/v1/cases/' + encodeURIComponent(form.dataset.caseId) + '/remarks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({remark:form.elements.remark.value})
+      });
+      document.getElementById('detailModal').hidden = true;
+      await loadPage();
+    } catch (error) {
+      message.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  document.getElementById('closeCardResultsModal').addEventListener('click', closeCardResultsModal);
+  document.getElementById('targetMovements').addEventListener('click', function (event) {
+    var viewAllButton = event.target.closest('.movement-all');
+    if (viewAllButton) {
+      openMovementRanking(viewAllButton);
+      return;
+    }
+    var button = event.target.closest('.movement-item');
+    if (button) openMovementCases(button);
+  });
+  document.getElementById('cardResultsBody').addEventListener('click', function (event) {
+    var pageBtn = event.target.closest('[data-modal-page]');
+    if (pageBtn) {
+      if (pageBtn.disabled) return;
+      var target = pageBtn.dataset.modalPage;
+      var newPage = cardResultsCurrentPage;
+      if (target === 'first') newPage = 1;
+      else if (target === 'prev') newPage = Math.max(1, cardResultsCurrentPage - 1);
+      else if (target === 'next') newPage = Math.min(cardResultsTotalPages, cardResultsCurrentPage + 1);
+      else if (target === 'last') newPage = cardResultsTotalPages;
+      else newPage = parseInt(target, 10);
+      if (newPage && newPage !== cardResultsCurrentPage) {
+        if (currentWorkloadContext) {
+          loadModalFilteredCases(newPage);
+        } else {
+          loadCardResultsPage(newPage);
+        }
+      }
+      return;
+    }
+    var actionBtn = event.target.closest('button, span, div');
+    if (actionBtn) {
+      if (actionBtn.dataset.modalCopy !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalCopy];
+        if (row) copyText(fullCaseText(row), 'Case details copied');
+        return;
+      } else if (actionBtn.dataset.modalViewIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalViewIndex];
+        if (row) showCaseDetails(row);
+        return;
+      } else if (actionBtn.dataset.modalActionIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalActionIndex];
+        if (row) openDirectCloseModal(row);
+        return;
+      } else if (actionBtn.dataset.modalReportIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalReportIndex];
+        if (row) downloadCaseReport(row);
+        return;
+      } else if (actionBtn.dataset.modalMailIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalMailIndex];
+        if (row) mailAreaManager(row, actionBtn);
+        return;
+      } else if (actionBtn.dataset.modalRemarkIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalRemarkIndex];
+        if (row) showRemarkModal(row);
+        return;
+      } else if (actionBtn.dataset.modalClaimIndex !== undefined) {
+        var row = cardResultsCases[actionBtn.dataset.modalClaimIndex];
+        if (row) copyText(row.claimNumber || row.id, 'Claim number copied');
+        return;
+      }
+    }
+    var button = event.target.closest('.ranking-case-button');
+    if (button) openMovementCases(button);
+  });
+
+  document.getElementById('cardResultsBody').addEventListener('dblclick', function (event) {
+    var target = event.target.closest('[data-modal-claim-index]');
+    if (!target) return;
+    var row = cardResultsCases[target.dataset.modalClaimIndex];
+    if (row) copyText(row.claimNumber || row.id, 'Claim number copied');
+  });
+  document.getElementById('cardResultsModal').addEventListener('click', function (event) {
+    if (event.target === this) closeCardResultsModal();
+  });
+
+  document.getElementById('addFOAssignment').addEventListener('click', addFOAssignmentCard);
+  document.getElementById('foAssignments').addEventListener('change', function (event) {
+    var card = event.target.closest('.fo-assignment');
+    if (!card) return;
+    if (event.target.classList.contains('select-all-parts')) {
+      card.querySelectorAll('input[name="foPart"]').forEach(function (input) { input.checked = event.target.checked; });
+    } else if (event.target.name.indexOf('foEmployment') === 0) {
+      if (!directCloseOptions) return;
+      card.querySelector('.fo-assignee').innerHTML = assigneeOptions(directCloseOptions.fieldOfficers, event.target.value, '-- Choose FO --');
+    } else if (event.target.name === 'foPart') {
+      var parts = Array.from(card.querySelectorAll('input[name="foPart"]'));
+      card.querySelector('.select-all-parts').checked = parts.every(function (input) { return input.checked; });
+    }
+  });
+  document.getElementById('foAssignments').addEventListener('click', function (event) {
+    var removeButton = event.target.closest('[data-remove-fo]');
+    if (removeButton) removeButton.closest('.fo-assignment').remove();
+  });
+  document.querySelectorAll('input[name="rmEmployment"]').forEach(function (input) {
+    input.addEventListener('change', function () {
+      if (!directCloseOptions) return;
+      document.getElementById('reportMakerSelect').innerHTML = assigneeOptions(directCloseOptions.reportMakers, input.value, '-- Choose RM --');
+    });
+  });
+  document.querySelectorAll('input[name="closeMode"]').forEach(function (input) {
+    input.addEventListener('change', refreshDirectCloseStatus);
+  });
+  document.querySelectorAll('input[name="denialPart"]').forEach(function (input) {
+    input.addEventListener('change', refreshDirectCloseStatus);
+  });
+  document.getElementById('directCloseForm').addEventListener('submit', submitDirectClose);
+  document.getElementById('closeDirectCloseModal').addEventListener('click', closeDirectCloseModal);
+  document.getElementById('cancelDirectClose').addEventListener('click', closeDirectCloseModal);
+  document.getElementById('directCloseModal').addEventListener('click', function (event) {
+    if (event.target === this) closeDirectCloseModal();
+  });
+
+  document.getElementById('filterForm').addEventListener('submit', function (event) { 
+    event.preventDefault(); 
+    currentPage = 1; 
+    loadPage(); 
+  });
+  document.getElementById('filterForm').addEventListener('input', function (event) {
+    if (event.target.matches('input[type="search"],input[type="text"],input[type="date"],input[type="month"]')) scheduleLiveFilter();
+  });
+  document.getElementById('filterForm').addEventListener('change', function (event) {
+    if (event.target.id === 'filterAreaManager') updateAreaManagerEmailButton();
+    if (event.target.matches('select')) scheduleLiveFilter();
+  });
+  document.getElementById('emailAreaManager').addEventListener('click', async function () {
+    var select = document.getElementById('filterAreaManager');
+    var button = this;
+    if (!select || !select.value) {
+      if (select) select.focus();
+      showCopyToast('Please select an Area Manager from the filter first', false);
+      return;
+    }
+    var option = select.options[select.selectedIndex];
+    var amName = option ? option.textContent : 'Area Manager';
+
+    var originalHTML = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mailing AM…';
+
+    try {
+      var formData = new FormData(document.getElementById('filterForm'));
+      formData.delete('limit');
+      formData.set('am_id', select.value);
+      formData.set('tab_status', currentStatus || 'total');
+      if (currentCategory) formData.set('category', currentCategory);
+      if (currentOverdue) formData.set('overdue', '1');
+      if (currentCompletedToday) formData.set('completed_today', '1');
+
+      var query = new URLSearchParams(formData);
+      var response = await fetchJSON('/api/v1/cases/mail-am?' + query.toString(), {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      showCopyToast(response.message || ('Case register report mailed to ' + amName), true);
+    } catch (error) {
+      showCopyToast(error.message || 'Failed sending email to Area Manager', false);
+    } finally {
+      button.disabled = false;
+      button.innerHTML = originalHTML;
+    }
+  });
+
+  async function reloadCaseStatus() {
+    var monthInput = document.getElementById('statusFilterMonth');
+    var dateInput = document.getElementById('statusFilterDate');
+    var month = monthInput ? monthInput.value : '';
+    var date = dateInput ? dateInput.value : '';
+    var query = new URLSearchParams();
+    if (month) query.set('month', month);
+    if (date) query.set('date', date);
+    try {
+      var payload = await fetchJSON('/api/v1/dashboard/case-status?' + query.toString());
+      renderSegments(payload.segments || []);
+    } catch (error) {
+      showError(error.message);
+    }
+  }
+
+  function openStatusCases(status) {
+    var month = document.getElementById('statusFilterMonth') ? document.getElementById('statusFilterMonth').value : '';
+    var date = document.getElementById('statusFilterDate') ? document.getElementById('statusFilterDate').value : '';
+    var filters = {caseStatus: status, status: 'total'};
+    if (date) filters.allocationDate = date;
+    else if (month) filters.filterMonth = month;
+    openCardResults(status.toUpperCase() + ' cases', filters);
+  }
+
+  document.getElementById('statusFilterMonth').addEventListener('change', function () {
+    if (this.value) {
+      document.getElementById('statusFilterDate').value = '';
+    }
+    reloadCaseStatus();
+  });
+  document.getElementById('statusFilterDate').addEventListener('change', function () {
+    if (this.value) {
+      document.getElementById('statusFilterMonth').value = this.value.slice(0, 7);
+    }
+    reloadCaseStatus();
+  });
+  document.getElementById('statusFilterReset').addEventListener('click', function () {
+    document.getElementById('statusFilterMonth').value = '';
+    document.getElementById('statusFilterDate').value = '';
+    reloadCaseStatus();
+  });
+  document.getElementById('statusDonut').addEventListener('click', function (event) {
+    var segment = event.target.closest('.donut-segment');
+    if (segment && segment.dataset.status) openStatusCases(segment.dataset.status);
+  });
+  document.getElementById('statusLegend').addEventListener('click', function (event) {
+    var item = event.target.closest('[data-status-detail]');
+    if (item && item.dataset.statusDetail) openStatusCases(item.dataset.statusDetail);
+  });
+
+  document.getElementById('filterForm').addEventListener('reset', function () { 
+    currentPage = 1; 
+    currentStatus = 'total'; 
+    currentCategory = '';
+    currentOverdue = false;
+    currentCompletedToday = false;
+    document.querySelectorAll('.action-card[data-category]').forEach(function (card) { card.classList.remove('selected'); });
+    document.querySelectorAll('.tab-button').forEach(function (button) { 
+      button.classList.toggle('active', button.dataset.status === 'total'); 
+    }); 
+    setTimeout(function () { populateFilterOptions(filterOptions); loadPage(); }, 0); 
+  });
+
+  document.querySelectorAll('.tab-button').forEach(function (button) { 
+    button.addEventListener('click', function () { 
+      currentStatus = button.dataset.status; 
+      currentOverdue = false;
+      currentCompletedToday = false;
+      currentPage = 1; 
+      document.querySelectorAll('.tab-button').forEach(function (tab) { 
+        tab.classList.toggle('active', tab === button); 
+      }); 
+      loadPage(); 
+    }); 
+  });
+
+  document.getElementById('paginationControls').addEventListener('click', function (event) {
+    var button = event.target.closest('.pagination-btn');
+    if (!button || button.disabled) return;
+    if (button.id === 'firstPage') {
+      if (currentPage > 1) { currentPage = 1; loadPage(); }
+    } else if (button.id === 'previousPage') {
+      if (currentPage > 1) { currentPage--; loadPage(); }
+    } else if (button.id === 'nextPage') {
+      if (currentPage < totalPages) { currentPage++; loadPage(); }
+    } else if (button.id === 'lastPage') {
+      if (currentPage < totalPages) { currentPage = totalPages; loadPage(); }
+    } else if (button.dataset.page) {
+      var targetPage = Number(button.dataset.page);
+      if (targetPage !== currentPage) {
+        currentPage = targetPage;
+        loadPage();
+      }
+    }
+  });
+  document.getElementById('refreshDashboard').addEventListener('click', loadPage);
+  document.getElementById('sidebarToggle').addEventListener('click', function () { document.getElementById('appSidebar').classList.toggle('open'); });
+  document.getElementById('logoutButton').addEventListener('click', async function () { try { await fetchJSON('/api/v1/logout', {method:'POST'}); } finally { location.href='/login'; } });
+  setInterval(updateRunningTimers, 1000);
+  setInterval(function () { if (!document.body.classList.contains('loading')) loadPage(); }, 30000);
+  
+  document.getElementById('exportCases').addEventListener('click', function () {
+    var columns = ['Claim #','Patient','Insurance','Case type','Hospital','Allocated','Closing date','Status','Remark'];
+    var data = rows.map(function (row) { return [row.claimNumber || row.id, row.patient, row.insurance, row.caseType, row.hospital, row.allocatedAt, row.closedAt || '', row.status, row.finalRemark || row.remark || '']; });
+    var csv = [columns].concat(data).map(function (line) { return line.map(function (value) { return '"' + String(value || '').replace(/"/g,'""') + '"'; }).join(','); }).join('\r\n');
+    var link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); link.download = 'brain-bird-cases.csv'; link.click(); URL.revokeObjectURL(link.href);
+  });
+
+  function downloadCaseReport(row) {
+    var columns = ['Claim #','Patient','Insurance','Case type','Hospital','Allocated','Status','Remark'];
+    var data = [[row.claimNumber || row.id, row.patient, row.insurance, row.caseType, row.hospital, row.allocatedAt, row.status, row.finalRemark || row.remark || '']];
+    var csv = [columns].concat(data).map(function (line) { return line.map(function (value) { return '"' + String(value || '').replace(/"/g,'""') + '"'; }).join(','); }).join('\r\n');
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    link.download = (row.claimNumber || row.id || 'case') + '-report.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  var compSearchInput = document.getElementById('companySearchInput');
+  if (compSearchInput) {
+    compSearchInput.addEventListener('input', function () {
+      companySearchQuery = this.value.trim();
+      companyCurrentPage = 1;
+      renderCompanyWorkload();
+    });
+  }
+
+  var foSearchInputEl = document.getElementById('foSearchInput');
+  if (foSearchInputEl) {
+    foSearchInputEl.addEventListener('input', function () {
+      foSearchQuery = this.value.trim();
+      foCurrentPage = 1;
+      renderFOWorkload();
+    });
+  }
+  var hoverTimer = null;
+  var toolbarEl = document.getElementById('modalFilterToolbar');
+  var popoverEl = document.getElementById('modalFilterPopover');
+  var chipsRowEl = document.getElementById('modalFilterChipsRow');
+
+  if (chipsRowEl) {
+    chipsRowEl.addEventListener('mouseover', function (e) {
+      var pill = e.target.closest('.filter-pill');
+      if (pill) {
+        clearTimeout(hoverTimer);
+        var key = pill.getAttribute('data-filter');
+        if (activeModalFilter !== key) {
+          openModalFilterPopover(key, pill);
+        }
+      }
+    });
+
+    chipsRowEl.addEventListener('click', function (e) {
+      var clearBtn = e.target.closest('[data-clear-pill]');
+      if (clearBtn) {
+        e.stopPropagation();
+        clearTimeout(hoverTimer);
+        var key = clearBtn.getAttribute('data-clear-pill');
+        clearModalFilter(key);
+        closeModalFilterPopover();
+        loadModalFilteredCases(1);
+        return;
+      }
+
+      var pill = e.target.closest('.filter-pill');
+      if (pill) {
+        clearTimeout(hoverTimer);
+        var key = pill.getAttribute('data-filter');
+        if (activeModalFilter === key && popoverEl && !popoverEl.hidden) {
+          closeModalFilterPopover();
+        } else {
+          openModalFilterPopover(key, pill);
+        }
+        return;
+      }
+
+      if (e.target.closest('#modalResetFilters')) {
+        clearTimeout(hoverTimer);
+        resetAllModalFilters();
+      }
+    });
+  }
+
+  if (toolbarEl && popoverEl) {
+    toolbarEl.addEventListener('mouseleave', function (e) {
+      if (e.relatedTarget && (popoverEl.contains(e.relatedTarget) || toolbarEl.contains(e.relatedTarget))) return;
+      hoverTimer = setTimeout(function () {
+        closeModalFilterPopover();
+      }, 280);
+    });
+
+    popoverEl.addEventListener('mouseleave', function (e) {
+      if (e.relatedTarget && (toolbarEl.contains(e.relatedTarget) || popoverEl.contains(e.relatedTarget))) return;
+      hoverTimer = setTimeout(function () {
+        closeModalFilterPopover();
+      }, 280);
+    });
+
+    popoverEl.addEventListener('mouseenter', function () {
+      clearTimeout(hoverTimer);
+    });
+  }
+
+  var popoverApplyBtn = document.getElementById('popoverApply');
+  if (popoverApplyBtn) {
+    popoverApplyBtn.addEventListener('click', function () {
+      if (activeModalFilter) {
+        updateModalFilterPill(activeModalFilter);
+      }
+      closeModalFilterPopover();
+      loadModalFilteredCases(1);
+    });
+  }
+
+  var popoverClearBtn = document.getElementById('popoverClear');
+  if (popoverClearBtn) {
+    popoverClearBtn.addEventListener('click', function () {
+      if (activeModalFilter) {
+        clearModalFilter(activeModalFilter);
+      }
+      closeModalFilterPopover();
+      loadModalFilteredCases(1);
+    });
+  }
+
+  var closePopoverBtn = document.getElementById('closePopover');
+  if (closePopoverBtn) {
+    closePopoverBtn.addEventListener('click', function () {
+      closeModalFilterPopover();
+    });
+  }
+
+  var popoverBodyEl = document.getElementById('popoverBody');
+  if (popoverBodyEl) {
+    popoverBodyEl.addEventListener('change', function (e) {
+      if (e.target.matches('select')) {
+        if (activeModalFilter) {
+          updateModalFilterPill(activeModalFilter);
+        }
+        if (e.target.id !== 'modalFilterInsurance' && e.target.id !== 'modalFilterState') {
+          closeModalFilterPopover();
+          loadModalFilteredCases(1);
+        } else {
+          loadModalFilteredCases(1);
+        }
+      }
+    });
+
+    popoverBodyEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.matches('input')) {
+        e.preventDefault();
+        if (activeModalFilter) {
+          updateModalFilterPill(activeModalFilter);
+        }
+        closeModalFilterPopover();
+        loadModalFilteredCases(1);
+      }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var popover = document.getElementById('modalFilterPopover');
+    if (!popover || popover.hidden) return;
+    if (!popover.contains(e.target) && !e.target.closest('.filter-pill')) {
+      closeModalFilterPopover();
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var popover = document.getElementById('modalFilterPopover');
+      if (popover && !popover.hidden) {
+        closeModalFilterPopover();
+      }
+    }
+  });
+
+  document.querySelectorAll('input[name="foTypeFilter"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      foTypeFilter = this.value;
+      foCurrentPage = 1;
+      renderFOWorkload();
+    });
+  });
+
+  loadPage();
+})();
+</script>
+</body>
+</html>

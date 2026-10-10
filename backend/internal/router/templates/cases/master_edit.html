@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Case Edit | Brain Bird</title>
+        <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+    /* ========================================================
+       DASHBOARD DESIGN SYSTEM - UNIFIED THEME
+       ======================================================== */
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+
+        /* Compatibility aliases */
+        --primary: var(--brand);
+        --primary-light: var(--brand-hover);
+        --secondary: var(--muted);
+        --success: var(--green);
+        --danger: var(--red);
+        --border: var(--line);
+        --neutral-bg: var(--canvas);
+        --neutral-border: var(--line);
+        --text-dark: var(--ink);
+        --text-muted: var(--muted);
+        --slate-base: var(--canvas);
+        --slate-surface: var(--surface);
+        --brand-primary: var(--brand);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+        background: var(--canvas);
+    }
+
+    .app-main {
+        margin-left: 0;
+        flex-grow: 1;
+        background-color: var(--canvas);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .app-content {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 22px 26px 26px;
+        flex: 1;
+    }
+
+    /* TOP HEADER */
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        min-height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 10px 28px;
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 4px rgba(20, 34, 48, 0.03);
+    }
+
+    .header-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .header-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--brand);
+    }
+
+    .header-btn-danger {
+        color: var(--red);
+        border-color: rgba(179, 59, 66, 0.2);
+    }
+    .header-btn-danger:hover {
+        background: #fdf2f2;
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 14px;
+        border-left: 1px solid var(--line);
+    }
+
+    .profile-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        background: var(--brand);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .profile-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .profile-name {
+        font-weight: 650;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .profile-role {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    /* SIDEBAR */
+    .app-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-260px);
+        transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+        box-shadow: 4px 0 24px rgba(20, 34, 48, 0.08);
+        z-index: 1040;
+    }
+
+    .app-sidebar:hover, .app-sidebar.open, .sidebar-hover-notch:hover + .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-hover-notch {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 58px;
+        background-color: var(--brand);
+        color: #ffffff;
+        border: 0;
+        border-radius: 0 9px 9px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1041;
+        box-shadow: 2px 0 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .sidebar-brand {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-brand img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        border-radius: 7px;
+    }
+
+    .sidebar-brand .title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ink);
+    }
+
+    .sidebar-menu {
+        padding: 16px 12px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .menu-label {
+        padding: 0 10px 8px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .nav-item-link {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        margin-bottom: 3px;
+        border-radius: 7px;
+        color: var(--ink);
+        background: transparent;
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .nav-item-link:hover {
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .nav-item-link.active {
+        color: var(--brand);
+        background: #eaf1ff;
+        font-weight: 700;
+    }
+
+    .nav-item-link i {
+        width: 18px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .nav-item-link.active i {
+        color: var(--brand);
+    }
+
+    /* PAGE TITLE BANNER */
+    .page-title-banner {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+        padding: 16px 22px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .page-title-banner h4 {
+        color: var(--ink) !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+
+    .page-title-banner h4 i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .page-title-banner p {
+        color: var(--muted) !important;
+        font-size: 12px !important;
+        margin: 3px 0 0 0 !important;
+    }
+
+    /* CARDS & PANELS */
+    .card, .form-card, .filter-card {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+    }
+
+    .card-header, .section-head {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    .card-title, .section-title {
+        color: var(--ink) !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .card-title i, .section-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .card-body, .section-body {
+        padding: 20px 24px !important;
+    }
+
+    .form-section {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        overflow: hidden !important;
+    }
+
+    /* FORM LABELS & INPUTS */
+    .form-label, .f-label {
+        font-size: 11px !important;
+        font-weight: 650 !important;
+        color: var(--muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 6px !important;
+        display: block !important;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--red) !important;
+    }
+
+    .form-control, .form-select {
+        font-size: 13.5px !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        color: var(--ink) !important;
+        background-color: #ffffff !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--brand) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+        outline: none !important;
+    }
+
+    .input-icon {
+        color: var(--muted) !important;
+    }
+
+    /* BUTTONS */
+    .btn-primary, .btn-magic, #finalSubmitBtn, #btnMasterSave, #btnConfirmExport {
+        background: var(--brand) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--brand) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-primary:hover, .btn-magic:hover, #finalSubmitBtn:hover, #btnMasterSave:hover, #btnConfirmExport:hover {
+        background: var(--brand-hover) !important;
+        border-color: var(--brand-hover) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    .btn-secondary, .btn-light, .btn-outline-secondary {
+        background: #ffffff !important;
+        color: var(--ink) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-secondary:hover, .btn-light:hover, .btn-outline-secondary:hover {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: var(--ink) !important;
+    }
+
+    .btn-danger, #reworkSubmitBtn {
+        background: var(--red) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--red) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-danger:hover, #reworkSubmitBtn:hover {
+        background: #991b1b !important;
+        border-color: #991b1b !important;
+        color: #ffffff !important;
+    }
+
+    /* MODALS */
+    .modal-content {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 12px 36px rgba(20, 34, 48, 0.12) !important;
+    }
+
+    .modal-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 14px 20px !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title {
+        font-size: 15px !important;
+        font-weight: 650 !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .modal-footer {
+        background: #f8fafc !important;
+        border-top: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    /* TABLES */
+    .table thead th {
+        background: #f8fafc !important;
+        color: var(--muted) !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid var(--line) !important;
+        border-top: none !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--line) !important;
+        color: var(--ink) !important;
+        font-size: 13px !important;
+        vertical-align: middle !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody tr:hover td {
+        background: #fbfcfe !important;
+    }
+
+    /* BADGES */
+    .badge {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        border-radius: 999px !important;
+        padding: 3px 9px !important;
+    }
+    .badge.bg-success, .badge.status-complete {
+        background: #eaf8f1 !important;
+        color: var(--green) !important;
+        border: 1px solid rgba(22, 132, 91, 0.2) !important;
+    }
+    .badge.bg-danger, .badge.status-rework {
+        background: #fdf2f2 !important;
+        color: var(--red) !important;
+        border: 1px solid rgba(179, 59, 66, 0.2) !important;
+    }
+    .badge.bg-warning {
+        background: #fef8ee !important;
+        color: var(--amber) !important;
+        border: 1px solid rgba(170, 105, 0, 0.2) !important;
+    }
+    .badge.bg-light {
+        background: #f1f5f9 !important;
+        color: var(--muted) !important;
+        border: 1px solid var(--line) !important;
+    }
+
+    /* Autocomplete Dropdown */
+    .autocomplete-dropdown { 
+        position: absolute; 
+        z-index: 1000; 
+        background: #fff; 
+        width: 100%; 
+        max-height: 250px; 
+        overflow-y: auto; 
+        box-shadow: var(--shadow); 
+        border-radius: 0 0 8px 8px; 
+        border: 1px solid var(--line); 
+        border-top: none; 
+        padding: 0; 
+        margin: 0; 
+        list-style: none; 
+        top: 100%; 
+        left: 0; 
+    }
+    .autocomplete-item { 
+        padding: 10px 14px; 
+        cursor: pointer; 
+        border-bottom: 1px solid #f1f5f9; 
+        font-size: 13px; 
+        font-weight: 600; 
+        color: var(--ink); 
+        transition: all 0.15s; 
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: var(--brand-light); color: var(--brand); }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+
+
+        <div class="app-content">
+            <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-3 shadow-sm page-title-banner">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark"><i class="fa-solid fa-user-pen me-2"></i> Master Case Edit Console</h4>
+                    <p class="text-muted m-0 small">Select Insurance Company and enter Claim Number to load and edit all database fields</p>
+                </div>
+                
+            </div>
+
+            <!-- Search Card -->
+            <div class="card p-4 mb-4">
+                <form id="masterSearchForm" class="row g-3 align-items-end" onsubmit="event.preventDefault(); loadMasterCaseData();">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Insurance Company</label>
+                        <select class="form-select  fw-medium" id="search_insurance">
+                            <option value="">-- All Insurance Companies --</option>
+                            {{INSURERS_OPTIONS}}
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Claim Number *</label>
+                        <input type="text" class="form-control  fw-bold" id="search_claim" placeholder="Enter Claim Number (e.g. 1112685270330)..." required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="fa-solid fa-search me-1"></i> Fetch Case</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Full Case Edit Form Container -->
+            <div id="masterEditFormContainer" style="display: none;">
+                <form id="masterCaseSubmitForm" onsubmit="event.preventDefault(); saveMasterCaseData();">
+                    <input type="hidden" id="me_case_id">
+
+                    <!-- Section 1: Identity & Classification -->
+                    <div class="form-section">
+                        <div class="section-head"><h5 class="section-title"><i class="bi bi-shield-check me-2"></i> Section 1: Identity & Classification</h5></div>
+                        <div class="section-body row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Allocation Date & Time</label>
+                                <input type="datetime-local" id="me_allocation_date" class="form-control fw-bold">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Claim Number *</label>
+                                <input type="text" id="me_claim_number" class="form-control fw-bold" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Insurance Company</label>
+                                <select id="me_insurance_id" class="form-select">
+                                    <option value="">-- Select Insurance --</option>
+                                    {{INSURERS_OPTIONS}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Case Type</label>
+                                <select id="me_type_id" class="form-select">
+                                    <option value="">-- Select Type --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Sub Type</label>
+                                <select id="me_sub_type_id" class="form-select">
+                                    <option value="">-- Select Subtype --</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Financials & Policy -->
+                    <div class="form-section">
+                        <div class="section-head"><h5 class="section-title"><i class="fa-solid fa-file-shield me-2"></i> Section 2: Financials & Policy Details</h5></div>
+                        <div class="section-body row g-3">
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Insured Name</label><input type="text" id="me_insured_name" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Insured Mobile</label><input type="text" id="me_insured_mobile" class="form-control" maxlength="10"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Policy Number</label><input type="text" id="me_policy_no" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Policy Type</label><input type="text" id="me_policy_type" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Assured Amount</label><input type="number" id="me_assured_amount" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Claim Amount</label><input type="number" id="me_claim_amount" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Policy Start Date</label><input type="date" id="me_policy_start_date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Policy End Date</label><input type="date" id="me_policy_end_date" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Inception Date</label><input type="date" id="me_policy_inception_date" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label fw-bold text-muted small text-uppercase">Portability Details</label><input type="text" id="me_portability_details" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label fw-bold text-muted small text-uppercase">Previous Claim History</label><input type="text" id="me_previous_claim_history" class="form-control"></div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Patient Details -->
+                    <div class="form-section">
+                        <div class="section-head"><h5 class="section-title"><i class="bi bi-person-lines-fill me-2"></i> Section 3: Patient Details</h5></div>
+                        <div class="section-body row g-3">
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Patient Name</label><input type="text" id="me_patient_name" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Patient Mobile</label><input type="text" id="me_patient_mobile" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label fw-bold text-muted small text-uppercase">Patient Age</label><input type="text" id="me_patient_age" class="form-control"></div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Gender</label>
+                                <select id="me_gender" class="form-select"><option value="">-- Select --</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select>
+                            </div>
+                            <div class="col-md-2"><label class="form-label fw-bold text-muted small text-uppercase">Relationship</label><input type="text" id="me_relationship_with_insured" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Occupation</label><input type="text" id="me_patient_occupation" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">DOJ</label><input type="date" id="me_doj" class="form-control"></div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Patient State</label>
+                                <select id="me_patient_state_id" class="form-select" onchange="loadMasterCities(this.value, '#me_patient_city_id')">
+                                    <option value="">-- Select State --</option>
+                                    {{STATES_OPTIONS}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Patient City</label>
+                                <select id="me_patient_city_id" class="form-select"><option value="">-- Select State First --</option></select>
+                            </div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Patient Pincode</label><input type="text" id="me_patient_pin_code" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Patient Aadhaar</label><input type="text" id="me_patient_aadhar" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label fw-bold text-muted small text-uppercase">Patient Address</label><input type="text" id="me_patient_address" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Diagnosis</label><input type="text" id="me_diagnosis" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Trigger Reason</label><input type="text" id="me_trigger_reason" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Other Details</label><input type="text" id="me_other_details" class="form-control"></div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Facility Details -->
+                    <div class="form-section">
+                        <div class="section-head"><h5 class="section-title"><i class="bi bi-hospital me-2"></i> Section 4: Facility & Hospital Details</h5></div>
+                        <div class="section-body row g-3">
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Name</label><input type="text" id="me_hospital_name" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Reg No</label><input type="text" id="me_hospital_reg_no" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Pincode</label><input type="text" id="me_pin_code" class="form-control"></div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Hospital State</label>
+                                <select id="me_state_id" class="form-select" onchange="loadMasterCities(this.value, '#me_city_id')">
+                                    <option value="">-- Select State --</option>
+                                    {{STATES_OPTIONS}}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Hospital City</label>
+                                <select id="me_city_id" class="form-select"><option value="">-- Select State First --</option></select>
+                            </div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">DOA</label><input type="datetime-local" id="me_doa" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">DOD</label><input type="datetime-local" id="me_dod" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">MLC Number</label><input type="text" id="me_mlc_number" class="form-control"></div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Accidental Claim</label>
+                                <select id="me_accidental_claim" class="form-select"><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select>
+                            </div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Plan of Management</label><input type="text" id="me_plan_of_management" class="form-control"></div>
+                            <div class="col-md-3"><label class="form-label fw-bold text-muted small text-uppercase">Collected Documents</label><input type="text" id="me_collected_documents" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Address</label><input type="text" id="me_hospital_address" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label fw-bold text-muted small text-uppercase">Geographical Distance</label><input type="text" id="me_geographical_distance" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Lat</label><input type="text" id="me_hospital_lat" class="form-control"></div>
+                            <div class="col-md-2"><label class="form-label fw-bold text-muted small text-uppercase">Hospital Lng</label><input type="text" id="me_hospital_lng" class="form-control"></div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Managers & Field Officers (FOs) Management -->
+                    <div class="form-section">
+                        <div class="section-head"><h5 class="section-title"><i class="bi bi-diagram-3 me-2"></i> Section 5: Managers, Field Officers (FOs) & Status</h5></div>
+                        <div class="section-body">
+                            
+                            <!-- Filtered Dynamic Managers Dropdowns -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-uppercase">Area Manager (AM / CM)</label>
+                                    <select id="me_cm_id" class="form-select">
+                                        <option value="">-- Select AM --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-uppercase">Internal Case Manager (ICM)</label>
+                                    <select id="me_icm_id" class="form-select ">
+                                        <option value="">-- Select ICM --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-uppercase">Allocation Manager (ALM)</label>
+                                    <select id="me_alm_id" class="form-select">
+                                        <option value="">-- Select ALM --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-uppercase">Report Maker</label>
+                                    <select id="me_report_maker_id" class="form-select">
+                                        <option value="">-- Select Report Maker --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Field Officers Assignment (ALL FOs Allowed) -->
+                            <div class="p-3 bg-light rounded-3 border mb-4">
+                                <div class="row g-3 align-items-center mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold text-dark m-0"><i class="fa-solid fa-users-gear me-2"></i> Bulk Assign Field Officer</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select fw-bold" id="bulk_fo_select" onchange="applyBulkFO(this.value)">
+                                            <option value="">-- Select FO to Apply to ALL 6 FO Nodes --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Primary FO (fo_id)</label>
+                                        <select id="me_fo_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Hospital FO (fo_hospital_id)</label>
+                                        <select id="me_fo_hospital_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Patient FO (fo_patient_id)</label>
+                                        <select id="me_fo_patient_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Pharmacy FO (fo_pharmacy_id)</label>
+                                        <select id="me_fo_pharmacy_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Pathology FO (fo_pathology_id)</label>
+                                        <select id="me_fo_pathology_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold text-muted small text-uppercase">Doctor FO (fo_doctor_id)</label>
+                                        <select id="me_fo_doctor_id" class="form-select fo-dropdown">
+                                            <option value="">-- Select FO --</option>
+                                            {{USERS_OPTIONS}}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Case Status & Verdict -->
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-dark small text-uppercase">Case Status</label>
+                                    <select id="me_status" class="form-select fw-bold">
+                                        <option value="OPEN">OPEN</option>
+                                        <option value="PAYABLE">PAYABLE</option>
+                                        <option value="REJECTED">REJECTED</option>
+                                        <option value="QUERY">QUERY</option>
+                                        <option value="REWORK">REWORK</option>
+                                        <option value="TRASHED">TRASHED</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-dark small text-uppercase">Case Verdict</label>
+                                    <input type="text" id="me_case_verdict" class="form-control fw-bold">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-dark small text-uppercase">Final Remark</label>
+                                    <input type="text" id="me_final_remark" class="form-control">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold text-dark small text-uppercase">FO Final Remark</label>
+                                    <input type="text" id="me_fo_final_remark" class="form-control">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="mt-4 border-top pt-3 text-end mb-5">
+                        
+                        <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm" id="btnMasterSave"><i class="fa-solid fa-floppy-disk me-2"></i> Update Master Case Record</button>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+
+{{FOOTER_PARTIAL}}
+
+
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<script>
+    const allCaseTypesMaster = {{CASE_TYPES_JSON}};
+    const allSubTypesMaster = {{SUB_TYPES_JSON}};
+
+    function updateCaseTypesOptions(insuranceId, selectedTypeId = null) {
+        let typeSelect = $('#me_type_id');
+        typeSelect.empty().append('<option value="">-- Select Type --</option>');
+
+        let filtered = allCaseTypesMaster;
+        if (insuranceId) {
+            filtered = allCaseTypesMaster.filter(ct => ct.insurance_company_id == insuranceId || !ct.insurance_company_id);
+        }
+
+        let seenNames = new Set();
+        filtered.forEach(ct => {
+            let nameKey = ct.type_name.trim().toLowerCase();
+            if (!seenNames.has(nameKey)) {
+                seenNames.add(nameKey);
+                let isSelected = (selectedTypeId && ct.id == selectedTypeId) ? 'selected' : '';
+                typeSelect.append(`<option value="${ct.id}" ${isSelected}>${ct.type_name}</option>`);
+            }
+        });
+    }
+
+    function updateSubTypesOptions(caseTypeId, selectedSubTypeId = null) {
+        let subSelect = $('#me_sub_type_id');
+        subSelect.empty().append('<option value="">-- Select Subtype --</option>');
+
+        if (!caseTypeId) return;
+
+        let filtered = allSubTypesMaster.filter(st => st.case_type_id == caseTypeId);
+        let seenNames = new Set();
+
+        filtered.forEach(st => {
+            let nameKey = st.sub_type_name.trim().toLowerCase();
+            if (!seenNames.has(nameKey)) {
+                seenNames.add(nameKey);
+                let isSelected = (selectedSubTypeId && st.id == selectedSubTypeId) ? 'selected' : '';
+                subSelect.append(`<option value="${st.id}" ${isSelected}>${st.sub_type_name}</option>`);
+            }
+        });
+    }
+
+    // Dynamic Manager Loader logic
+    function updateMappedManagers(insId, typeId, subTypeId, stateId, cityId, selectedValues = {}) {
+        let payload = {
+            insurance_id: insId !== undefined ? insId : $('#me_insurance_id').val(),
+            type_id: typeId !== undefined ? typeId : $('#me_type_id').val(),
+            sub_type_id: subTypeId !== undefined ? subTypeId : $('#me_sub_type_id').val(),
+            hosp_state_id: stateId !== undefined ? stateId : $('#me_state_id').val(),
+            hosp_city_id: cityId !== undefined ? cityId : $('#me_city_id').val()
+        };
+
+        $.post('/api/cases/get-mapped-managers', payload, function(res) {
+            if (res.status === 'success') {
+                let amSelect = $('#me_cm_id');
+                amSelect.empty().append('<option value="">-- Select AM --</option>');
+                res.ams.forEach(u => amSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+                if (selectedValues.cm_id) amSelect.val(selectedValues.cm_id);
+
+                let icmSelect = $('#me_icm_id');
+                icmSelect.empty().append('<option value="">-- Select ICM --</option>');
+                res.icms.forEach(u => icmSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+                if (selectedValues.icm_id) icmSelect.val(selectedValues.icm_id);
+
+                let almSelect = $('#me_alm_id');
+                almSelect.empty().append('<option value="">-- Select ALM --</option>');
+                res.alms.forEach(u => almSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+                if (selectedValues.alm_id) almSelect.val(selectedValues.alm_id);
+
+                let rmSelect = $('#me_report_maker_id');
+                rmSelect.empty().append('<option value="">-- Select Report Maker --</option>');
+                res.rms.forEach(u => rmSelect.append(`<option value="${u.id}">${u.fullname}</option>`));
+                if (selectedValues.report_maker_id) rmSelect.val(selectedValues.report_maker_id);
+            }
+        });
+    }
+
+    // Connect dropdowns to trigger Manager update
+    $('#me_insurance_id, #me_type_id, #me_sub_type_id, #me_state_id, #me_city_id').on('change', function() {
+        if($(this).attr('id') === 'me_insurance_id') {
+            updateCaseTypesOptions($(this).val());
+            updateSubTypesOptions(null);
+        }
+        if($(this).attr('id') === 'me_type_id') {
+            updateSubTypesOptions($(this).val());
+        }
+        updateMappedManagers();
+    });
+
+    function formatDateTimeForInput(dateTimeStr) {
+        if (!dateTimeStr) return '';
+        return dateTimeStr.replace(' ', 'T').slice(0, 16);
+    }
+
+    function applyBulkFO(foUserId) {
+        if(foUserId) {
+            $('.fo-dropdown').val(foUserId);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'FO Applied to All FO Parts', showConfirmButton: false, timer: 1200 });
+        }
+    }
+
+    function loadMasterCities(stateId, citySelectId, selectedCityId = null) {
+        if(!stateId) {
+            $(citySelectId).html('<option value="">-- Select State First --</option>');
+            return;
+        }
+        $.post('/api/cases/get-cities', { state_id: stateId }, function(html) {
+            $(citySelectId).html(html);
+            if(selectedCityId) {
+                $(citySelectId).val(selectedCityId);
+            }
+        });
+    }
+
+    function loadMasterCaseData() {
+        let claimNo = $('#search_claim').val();
+        let insId = $('#search_insurance').val();
+
+        if(!claimNo) {
+            Swal.fire('Required Field', 'Please enter a Claim Number to search.', 'warning');
+            return;
+        }
+
+        Swal.fire({ title: 'Fetching Case Data...', didOpen: () => { Swal.showLoading(); } });
+
+        $.post('/api/master-edit/fetch', { claim_number: claimNo, insurance_company_id: insId }, function(res) {
+            Swal.close();
+            if(res.status === 'success' && res.data) {
+                let d = res.data;
+                $('#me_case_id').val(d.id);
+                $('#me_claim_number').val(d.claim_number);
+                $('#me_insurance_id').val(d.insurance_company_id);
+
+                updateCaseTypesOptions(d.insurance_company_id, d.case_type_id);
+                updateSubTypesOptions(d.case_type_id, d.case_sub_type_id);
+
+                let allocDate = d.allocation_date || d.created_at;
+                if(allocDate) {
+                    $('#me_allocation_date').val(formatDateTimeForInput(allocDate));
+                } else {
+                    $('#me_allocation_date').val('');
+                }
+
+                $('#me_insured_name').val(d.insured_name);
+                $('#me_insured_mobile').val(d.insured_mobile);
+                $('#me_policy_no').val(d.policy_no);
+                $('#me_policy_type').val(d.policy_type);
+                $('#me_assured_amount').val(d.assured_amount);
+                $('#me_claim_amount').val(d.claim_amount);
+                $('#me_portability_details').val(d.portability_details);
+                $('#me_previous_claim_history').val(d.previous_claim_history);
+
+                if(d.policy_start_date) $('#me_policy_start_date').val(d.policy_start_date.split('T')[0]);
+                if(d.policy_end_date) $('#me_policy_end_date').val(d.policy_end_date.split('T')[0]);
+                if(d.policy_inception_date) $('#me_policy_inception_date').val(d.policy_inception_date.split('T')[0]);
+                if(d.doj) $('#me_doj').val(d.doj.split('T')[0]);
+
+                $('#me_patient_name').val(d.patient_name);
+                $('#me_patient_mobile').val(d.patient_mobile);
+                $('#me_patient_age').val(d.patient_age);
+                $('#me_gender').val(d.gender);
+                $('#me_relationship_with_insured').val(d.relationship_with_insured);
+                $('#me_patient_occupation').val(d.patient_occupation);
+                $('#me_patient_address').val(d.patient_address);
+                $('#me_patient_pin_code').val(d.patient_pin_code);
+                $('#me_patient_aadhar').val(d.patient_aadhar);
+                $('#me_diagnosis').val(d.diagnosis);
+                $('#me_trigger_reason').val(d.trigger_reason);
+                $('#me_other_details').val(d.other_details);
+
+                if(d.patient_state_id) {
+                    $('#me_patient_state_id').val(d.patient_state_id);
+                    loadMasterCities(d.patient_state_id, '#me_patient_city_id', d.patient_city_id);
+                }
+
+                $('#me_hospital_name').val(d.hospital_name);
+                $('#me_hospital_reg_no').val(d.hospital_reg_no);
+                $('#me_pin_code').val(d.hospital_pin_code);
+                $('#me_hospital_address').val(d.hospital_address);
+                $('#me_mlc_number').val(d.mlc_number);
+                $('#me_accidental_claim').val(d.accidental_claim);
+                $('#me_plan_of_management').val(d.plan_of_management);
+                $('#me_collected_documents').val(d.collected_documents);
+                $('#me_geographical_distance').val(d.geographical_distance);
+                $('#me_hospital_lat').val(d.hospital_lat);
+                $('#me_hospital_lng').val(d.hospital_lng);
+
+                if(d.state_id) {
+                    $('#me_state_id').val(d.state_id);
+                    loadMasterCities(d.state_id, '#me_city_id', d.city_id);
+                }
+
+                if(d.doa) $('#me_doa').val(formatDateTimeForInput(d.doa));
+                if(d.dod) $('#me_dod').val(formatDateTimeForInput(d.dod));
+
+                // AJAX Load the strictly linked managers instead of hardcoded allUsers
+                updateMappedManagers(d.insurance_company_id, d.case_type_id, d.case_sub_type_id, d.state_id, d.city_id, {
+                    cm_id: d.cm_id,
+                    icm_id: d.icm_id,
+                    alm_id: d.allocation_manager_id,
+                    report_maker_id: d.report_maker_id
+                });
+
+                $('#me_fo_id').val(d.fo_id);
+                $('#me_fo_hospital_id').val(d.fo_hospital_id);
+                $('#me_fo_patient_id').val(d.fo_patient_id);
+                $('#me_fo_pharmacy_id').val(d.fo_pharmacy_id);
+                $('#me_fo_pathology_id').val(d.fo_pathology_id);
+                $('#me_fo_doctor_id').val(d.fo_doctor_id);
+
+                $('#me_status').val(d.status || 'OPEN');
+                $('#me_case_verdict').val(d.case_verdict);
+                $('#me_final_remark').val(d.final_remark);
+                $('#me_fo_final_remark').val(d.fo_final_remark);
+
+                $('#masterEditFormContainer').slideDown();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Case Loaded Successfully', showConfirmButton: false, timer: 1500 });
+            } else {
+                Swal.fire('Not Found', res.message, 'error');
+            }
+        }).fail(() => {
+            Swal.close();
+            Swal.fire('Server Error', 'Failed to fetch case data.', 'error');
+        });
+    }
+
+    function saveMasterCaseData() {
+        let btn = $('#btnMasterSave');
+        btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Saving Updates...');
+
+        let payload = {
+            case_id: $('#me_case_id').val(),
+            claim_number: $('#me_claim_number').val(),
+            insurance_id: $('#me_insurance_id').val(),
+            type_id: $('#me_type_id').val(),
+            sub_type_id: $('#me_sub_type_id').val(),
+            allocation_date: $('#me_allocation_date').val(),
+            patient_name: $('#me_patient_name').val(),
+            patient_mobile: $('#me_patient_mobile').val(),
+            patient_aadhar: $('#me_patient_aadhar').val(),
+            patient_age: $('#me_patient_age').val(),
+            gender: $('#me_gender').val(),
+            relationship_with_insured: $('#me_relationship_with_insured').val(),
+            patient_occupation: $('#me_patient_occupation').val(),
+            patient_address: $('#me_patient_address').val(),
+            patient_state_id: $('#me_patient_state_id').val(),
+            patient_city_id: $('#me_patient_city_id').val(),
+            patient_pin_code: $('#me_patient_pin_code').val(),
+            other_details: $('#me_other_details').val(),
+            diagnosis: $('#me_diagnosis').val(),
+            trigger_reason: $('#me_trigger_reason').val(),
+            insured_name: $('#me_insured_name').val(),
+            insured_mobile: $('#me_insured_mobile').val(),
+            policy_no: $('#me_policy_no').val(),
+            policy_type: $('#me_policy_type').val(),
+            assured_amount: $('#me_assured_amount').val(),
+            claim_amount: $('#me_claim_amount').val(),
+            portability_details: $('#me_portability_details').val(),
+            previous_claim_history: $('#me_previous_claim_history').val(),
+            doj: $('#me_doj').val(),
+            policy_start_date: $('#me_policy_start_date').val(),
+            policy_end_date: $('#me_policy_end_date').val(),
+            policy_inception_date: $('#me_policy_inception_date').val(),
+            hospital_name: $('#me_hospital_name').val(),
+            hospital_address: $('#me_hospital_address').val(),
+            hospital_reg_no: $('#me_hospital_reg_no').val(),
+            state_id: $('#me_state_id').val(),
+            city_id: $('#me_city_id').val(),
+            pin_code: $('#me_pin_code').val(),
+            hospital_lat: $('#me_hospital_lat').val(),
+            hospital_lng: $('#me_hospital_lng').val(),
+            doa: $('#me_doa').val(),
+            dod: $('#me_dod').val(),
+            mlc_number: $('#me_mlc_number').val(),
+            accidental_claim: $('#me_accidental_claim').val(),
+            plan_of_management: $('#me_plan_of_management').val(),
+            collected_documents: $('#me_collected_documents').val(),
+            geographical_distance: $('#me_geographical_distance').val(),
+            cm_id: $('#me_cm_id').val(),
+            icm_id: $('#me_icm_id').val(),
+            alm_id: $('#me_alm_id').val(),
+            report_maker_id: $('#me_report_maker_id').val(),
+            fo_id: $('#me_fo_id').val(),
+            fo_hospital_id: $('#me_fo_hospital_id').val(),
+            fo_patient_id: $('#me_fo_patient_id').val(),
+            fo_pharmacy_id: $('#me_fo_pharmacy_id').val(),
+            fo_pathology_id: $('#me_fo_pathology_id').val(),
+            fo_doctor_id: $('#me_fo_doctor_id').val(),
+            status: $('#me_status').val(),
+            case_verdict: $('#me_case_verdict').val(),
+            final_remark: $('#me_final_remark').val(),
+            fo_final_remark: $('#me_fo_final_remark').val()
+        };
+
+        $.post('/api/master-edit/submit', payload, function(res) {
+            btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-2"></i> Update Master Case Record');
+            if(res.status === 'success') {
+                Swal.fire('Saved!', res.message, 'success');
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        }).fail(() => {
+            btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-2"></i> Update Master Case Record');
+            Swal.fire('Server Error', 'Failed to save master case updates.', 'error');
+        });
+    }
+</script>
+</body>
+</html>

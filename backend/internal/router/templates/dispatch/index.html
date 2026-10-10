@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Dispatch Console | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .stats-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: var(--shadow);
+        cursor: pointer;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(25,39,52,.1); }
+    .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+
+    .table-container-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .filter-bar {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        background: #fdfdfd;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .pro-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .pro-table th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+    }
+    .pro-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+        vertical-align: middle;
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .pro-table tr:hover td { background: #fbfcfe; }
+
+    .doc-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all .2s;
+        user-select: none;
+        border: 1px solid transparent;
+        margin: 2px;
+    }
+    .doc-pill.received {
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
+    }
+    .doc-pill.pending {
+        background: #fef2f2;
+        color: #991b1b;
+        border-color: #fecaca;
+    }
+    .doc-pill:hover { transform: scale(1.05); }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Navigation Suite Bar -->
+            <div class="suite-nav-bar">
+                <a href="/cases/matrix" class="suite-nav-item"><i class="fa-solid fa-table-cells"></i> Cases Matrix</a>
+                <a href="/dispatch" class="suite-nav-item active"><i class="fa-solid fa-truck-fast"></i> Dispatch Console</a>
+                <a href="/attendance/manual_matrix" class="suite-nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance Matrix</a>
+                <a href="/master_edit" class="suite-nav-item"><i class="fa-solid fa-pen-to-square"></i> Master Edit</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-truck-fast text-primary me-2"></i> Document Dispatch & Handover Console</h4>
+                    <span class="muted">Track physical hardcopies, FO doc handovers, verification certificates, and field dispatches</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadDispatchData()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                    <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" onclick="exportExcel()"><i class="fa-solid fa-file-excel me-1"></i> Export Excel</button>
+                </div>
+            </div>
+
+            <!-- Stats KPI Cards -->
+            <div class="stats-card-grid">
+                <div class="stat-card" onclick="setTabFilter('all')">
+                    <div class="stat-title">Total Dispatches</div>
+                    <div class="stat-val" id="statTotal">0</div>
+                </div>
+                <div class="stat-card" onclick="setTabFilter('received')">
+                    <div class="stat-title" style="color:var(--green)">Hardcopy Received</div>
+                    <div class="stat-val" style="color:var(--green)" id="statReceived">0</div>
+                </div>
+                <div class="stat-card" onclick="setTabFilter('pending')">
+                    <div class="stat-title" style="color:var(--amber)">Pending Documents</div>
+                    <div class="stat-val" style="color:var(--amber)" id="statPending">0</div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="table-container-card">
+                <div class="filter-bar">
+                    <div class="input-group" style="max-width: 260px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="filterSearch" class="form-control border-start-0" placeholder="Claim / Patient..." onkeyup="onFilterChange()">
+                    </div>
+                    <div style="min-width: 190px;">
+                        <select id="filterInsurance" class="form-select" onchange="onFilterChange()">
+                            <option value="0">All Insurances</option>
+                        </select>
+                    </div>
+                    <div style="min-width: 170px;">
+                        <select id="filterState" class="form-select" onchange="onFilterChange()">
+                            <option value="0">All States</option>
+                        </select>
+                    </div>
+                    <div style="min-width: 170px;">
+                        <select id="filterFO" class="form-select" onchange="onFilterChange()">
+                            <option value="0">All Field Officers</option>
+                        </select>
+                    </div>
+                    <div style="min-width: 140px;">
+                        <select id="filterTab" class="form-select fw-semibold" onchange="onFilterChange()">
+                            <option value="all">All Status</option>
+                            <option value="received">Received</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="ms-auto text-muted small fw-semibold" id="recordsSummary">
+                        Showing 0 of 0 entries
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Claim & Patient</th>
+                                <th>Insurance & Type</th>
+                                <th>Hospital & Location</th>
+                                <th>Assigned FO</th>
+                                <th>Documents Checklist (Click to Toggle)</th>
+                                <th style="text-align: center; width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dispatchTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2 d-block"></i>
+                                    <span class="muted fw-semibold">Loading Dispatch Records...</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+                    <span class="small muted" id="pageInfo">Page 1</span>
+                    <nav><ul class="pagination pagination-sm m-0" id="paginationContainer"></ul></nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            {{FOOTER_PARTIAL}}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: FO Part Allocation & Metadata -->
+<div class="modal fade" id="dispatchDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-folder-open me-2 text-warning"></i> Case Document Breakdown</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="modalCaseId">
+                <div class="alert alert-light border d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold fs-6" id="modalClaimNumber">Claim Details</span>
+                    <span class="badge bg-primary fs-7" id="modalPrimaryFO">Assigned FO</span>
+                </div>
+
+                <h6 class="fw-bold text-muted text-uppercase small mb-3">Document Parts Verification Status:</h6>
+                <div class="row g-2 mb-4" id="modalPartsContainer">
+                    <!-- Dynamic parts -->
+                </div>
+
+                <h6 class="fw-bold text-muted text-uppercase small mb-2">Dispatcher & Handover Details:</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Completed By Type</label>
+                        <select id="modalCompType" class="form-select">
+                            <option value="same_fo">Assigned Field Officer</option>
+                            <option value="different_fo">Different FO</option>
+                            <option value="courier">Courier / Speed Post</option>
+                            <option value="hand_delivery">Hand Delivery / Office</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Receiver / Courier Name</label>
+                        <input type="text" id="modalCompName" class="form-control" placeholder="Name or Consignment #">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2 justify-content-between">
+                <button type="button" class="btn btn-outline-success btn-sm fw-bold rounded-pill" onclick="receiveAllInModal()"><i class="fa-solid fa-check-double me-1"></i> Receive All 7 Docs</button>
+                <button type="button" class="btn btn-primary btn-sm fw-bold px-4 rounded-pill" onclick="saveModalMeta()"><i class="fa-solid fa-save me-1"></i> Save Details</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let currentPage = 1;
+const pageSize = 25;
+let currentTabFilter = 'all';
+let detailModalInstance = null;
+let currentLoadedCases = [];
+
+const docLabels = {
+    'doc_doctor_statement': 'Doctor Statement',
+    'doc_pathology': 'Pathology',
+    'doc_final_bill': 'Final Bill',
+    'doc_discharge_summary': 'Discharge Summary',
+    'doc_insured_part': 'Insured Part',
+    'doc_pre_auth': 'Pre Auth',
+    'doc_icp': 'ICP'
+};
+
+function initFilters() {
+    $.getJSON('/api/dispatch/initial_data', function(res) {
+        if (res.status === 'success') {
+            if (res.insurances) {
+                let html = '<option value="0">All Insurances</option>';
+                res.insurances.forEach(i => html += `<option value="${i.id}">${i.name}</option>`);
+                $('#filterInsurance').html(html);
+            }
+            if (res.states) {
+                let html = '<option value="0">All States</option>';
+                res.states.forEach(s => html += `<option value="${s.id}">${s.name}</option>`);
+                $('#filterState').html(html);
+            }
+            if (res.fos) {
+                let html = '<option value="0">All Field Officers</option>';
+                res.fos.forEach(f => html += `<option value="${f.id}">${f.name}</option>`);
+                $('#filterFO').html(html);
+            }
+        }
+    });
+}
+
+function loadDispatchData() {
+    $('#dispatchTableBody').html(`
+        <tr>
+            <td colspan="7" class="text-center py-5">
+                <i class="fa-solid fa-spinner fa-spin fa-2x text-primary mb-2 d-block"></i>
+                <span class="muted fw-semibold">Loading Dispatch Records...</span>
+            </td>
+        </tr>
+    `);
+
+    let params = {
+        page: currentPage,
+        limit: pageSize,
+        search: $('#filterSearch').val() || '',
+        insurance: $('#filterInsurance').val() || 0,
+        state: $('#filterState').val() || 0,
+        fo_id: $('#filterFO').val() || 0,
+        tab_filter: $('#filterTab').val() || currentTabFilter
+    };
+
+    $.getJSON('/api/dispatch/list', params, function(res) {
+        if (res.status === 'success') {
+            currentLoadedCases = res.cases || [];
+            renderTable(currentLoadedCases, res.pagination);
+            if (res.stats) {
+                $('#statTotal').text(res.stats.total || 0);
+                $('#statReceived').text(res.stats.received || 0);
+                $('#statPending').text(res.stats.pending || 0);
+            }
+        } else {
+            $('#dispatchTableBody').html(`<tr><td colspan="7" class="text-center py-4 text-danger fw-bold">${res.message || 'Error'}</td></tr>`);
+        }
+    }).fail(function() {
+        $('#dispatchTableBody').html(`<tr><td colspan="7" class="text-center py-4 text-danger fw-bold">Failed to load dispatch data.</td></tr>`);
+    });
+}
+
+function renderTable(cases, pagination) {
+    if (!cases || cases.length === 0) {
+        $('#dispatchTableBody').html(`<tr><td colspan="7" class="text-center py-5 text-muted fw-bold"><i class="fa-solid fa-box-open fa-2x mb-2 d-block"></i> No dispatch records found matching criteria.</td></tr>`);
+        $('#recordsSummary').text('Showing 0 of 0 entries');
+        $('#pageInfo').text('Page 1 of 1');
+        $('#paginationContainer').html('');
+        return;
+    }
+
+    let startIdx = (pagination.current_page - 1) * pagination.limit;
+    let html = '';
+
+    cases.forEach((r, idx) => {
+        let globalSn = startIdx + idx + 1;
+        let allowed = r.allowed_parts || ['doc_doctor_statement', 'doc_pathology', 'doc_final_bill', 'doc_discharge_summary', 'doc_insured_part', 'doc_pre_auth', 'doc_icp'];
+
+        let pillsHtml = '';
+        allowed.forEach(k => {
+            let val = r[k] || 0;
+            let cls = val === 1 ? 'received' : 'pending';
+            let icon = val === 1 ? 'fa-check' : 'fa-clock';
+            pillsHtml += `<span class="doc-pill ${cls}" onclick="toggleDoc(${r.case_id}, '${k}', ${val === 1 ? 0 : 1})" title="Click to Toggle"><i class="fa-solid ${icon}"></i> ${docLabels[k] || k}</span>`;
+        });
+
+        html += `
+            <tr>
+                <td class="fw-bold text-muted">${globalSn}</td>
+                <td>
+                    <strong class="text-dark d-block">${r.claim_number}</strong>
+                    <span class="muted small">${r.patient_name || '-'}</span>
+                </td>
+                <td>
+                    <strong class="text-dark d-block">${r.company_name}</strong>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold">${r.type_name}${r.sub_type_name ? ' ('+r.sub_type_name+')' : ''}</span>
+                </td>
+                <td>
+                    <span class="text-dark fw-semibold d-block">${r.hospital_name || '-'}</span>
+                    <span class="muted small">${r.district_name ? r.district_name + ', ' : ''}${r.state_name || ''}</span>
+                </td>
+                <td>
+                    <strong class="text-dark d-block">${r.assigned_fo_name}</strong>
+                    <span class="muted small">${r.is_fo_complete ? '<span class="text-success fw-bold"><i class="fa-solid fa-check-circle"></i> Handover Complete</span>' : '<span class="text-warning fw-bold"><i class="fa-solid fa-hourglass-half"></i> Pending</span>'}</span>
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap">${pillsHtml}</div>
+                </td>
+                <td style="text-align: center;">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openDetailModal(${r.case_id}, '${r.claim_number}', '${r.assigned_fo_name}')" title="Manage Document Details"><i class="fa-solid fa-list-check"></i></button>
+                    <button class="btn btn-sm btn-outline-success" onclick="receiveAllDirect(${r.case_id})" title="Receive All 7"><i class="fa-solid fa-check-double"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+
+    $('#dispatchTableBody').html(html);
+    $('#recordsSummary').text(`Showing ${startIdx + 1} to ${startIdx + cases.length} of ${pagination.total_records} entries`);
+    $('#pageInfo').text(`Page ${pagination.current_page} of ${pagination.total_pages}`);
+    renderPagination(pagination);
+}
+
+function renderPagination(p) {
+    if (p.total_pages <= 1) {
+        $('#paginationContainer').html('');
+        return;
+    }
+    let html = '';
+    html += `<li class="page-item ${p.current_page === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(1)">«</a></li>`;
+    html += `<li class="page-item ${p.current_page === 1 ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.current_page - 1})">‹</a></li>`;
+    
+    let startPage = Math.max(1, p.current_page - 2);
+    let endPage = Math.min(p.total_pages, p.current_page + 2);
+
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<li class="page-item ${i === p.current_page ? 'active' : ''}"><a class="page-link" onclick="goToPage(${i})">${i}</a></li>`;
+    }
+
+    html += `<li class="page-item ${p.current_page === p.total_pages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.current_page + 1})">›</a></li>`;
+    html += `<li class="page-item ${p.current_page === p.total_pages ? 'disabled' : ''}"><a class="page-link" onclick="goToPage(${p.total_pages})">»</a></li>`;
+    $('#paginationContainer').html(html);
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadDispatchData();
+}
+
+function onFilterChange() {
+    currentPage = 1;
+    loadDispatchData();
+}
+
+function setTabFilter(tab) {
+    $('#filterTab').val(tab);
+    onFilterChange();
+}
+
+function toggleDoc(caseId, field, val) {
+    $.post('/api/dispatch/toggle-doc', { case_id: caseId, field: field, value: val }, function(res) {
+        if (res.status === 'success') {
+            loadDispatchData();
+        } else {
+            Swal.fire('Error', res.message, 'error');
+        }
+    });
+}
+
+function receiveAllDirect(caseId) {
+    $.post('/api/dispatch/receive-all', { case_id: caseId }, function(res) {
+        if (res.status === 'success') {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'All 7 documents received!', showConfirmButton: false, timer: 1200 });
+            loadDispatchData();
+        }
+    });
+}
+
+function openDetailModal(caseId, claimNumber, foName) {
+    $('#modalCaseId').val(caseId);
+    $('#modalClaimNumber').text(claimNumber);
+    $('#modalPrimaryFO').text(foName);
+    $('#modalPartsContainer').html('<div class="col-12 py-3 text-center text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading parts...</div>');
+    detailModalInstance.show();
+
+    $.getJSON(`/api/dispatch/docs/${caseId}`, function(res) {
+        if (res.status === 'success' && res.data) {
+            let d = res.data;
+            $('#modalCompType').val(d.completed_by_type || 'same_fo');
+            $('#modalCompName').val(d.completed_by_name || '');
+
+            let partsHtml = '';
+            Object.keys(docLabels).forEach(k => {
+                let checked = d[k] === 1 ? 'checked' : '';
+                partsHtml += `
+                    <div class="col-md-6">
+                        <div class="p-2 border rounded d-flex align-items-center justify-content-between bg-light">
+                            <label class="form-check-label fw-bold text-dark small" for="chk_${k}">${docLabels[k]}</label>
+                            <input type="checkbox" class="form-check-input" id="chk_${k}" ${checked} onchange="toggleDoc(${caseId}, '${k}', this.checked ? 1 : 0)">
+                        </div>
+                    </div>
+                `;
+            });
+            $('#modalPartsContainer').html(partsHtml);
+        }
+    });
+}
+
+function receiveAllInModal() {
+    let caseId = $('#modalCaseId').val();
+    if (caseId) {
+        receiveAllDirect(caseId);
+        detailModalInstance.hide();
+    }
+}
+
+function saveModalMeta() {
+    let caseId = $('#modalCaseId').val();
+    let compType = $('#modalCompType').val();
+    let compName = $('#modalCompName').val();
+
+    $.post('/api/dispatch/save-meta', { case_id: caseId, completed_by_type: compType, completed_by_name: compName }, function(res) {
+        if (res.status === 'success') {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Details saved!', showConfirmButton: false, timer: 1200 });
+            detailModalInstance.hide();
+            loadDispatchData();
+        }
+    });
+}
+
+function exportExcel() {
+    let search = $('#filterSearch').val() || '';
+    let insurance = $('#filterInsurance').val() || 0;
+    let state = $('#filterState').val() || 0;
+    let fo_id = $('#filterFO').val() || 0;
+    let tab = $('#filterTab').val() || 'all';
+
+    let url = `/dispatch?export_excel=1&search=${encodeURIComponent(search)}&insurance=${insurance}&state=${state}&fo_id=${fo_id}&tab_filter=${tab}`;
+    window.location.href = url;
+}
+
+$(document).ready(function() {
+    detailModalInstance = new bootstrap.Modal(document.getElementById('dispatchDetailModal'));
+    initFilters();
+    loadDispatchData();
+});
+</script>
+</body>
+</html>

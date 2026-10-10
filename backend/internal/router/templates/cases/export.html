@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Data Console | Brain Bird</title>
+        <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+    /* ========================================================
+       DASHBOARD DESIGN SYSTEM - UNIFIED THEME
+       ======================================================== */
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+
+        /* Compatibility aliases */
+        --primary: var(--brand);
+        --primary-light: var(--brand-hover);
+        --secondary: var(--muted);
+        --success: var(--green);
+        --danger: var(--red);
+        --border: var(--line);
+        --neutral-bg: var(--canvas);
+        --neutral-border: var(--line);
+        --text-dark: var(--ink);
+        --text-muted: var(--muted);
+        --slate-base: var(--canvas);
+        --slate-surface: var(--surface);
+        --brand-primary: var(--brand);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+        background: var(--canvas);
+    }
+
+    .app-main {
+        margin-left: 0;
+        flex-grow: 1;
+        background-color: var(--canvas);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .app-content {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 22px 26px 26px;
+        flex: 1;
+    }
+
+    /* TOP HEADER */
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        min-height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 10px 28px;
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 4px rgba(20, 34, 48, 0.03);
+    }
+
+    .header-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .header-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--brand);
+    }
+
+    .header-btn-danger {
+        color: var(--red);
+        border-color: rgba(179, 59, 66, 0.2);
+    }
+    .header-btn-danger:hover {
+        background: #fdf2f2;
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 14px;
+        border-left: 1px solid var(--line);
+    }
+
+    .profile-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        background: var(--brand);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .profile-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .profile-name {
+        font-weight: 650;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .profile-role {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    /* SIDEBAR */
+    .app-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-260px);
+        transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+        box-shadow: 4px 0 24px rgba(20, 34, 48, 0.08);
+        z-index: 1040;
+    }
+
+    .app-sidebar:hover, .app-sidebar.open, .sidebar-hover-notch:hover + .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-hover-notch {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 58px;
+        background-color: var(--brand);
+        color: #ffffff;
+        border: 0;
+        border-radius: 0 9px 9px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1041;
+        box-shadow: 2px 0 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .sidebar-brand {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-brand img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        border-radius: 7px;
+    }
+
+    .sidebar-brand .title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ink);
+    }
+
+    .sidebar-menu {
+        padding: 16px 12px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .menu-label {
+        padding: 0 10px 8px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .nav-item-link {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        margin-bottom: 3px;
+        border-radius: 7px;
+        color: var(--ink);
+        background: transparent;
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .nav-item-link:hover {
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .nav-item-link.active {
+        color: var(--brand);
+        background: #eaf1ff;
+        font-weight: 700;
+    }
+
+    .nav-item-link i {
+        width: 18px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .nav-item-link.active i {
+        color: var(--brand);
+    }
+
+    /* PAGE TITLE BANNER */
+    .page-title-banner {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+        padding: 16px 22px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .page-title-banner h4 {
+        color: var(--ink) !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+
+    .page-title-banner h4 i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .page-title-banner p {
+        color: var(--muted) !important;
+        font-size: 12px !important;
+        margin: 3px 0 0 0 !important;
+    }
+
+    /* CARDS & PANELS */
+    .card, .form-card, .filter-card {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+    }
+
+    .card-header, .section-head {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    .card-title, .section-title {
+        color: var(--ink) !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .card-title i, .section-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .card-body, .section-body {
+        padding: 20px 24px !important;
+    }
+
+    .form-section {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        overflow: hidden !important;
+    }
+
+    /* FORM LABELS & INPUTS */
+    .form-label, .f-label {
+        font-size: 11px !important;
+        font-weight: 650 !important;
+        color: var(--muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 6px !important;
+        display: block !important;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--red) !important;
+    }
+
+    .form-control, .form-select {
+        font-size: 13.5px !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        color: var(--ink) !important;
+        background-color: #ffffff !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--brand) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+        outline: none !important;
+    }
+
+    .input-icon {
+        color: var(--muted) !important;
+    }
+
+    /* BUTTONS */
+    .btn-primary, .btn-magic, #finalSubmitBtn, #btnMasterSave, #btnConfirmExport {
+        background: var(--brand) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--brand) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-primary:hover, .btn-magic:hover, #finalSubmitBtn:hover, #btnMasterSave:hover, #btnConfirmExport:hover {
+        background: var(--brand-hover) !important;
+        border-color: var(--brand-hover) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    .btn-secondary, .btn-light, .btn-outline-secondary {
+        background: #ffffff !important;
+        color: var(--ink) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-secondary:hover, .btn-light:hover, .btn-outline-secondary:hover {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: var(--ink) !important;
+    }
+
+    .btn-danger, #reworkSubmitBtn {
+        background: var(--red) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--red) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-danger:hover, #reworkSubmitBtn:hover {
+        background: #991b1b !important;
+        border-color: #991b1b !important;
+        color: #ffffff !important;
+    }
+
+    /* MODALS */
+    .modal-content {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 12px 36px rgba(20, 34, 48, 0.12) !important;
+    }
+
+    .modal-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 14px 20px !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title {
+        font-size: 15px !important;
+        font-weight: 650 !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .modal-footer {
+        background: #f8fafc !important;
+        border-top: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    /* TABLES */
+    .table thead th {
+        background: #f8fafc !important;
+        color: var(--muted) !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid var(--line) !important;
+        border-top: none !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--line) !important;
+        color: var(--ink) !important;
+        font-size: 13px !important;
+        vertical-align: middle !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody tr:hover td {
+        background: #fbfcfe !important;
+    }
+
+    /* BADGES */
+    .badge {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        border-radius: 999px !important;
+        padding: 3px 9px !important;
+    }
+    .badge.bg-success, .badge.status-complete {
+        background: #eaf8f1 !important;
+        color: var(--green) !important;
+        border: 1px solid rgba(22, 132, 91, 0.2) !important;
+    }
+    .badge.bg-danger, .badge.status-rework {
+        background: #fdf2f2 !important;
+        color: var(--red) !important;
+        border: 1px solid rgba(179, 59, 66, 0.2) !important;
+    }
+    .badge.bg-warning {
+        background: #fef8ee !important;
+        color: var(--amber) !important;
+        border: 1px solid rgba(170, 105, 0, 0.2) !important;
+    }
+    .badge.bg-light {
+        background: #f1f5f9 !important;
+        color: var(--muted) !important;
+        border: 1px solid var(--line) !important;
+    }
+
+    /* Autocomplete Dropdown */
+    .autocomplete-dropdown { 
+        position: absolute; 
+        z-index: 1000; 
+        background: #fff; 
+        width: 100%; 
+        max-height: 250px; 
+        overflow-y: auto; 
+        box-shadow: var(--shadow); 
+        border-radius: 0 0 8px 8px; 
+        border: 1px solid var(--line); 
+        border-top: none; 
+        padding: 0; 
+        margin: 0; 
+        list-style: none; 
+        top: 100%; 
+        left: 0; 
+    }
+    .autocomplete-item { 
+        padding: 10px 14px; 
+        cursor: pointer; 
+        border-bottom: 1px solid #f1f5f9; 
+        font-size: 13px; 
+        font-weight: 600; 
+        color: var(--ink); 
+        transition: all 0.15s; 
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: var(--brand-light); color: var(--brand); }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+
+
+        <div class="app-content">
+            <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-3 shadow-sm page-title-banner">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark"><i class="fa-solid fa-file-excel me-2"></i> Data Export Hub</h4>
+                    <p class="text-muted m-0 small">Filter by Insurance, Case Type, Month, Days, or Staff to generate and export styled reports</p>
+                </div>
+                
+            </div>
+
+            <div class="filter-card p-4 mb-4">
+                <form id="filterForm">
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label class="f-label">Insurance Company</label>
+                            <select name="ins_id" id="ins_id" class="form-select form-select-sm filter-input">
+                                <option value="">-- All Companies --</option>
+                                {{INSURERS_OPTIONS}}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Case Type</label>
+                            <select name="cat_id" id="cat_id" class="form-select form-select-sm filter-input" disabled><option value="">-- Select Company --</option></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Sub Type</label>
+                            <select name="sub_id" id="sub_id" class="form-select form-select-sm filter-input" disabled><option value="">-- Select Category --</option></select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Alloc. Month</label>
+                            <input type="month" name="alloc_month" id="alloc_month" class="form-control form-control-sm filter-input" title="Filter by Allocation Month">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Closing Month</label>
+                            <input type="month" name="closing_month" id="closing_month" class="form-control form-control-sm filter-input" title="Filter by Closing Month">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Alloc. Date Range</label>
+                            <div class="input-group input-group-sm">
+                                <input type="date" name="alloc_from_date" class="form-control filter-input" title="From Date">
+                                <input type="date" name="alloc_to_date" class="form-control filter-input" title="To Date">
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="f-label">Tracker Status</label>
+                            <select name="status_filter" id="status_filter" class="form-select form-select-sm filter-input">
+                                <option value="">-- All Status --</option>
+                                <option value="open">Open</option>
+                                <option value="complete">Complete</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Days (Aging)</label>
+                            <select name="days_filter" id="days_filter" class="form-select form-select-sm filter-input">
+                                <option value="">-- All Days --</option>
+                                <option value="0_3">0 - 3 Days</option>
+                                <option value="4_7">4 - 7 Days</option>
+                                <option value="8_15">8 - 15 Days</option>
+                                <option value="15_plus">15+ Days</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">Data Limit</label>
+                            <select name="limit" id="limitFilter" class="form-select form-select-sm filter-input">
+                                <option value="25">25 Records</option>
+                                <option value="50">50 Records</option>
+                                <option value="100">100 Records</option>
+                                <option value="250">250 Records</option>
+                                <option value="500">500 Records</option>
+                                <option value="1000">1000 Records</option>
+                                <option value="ALL">All Records</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="f-label">FO Emp Type</label>
+                            <select name="emp_type" id="emp_type" class="form-select form-select-sm filter-input">
+                                <option value="">-- All FO Types --</option>
+                                <option value="salary">Salary Staff</option>
+                                <option value="freelancer">Freelancer</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="f-label">Hospital State</label>
+                            <select name="state_id" id="state_id" class="form-select form-select-sm filter-input">
+                                <option value="">-- All States --</option>
+                                {{STATES_OPTIONS}}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="f-label">City / District</label>
+                            <select name="city_id" id="city_id" class="form-select form-select-sm filter-input" disabled><option value="">-- Select State --</option></select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="f-label">Hospital Name</label>
+                            <select name="hospital" class="form-select form-select-sm filter-input">
+                                <option value="">-- All Hospitals --</option>
+                                {{HOSPITALS_OPTIONS}}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="f-label">Area Manager (AM)</label>
+                            <select name="am_id" class="form-select form-select-sm filter-input">
+                                <option value="">-- All Area Managers --</option>
+                                {{AMS_OPTIONS}}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="f-label">Allocation Manager (ALM)</label>
+                            <select name="alm_id" class="form-select form-select-sm filter-input">
+                                <option value="">-- All ALMs --</option>
+                                {{ALMS_OPTIONS}}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="f-label">Multi-Days (Sun, Mon..)</label>
+                            <select name="multi_dates[]" id="multi_dates" class="form-select form-select-sm filter-input" multiple style="height: 36px; padding:2px;" onfocus="this.style.height='150px';" onblur="this.style.height='36px';">
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                            <small class="text-muted" style="font-size: 8px;">Hold CTRL/CMD to select multiple</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-2 fw-bold" id="btnResetFilters" onclick="resetFilters()">
+                                <i class="fa-solid fa-arrows-rotate me-1"></i> Reset Filters
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm rounded-2 fw-bold" id="btnUndoFilter" onclick="undoFilter()" disabled>
+                                <i class="fa-solid fa-rotate-left me-1"></i> Undo
+                            </button>
+                        </div>
+                        <button type="button" id="btnOpenExportModal" class="btn btn-primary fw-bold" onclick="openColumnSelectModal()">
+                            <i class="fa-solid fa-download me-2"></i> DOWNLOAD EXCEL NOW
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="filter-card p-0 overflow-hidden">
+                <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list me-2"></i>Live Data Preview</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover preview-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>CLAIM NO</th>
+                                <th>COMPANY & TYPE</th>
+                                <th>PATIENT & LOCATION</th>
+                                <th>FIELD OFFICER (FO)</th>
+                                <th>ALLOC. / CLOSING DATE</th>
+                                <th>AMOUNT & DIAGNOSIS</th>
+                                <th>RM / AM / CM / ALM</th>
+                                <th>DAYS</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody">
+                            <tr><td colspan="9" class="text-center py-4">Loading Data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 bg-light border-top d-flex justify-content-between align-items-center" id="paginationControls">
+                </div>
+            </div>
+        </div>
+
+        
+
+{{FOOTER_PARTIAL}}
+
+
+    </main>
+</div>
+
+<!-- MODAL: SELECT COLUMNS FOR EXCEL EXPORT -->
+<div class="modal fade" id="columnSelectModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-light text-dark border-bottom py-3">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-list-check me-2 text-primary"></i> Select Columns to Export</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <span class="small fw-bold text-muted text-uppercase">Check Database Fields to Include in Excel</span>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="chkSelectAllCols" checked onchange="toggleAllExportCols(this)">
+                        <label class="form-check-label fw-bold text-primary small" for="chkSelectAllCols">Select All / Deselect All</label>
+                    </div>
+                </div>
+
+                <div class="row g-2 column-select-box" id="exportColumnsGrid">
+                    <!-- Column Checkboxes dynamically listed -->
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-3 d-flex justify-content-between border-top">
+                <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="btnConfirmExport" class="btn btn-primary px-5 fw-bold shadow-sm" onclick="executeExcelGeneration()">
+                    <i class="fa-solid fa-download me-1"></i> Generate & Download Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<script>
+const API_URL = '/api/export/action';
+const dbSavedCols = {{SAVED_EXPORT_COLS_JSON}};
+
+// MASTER SCHEMA OF ALL EXPORTABLE COLUMNS FROM CASES TABLE
+const ALL_SCHEMA_COLUMNS = [
+    { key: 'claim_number', header: 'CLAIM NUMBER', width: 20 },
+    { key: 'company_name', header: 'INSURANCE COMPANY', width: 25 },
+    { key: 'type_name', header: 'CASE TYPE', width: 20 },
+    { key: 'sub_type_name', header: 'SUB TYPE', width: 20 },
+    { key: 'allocation_date', header: 'ALLOCATION DATE', width: 22 },
+    { key: 'allocation_month', header: 'ALLOCATION MONTH', width: 20 },
+    { key: 'opening_tat', header: 'TAT', width: 30 },
+    { key: 'case_age_days', header: 'LIVE DAYS (AGE)', width: 18 },
+    { key: 'aging_days', header: 'CLOSING TAT', width: 30 },
+    { key: 'closing_date', header: 'CLOSING DATE', width: 22 },
+    { key: 'closing_month', header: 'CLOSING MONTH', width: 20 },
+    { key: 'patient_name', header: 'PATIENT NAME', width: 22 },
+    { key: 'patient_mobile', header: 'PATIENT MOBILE', width: 16 },
+    { key: 'patient_age', header: 'PATIENT AGE', width: 12 },
+    { key: 'gender', header: 'GENDER', width: 12 },
+    { key: 'insured_name', header: 'INSURED NAME', width: 22 },
+    { key: 'insured_mobile', header: 'INSURED MOBILE', width: 16 },
+    { key: 'relationship_with_insured', header: 'RELATIONSHIP', width: 18 },
+    { key: 'patient_occupation', header: 'PATIENT OCCUPATION', width: 18 },
+    { key: 'patient_address', header: 'PATIENT ADDRESS', width: 25 },
+    { key: 'patient_pin_code', header: 'PATIENT PINCODE', width: 15 },
+    { key: 'patient_aadhar', header: 'PATIENT AADHAAR', width: 16 },
+    { key: 'hospital_name', header: 'HOSPITAL NAME', width: 25 },
+    { key: 'hospital_address', header: 'HOSPITAL ADDRESS', width: 28 },
+    { key: 'hospital_reg_no', header: 'HOSPITAL REG NO', width: 18 },
+    { key: 'hospital_pin_code', header: 'HOSPITAL PINCODE', width: 15 },
+    { key: 'hospital_lat', header: 'HOSPITAL LAT', width: 15 },
+    { key: 'hospital_lng', header: 'HOSPITAL LNG', width: 15 },
+    { key: 'state_name', header: 'STATE', width: 15 },
+    { key: 'district_name', header: 'CITY / DISTRICT', width: 18 },
+    { key: 'am_name', header: 'AREA MANAGER (AM)', width: 20 },
+    { key: 'cm_name', header: 'CASE MANAGER (CM)', width: 20 },
+    { key: 'alm_name', header: 'ALLOCATION MANAGER', width: 20 },
+    { key: 'fo_name', header: 'FIELD OFFICER (FO)', width: 35 },
+    { key: 'fo_employment_type', header: 'FO EMP TYPE', width: 18 },
+    { key: 'rm_name', header: 'REPORT MAKER (RM)', width: 22 },
+    { key: 'case_verdict', header: 'VERDICT', width: 20 },
+    { key: 'decision_status', header: 'DECISION STATUS', width: 18 },
+    { key: 'status', header: 'TRACKER STATUS', width: 18 },
+    { key: 'policy_no', header: 'POLICY NUMBER', width: 20 },
+    { key: 'policy_type', header: 'POLICY TYPE', width: 18 },
+    { key: 'policy_start_date', header: 'POLICY START DATE', width: 18 },
+    { key: 'policy_end_date', header: 'POLICY END DATE', width: 18 },
+    { key: 'policy_inception_date', header: 'INCEPTION DATE', width: 18 },
+    { key: 'assured_amount', header: 'ASSURED AMOUNT', width: 18 },
+    { key: 'claim_amount', header: 'CLAIM AMOUNT', width: 18 },
+    { key: 'diagnosis', header: 'DIAGNOSIS', width: 22 },
+    { key: 'trigger_reason', header: 'TRIGGER REASON', width: 25 },
+    { key: 'doj', header: 'DOJ', width: 15 },
+    { key: 'doa', header: 'DOA', width: 18 },
+    { key: 'dod', header: 'DOD', width: 18 },
+    { key: 'mlc_number', header: 'MLC NUMBER', width: 16 },
+    { key: 'accidental_claim', header: 'ACCIDENTAL CLAIM', width: 16 },
+    { key: 'plan_of_management', header: 'PLAN OF MANAGEMENT', width: 22 },
+    { key: 'collected_documents', header: 'COLLECTED DOCUMENTS', width: 22 },
+    { key: 'geographical_distance', header: 'GEO DISTANCE', width: 18 },
+    { key: 'other_details', header: 'OTHER DETAILS', width: 20 },
+    { key: 'ai_risk_score', header: 'AI RISK SCORE', width: 15 },
+    { key: 'ai_flag_reason', header: 'AI FLAG REASON', width: 22 },
+    { key: 'final_remark', header: 'FINAL REMARK', width: 25 },
+    { key: 'fo_final_remark', header: 'FO FINAL REMARK', width: 25 }
+];
+
+let filterHistory = [];
+let isRestoringState = false;
+
+$(document).ready(function() { 
+    filterHistory.push(getFormState());
+    loadPreviewData(1); 
+    buildColumnChecklistUI();
+});
+
+$('.filter-input').on('change', function() {
+    if (!isRestoringState) {
+        recordFilterState();
+    }
+    loadPreviewData(1);
+});
+
+function getFormState() {
+    let state = {};
+    $('#filterForm').find('input, select').each(function() {
+        let name = $(this).attr('name');
+        if (name) {
+            if ($(this).attr('multiple')) {
+                state[name] = $(this).val() || [];
+            } else {
+                state[name] = $(this).val();
+            }
+        }
+    });
+    return state;
+}
+
+function recordFilterState() {
+    let currentState = JSON.stringify(getFormState());
+    let lastState = filterHistory.length > 0 ? JSON.stringify(filterHistory[filterHistory.length - 1]) : null;
+    
+    if (currentState !== lastState) {
+        filterHistory.push(getFormState());
+        updateUndoButtonState();
+    }
+}
+
+function updateUndoButtonState() {
+    if (filterHistory.length > 1) {
+        $('#btnUndoFilter').prop('disabled', false);
+    } else {
+        $('#btnUndoFilter').prop('disabled', true);
+    }
+}
+
+function undoFilter() {
+    if (filterHistory.length > 1) {
+        filterHistory.pop();
+        let previousState = filterHistory[filterHistory.length - 1];
+        restoreFormState(previousState);
+        updateUndoButtonState();
+    }
+}
+
+function restoreFormState(state) {
+    isRestoringState = true;
+    for (let name in state) {
+        let $el = $(`[name="${name}"]`);
+        if ($el.length) {
+            $el.val(state[name]);
+        }
+    }
+    if ($('#ins_id').val()) { $('#cat_id').prop('disabled', false); } else { $('#cat_id').prop('disabled', true); }
+    if ($('#cat_id').val()) { $('#sub_id').prop('disabled', false); } else { $('#sub_id').prop('disabled', true); }
+    if ($('#state_id').val()) { $('#city_id').prop('disabled', false); } else { $('#city_id').prop('disabled', true); }
+    
+    isRestoringState = false;
+    loadPreviewData(1);
+}
+
+function resetFilters() {
+    isRestoringState = true;
+    $('#filterForm')[0].reset();
+    $('#cat_id, #sub_id, #city_id').html('<option value="">-- Select --</option>').prop('disabled', true);
+    isRestoringState = false;
+    
+    filterHistory = [getFormState()];
+    updateUndoButtonState();
+    loadPreviewData(1);
+}
+
+function formatMonth(rawDate) {
+    if(!rawDate || rawDate === 'N/A') return 'N/A';
+    let d = new Date(rawDate);
+    if(isNaN(d)) return 'N/A';
+    return d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function getColLetter(index1Based) {
+    if (!index1Based || index1Based < 1) return '';
+    let temp, letter = '';
+    while (index1Based > 0) {
+        temp = (index1Based - 1) % 26;
+        letter = String.fromCharCode(65 + temp) + letter;
+        index1Based = Math.floor((index1Based - temp - 1) / 26);
+    }
+    return letter;
+}
+
+function buildColumnChecklistUI() {
+    let savedCols = dbSavedCols;
+    if (!savedCols) {
+        try {
+            let stored = localStorage.getItem('export_selected_columns');
+            if (stored) savedCols = JSON.parse(stored);
+        } catch(e) {}
+    }
+
+    let html = '';
+    let allChecked = true;
+    ALL_SCHEMA_COLUMNS.forEach((col, idx) => {
+        let isChecked = true;
+        if (savedCols && Array.isArray(savedCols)) {
+            isChecked = savedCols.includes(col.key);
+        }
+        if (!isChecked) {
+            allChecked = false;
+        }
+        html += `
+        <div class="col-md-4 col-sm-6">
+            <div class="form-check">
+                <input class="form-check-input col-exporter-chk" type="checkbox" value="${col.key}" id="col_chk_${idx}" ${isChecked ? 'checked' : ''}>
+                <label class="form-check-label col-chk-label" for="col_chk_${idx}">${col.header}</label>
+            </div>
+        </div>`;
+    });
+    $('#exportColumnsGrid').html(html);
+    $('#chkSelectAllCols').prop('checked', allChecked);
+}
+
+function toggleAllExportCols(masterChk) {
+    $('.col-exporter-chk').prop('checked', $(masterChk).is(':checked'));
+}
+
+function openColumnSelectModal() {
+    $('#columnSelectModal').modal('show');
+}
+
+function generateDynamicFilename() {
+    let parts = ['BrainBird_Export'];
+    
+    let insText = $('#ins_id option:selected').text();
+    if (insText && !insText.includes('--')) {
+        let cleanIns = insText.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15);
+        parts.push(cleanIns);
+    }
+    
+    let month = $('#alloc_month').val() || $('#closing_month').val();
+    if (month) {
+        parts.push(month);
+    }
+    
+    let status = $('#status_filter').val();
+    if (status) {
+        parts.push(status.toUpperCase());
+    }
+    
+    let timestamp = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    parts.push(timestamp);
+    
+    return parts.join('_') + '.xlsx';
+}
+
+function loadPreviewData(page) {
+    $('#previewBody').html('<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-primary"></i> Syncing Preview...</td></tr>');
+    
+    let formData = $('#filterForm').serialize() + '&action=fetch_preview&page=' + page;
+    
+    $.post(API_URL, formData, function(res) {
+        if(res.status === 'success') {
+            let html = '';
+            if(!res.data || res.data.length === 0) {
+                html = '<tr><td colspan="9" class="text-center text-muted py-4">No records found for this filter.</td></tr>';
+                $('#paginationControls').html('<span class="small fw-bold text-muted">Total: 0</span>');
+            } else {
+                res.data.forEach(row => {
+                    let stat = (row.status || '').toLowerCase();
+                    let badgeClass = stat === 'open' ? 'bg-danger' : 'bg-success'; 
+                    let daysClass = row.aging_days > 15 ? 'text-danger fw-bold' : (row.aging_days > 7 ? 'text-warning fw-bold' : 'text-success fw-bold');
+                    
+                    let empTypeBadge = row.employment_type ? `<span class="badge bg-info text-dark" style="font-size: 8px;">${row.employment_type.toUpperCase()}</span>` : '';
+
+                    html += `<tr>
+                        <td class="fw-bold text-primary">${row.claim_number}</td>
+                        <td>${row.company_name || 'N/A'}<br><small class="text-muted">${row.type_name || ''} / ${row.sub_type_name || ''}</small></td>
+                        <td>${row.patient_name || 'N/A'}<br><small class="text-muted">${row.district_name || 'N/A'}, ${row.state_name || ''}</small></td>
+                        <td><span class="fw-bold">${row.fo_name || 'Unassigned'}</span><br>${empTypeBadge}</td>
+                        <td><small><b>Alloc:</b> ${row.allocation_date || 'N/A'}<br><b>Close:</b> ${row.closing_date || 'N/A'}</small></td>
+                        <td><b class="text-dark">${row.claim_amount || '0'}</b><br><small class="text-muted">${row.patient_diagnosis || 'N/A'}</small></td>
+                        <td><small><b>RM:</b> ${row.rm_name || 'N/A'}<br><b>AM:</b> ${row.am_name || 'N/A'}<br><b>CM:</b> ${row.cm_name || 'N/A'}<br><b>ALM:</b> ${row.alm_name || 'N/A'}</small></td>
+                        <td class="${daysClass}">${row.aging_days} Days</td>
+                        <td><span class="badge ${badgeClass}">${(row.status || '').toUpperCase()}</span></td>
+                    </tr>`;
+                });
+
+                let pControls = `<span class="small fw-bold text-muted">Showing Page ${res.current_page} of ${res.total_pages} (Total: ${res.total_records})</span>`;
+                pControls += `<div class="btn-group">`;
+                if(res.current_page > 1) {
+                    pControls += `<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="loadPreviewData(${res.current_page - 1})"><i class="fa-solid fa-chevron-left"></i> Prev</button>`;
+                }
+                if(res.current_page < res.total_pages) {
+                    pControls += `<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="loadPreviewData(${res.current_page + 1})">Next <i class="fa-solid fa-chevron-right"></i></button>`;
+                }
+                pControls += `</div>`;
+                $('#paginationControls').html(pControls);
+            }
+            $('#previewBody').html(html);
+        }
+    }, 'json');
+}
+
+$('#ins_id').on('change', function() {
+    let id = $(this).val();
+    $('#cat_id').html('<option>Loading...</option>').prop('disabled', true);
+    if(id) $.post(API_URL, { action: 'get_categories', ins_id: id }, function(res) {
+        let h = '<option value="">-- All Categories --</option>';
+        res.data.forEach(i => h += `<option value="${i.id}">${i.type_name}</option>`);
+        $('#cat_id').html(h).prop('disabled', false);
+    }, 'json');
+});
+
+$('#cat_id').on('change', function() {
+    let id = $(this).val();
+    $('#sub_id').html('<option>Loading...</option>').prop('disabled', true);
+    if(id) $.post(API_URL, { action: 'get_sub_types', cat_id: id }, function(res) {
+        let h = '<option value="">-- All Sub Types --</option>';
+        res.data.forEach(i => h += `<option value="${i.id}">${i.sub_type_name}</option>`);
+        $('#sub_id').html(h).prop('disabled', false);
+    }, 'json');
+});
+
+$('#state_id').on('change', function() {
+    let id = $(this).val();
+    $('#city_id').html('<option>Loading...</option>').prop('disabled', true);
+    if(id) $.post(API_URL, { action: 'get_districts', state_id: id }, function(res) {
+        let h = '<option value="">-- All Districts --</option>';
+        res.data.forEach(i => h += `<option value="${i.id}">${i.district_name}</option>`);
+        $('#city_id').html(h).prop('disabled', false);
+    }, 'json');
+});
+
+async function executeExcelGeneration() {
+    let checkedKeys = [];
+    $('.col-exporter-chk:checked').each(function() {
+        checkedKeys.push($(this).val());
+    });
+
+    if (checkedKeys.length === 0) {
+        Swal.fire('Warning', 'Please select at least 1 column to export.', 'warning');
+        return;
+    }
+
+    try {
+        $.post(API_URL, { action: 'save_preferences', columns: checkedKeys });
+        localStorage.setItem('export_selected_columns', JSON.stringify(checkedKeys));
+    } catch(e) {}
+
+    $('#columnSelectModal').modal('hide');
+
+    let btn = document.getElementById('btnOpenExportModal'); 
+    let oldH = btn.innerHTML;
+    const params = new URLSearchParams(new FormData(document.getElementById('filterForm'))).toString();
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> STYLING EXCEL...'; 
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${API_URL}?action=fetch_export_data&${params}`);
+        const resJson = await response.json();
+
+        if (!resJson.data || resJson.data.length === 0) { 
+            Swal.fire('No Data', 'No records found for export.', 'info'); 
+            btn.innerHTML = oldH; btn.disabled = false; return; 
+        }
+
+        resJson.data.forEach(row => {
+            row.cm_name = row.cm_name || 'N/A';
+            row.am_name = row.am_name || 'N/A';
+            if (row.allocation_date_raw) {
+                let d = new Date(row.allocation_date_raw);
+                if (!isNaN(d.getTime())) { row.allocation_date = d; }
+            }
+            if (row.allocation_month_raw) {
+                let d = new Date(row.allocation_month_raw);
+                if (!isNaN(d.getTime())) { d.setHours(12, 0, 0, 0); row.allocation_month = d; }
+            }
+            if (row.closing_date_raw) {
+                let d = new Date(row.closing_date_raw);
+                if (!isNaN(d.getTime())) { row.closing_date = d; }
+            }
+            if (row.closing_month_raw) {
+                let d = new Date(row.closing_month_raw);
+                if (!isNaN(d.getTime())) { d.setHours(12, 0, 0, 0); row.closing_month = d; }
+            }
+        });
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Master Report');
+
+        const activeColumns = ALL_SCHEMA_COLUMNS.filter(c => checkedKeys.includes(c.key));
+        worksheet.columns = activeColumns;
+
+        worksheet.addRows(resJson.data);
+
+        // SAFE NUMBER FORMATTING BASED ON 1-BASED COLUMN INDEXES
+        const allocIdx = activeColumns.findIndex(c => c.key === 'allocation_date') + 1;
+        const allocMonthIdx = activeColumns.findIndex(c => c.key === 'allocation_month') + 1;
+        const closeIdx = activeColumns.findIndex(c => c.key === 'closing_date') + 1;
+        const closeMonthIdx = activeColumns.findIndex(c => c.key === 'closing_month') + 1;
+
+        if (allocIdx > 0) worksheet.getColumn(allocIdx).numFmt = 'dd-mmm-yyyy hh:mm AM/PM';
+        if (allocMonthIdx > 0) worksheet.getColumn(allocMonthIdx).numFmt = 'mmmm yyyy';
+        if (closeIdx > 0) worksheet.getColumn(closeIdx).numFmt = 'dd-mmm-yyyy hh:mm AM/PM';
+        if (closeMonthIdx > 0) worksheet.getColumn(closeMonthIdx).numFmt = 'mmmm yyyy'; 
+
+        const headRow = worksheet.getRow(1);
+        headRow.height = 30;
+        headRow.eachCell((cell) => {
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = { top:{style:'thin'}, left:{style:'thin'}, bottom:{style:'thin'}, right:{style:'thin'} };
+        });
+
+        // SAFE DYNAMIC 1-BASED COLUMN INDEXES & EXCEL LETTERS FOR FORMULAS
+        const openTatIdx = activeColumns.findIndex(c => c.key === 'opening_tat') + 1;
+        const caseAgeIdx = activeColumns.findIndex(c => c.key === 'case_age_days') + 1;
+        const closeTatIdx = activeColumns.findIndex(c => c.key === 'aging_days') + 1;
+        const verdictIdx = activeColumns.findIndex(c => c.key === 'case_verdict') + 1;
+        const statusIdx = activeColumns.findIndex(c => c.key === 'status') + 1;
+
+        const allocLetter = allocIdx > 0 ? getColLetter(allocIdx) : null;
+        const closeLetter = closeIdx > 0 ? getColLetter(closeIdx) : null;
+
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber > 1) {
+                if (rowNumber % 2 === 0) row.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } }; });
+                
+                // FORMULA 1: OPENING TAT
+                if (openTatIdx > 0 && allocLetter) {
+                    row.getCell(openTatIdx).value = {
+                        formula: `INT(NOW()-${allocLetter}${rowNumber})&" Days "&TEXT(MOD(NOW()-${allocLetter}${rowNumber},1),"h")&" Hours "&TEXT(MOD(NOW()-${allocLetter}${rowNumber},1),"mm")&" Minutes"`
+                    };
+                }
+
+                // FORMULA 2: CASE AGE DAYS
+                if (caseAgeIdx > 0 && allocLetter) {
+                    if (closeLetter) {
+                        row.getCell(caseAgeIdx).value = {
+                            formula: `IF(${closeLetter}${rowNumber}="", INT(NOW()-${allocLetter}${rowNumber}), INT(${closeLetter}${rowNumber}-${allocLetter}${rowNumber}))`
+                        };
+                    } else {
+                        row.getCell(caseAgeIdx).value = {
+                            formula: `INT(NOW()-${allocLetter}${rowNumber})`
+                        };
+                    }
+                }
+
+                // FORMULA 3: CLOSING TAT
+                if (closeTatIdx > 0 && allocLetter && closeLetter) {
+                    row.getCell(closeTatIdx).value = {
+                        formula: `IF(${closeLetter}${rowNumber}="","",INT(${closeLetter}${rowNumber}-${allocLetter}${rowNumber})&" Days "&TEXT(MOD(${closeLetter}${rowNumber}-${allocLetter}${rowNumber},1),"h")&" Hours "&TEXT(MOD(${closeLetter}${rowNumber}-${allocLetter}${rowNumber},1),"mm")&" Minutes")`
+                    };
+                }
+
+                row.eachCell((cell, colNumber) => {
+                    cell.border = { top:{style:'hair'}, left:{style:'hair'}, bottom:{style:'hair'}, right:{style:'hair'} };
+                    cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+
+                    if (caseAgeIdx > 0 && colNumber === caseAgeIdx) {
+                        cell.font = { bold: true, color: { argb: 'FF990000' }, size: 12 };
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE5B4' } };
+                        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    }
+
+                    if (verdictIdx > 0 && colNumber === verdictIdx && cell.value) {
+                        cell.font = { bold: true };
+                        let dec = cell.value.toString().toLowerCase();
+                        if (dec.includes('payable')) cell.font.color = { argb: 'FF16A34A' };
+                        else if (dec.includes('rejected')) cell.font.color = { argb: 'FFDC2626' };
+                        else cell.font.color = { argb: 'FFFF8C00' };
+                    }
+
+                    if ((openTatIdx > 0 && colNumber === openTatIdx) || (closeTatIdx > 0 && colNumber === closeTatIdx)) {
+                        cell.alignment = { horizontal: 'center' };
+                    }
+
+                    if (statusIdx > 0 && colNumber === statusIdx && cell.value) {
+                        cell.font = { bold: true };
+                        let st = cell.value.toString().toLowerCase();
+                        if (st.includes('open')) cell.font.color = { argb: 'FFDC2626' }; 
+                        if (st.includes('complete')) cell.font.color = { argb: 'FF16A34A' }; 
+                    }
+                });
+            }
+        });
+
+        worksheet.views = [{ state: 'frozen', xSplit: 0, ySplit: 1 }];
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const exportFileName = generateDynamicFilename();
+        saveAs(new Blob([buffer]), exportFileName);
+        
+        Swal.fire('Export Successful', `File downloaded: ${exportFileName}`, 'success');
+
+    } catch (e) { 
+        console.error(e); 
+        Swal.fire('Export Error', 'Export failed: ' + e.message, 'error'); 
+    } 
+    finally { 
+        btn.innerHTML = oldH; 
+        btn.disabled = false; 
+    }
+}
+</script>
+</body>
+</html>

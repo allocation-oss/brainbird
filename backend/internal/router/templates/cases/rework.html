@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rework Cases Console | Brain Bird</title>
+        <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+    /* ========================================================
+       DASHBOARD DESIGN SYSTEM - UNIFIED THEME
+       ======================================================== */
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+
+        /* Compatibility aliases */
+        --primary: var(--brand);
+        --primary-light: var(--brand-hover);
+        --secondary: var(--muted);
+        --success: var(--green);
+        --danger: var(--red);
+        --border: var(--line);
+        --neutral-bg: var(--canvas);
+        --neutral-border: var(--line);
+        --text-dark: var(--ink);
+        --text-muted: var(--muted);
+        --slate-base: var(--canvas);
+        --slate-surface: var(--surface);
+        --brand-primary: var(--brand);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+        background: var(--canvas);
+    }
+
+    .app-main {
+        margin-left: 0;
+        flex-grow: 1;
+        background-color: var(--canvas);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .app-content {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 22px 26px 26px;
+        flex: 1;
+    }
+
+    /* TOP HEADER */
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        min-height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 10px 28px;
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 4px rgba(20, 34, 48, 0.03);
+    }
+
+    .header-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .header-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--brand);
+    }
+
+    .header-btn-danger {
+        color: var(--red);
+        border-color: rgba(179, 59, 66, 0.2);
+    }
+    .header-btn-danger:hover {
+        background: #fdf2f2;
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 14px;
+        border-left: 1px solid var(--line);
+    }
+
+    .profile-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        background: var(--brand);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .profile-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .profile-name {
+        font-weight: 650;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .profile-role {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    /* SIDEBAR */
+    .app-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-260px);
+        transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+        box-shadow: 4px 0 24px rgba(20, 34, 48, 0.08);
+        z-index: 1040;
+    }
+
+    .app-sidebar:hover, .app-sidebar.open, .sidebar-hover-notch:hover + .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-hover-notch {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 58px;
+        background-color: var(--brand);
+        color: #ffffff;
+        border: 0;
+        border-radius: 0 9px 9px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1041;
+        box-shadow: 2px 0 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .sidebar-brand {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-brand img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        border-radius: 7px;
+    }
+
+    .sidebar-brand .title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ink);
+    }
+
+    .sidebar-menu {
+        padding: 16px 12px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .menu-label {
+        padding: 0 10px 8px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .nav-item-link {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        margin-bottom: 3px;
+        border-radius: 7px;
+        color: var(--ink);
+        background: transparent;
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .nav-item-link:hover {
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .nav-item-link.active {
+        color: var(--brand);
+        background: #eaf1ff;
+        font-weight: 700;
+    }
+
+    .nav-item-link i {
+        width: 18px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .nav-item-link.active i {
+        color: var(--brand);
+    }
+
+    /* PAGE TITLE BANNER */
+    .page-title-banner {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+        padding: 16px 22px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .page-title-banner h4 {
+        color: var(--ink) !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+
+    .page-title-banner h4 i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .page-title-banner p {
+        color: var(--muted) !important;
+        font-size: 12px !important;
+        margin: 3px 0 0 0 !important;
+    }
+
+    /* CARDS & PANELS */
+    .card, .form-card, .filter-card {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+    }
+
+    .card-header, .section-head {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    .card-title, .section-title {
+        color: var(--ink) !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .card-title i, .section-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .card-body, .section-body {
+        padding: 20px 24px !important;
+    }
+
+    .form-section {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        overflow: hidden !important;
+    }
+
+    /* FORM LABELS & INPUTS */
+    .form-label, .f-label {
+        font-size: 11px !important;
+        font-weight: 650 !important;
+        color: var(--muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 6px !important;
+        display: block !important;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--red) !important;
+    }
+
+    .form-control, .form-select {
+        font-size: 13.5px !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        color: var(--ink) !important;
+        background-color: #ffffff !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--brand) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+        outline: none !important;
+    }
+
+    .input-icon {
+        color: var(--muted) !important;
+    }
+
+    /* BUTTONS */
+    .btn-primary, .btn-magic, #finalSubmitBtn, #btnMasterSave, #btnConfirmExport {
+        background: var(--brand) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--brand) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-primary:hover, .btn-magic:hover, #finalSubmitBtn:hover, #btnMasterSave:hover, #btnConfirmExport:hover {
+        background: var(--brand-hover) !important;
+        border-color: var(--brand-hover) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    .btn-secondary, .btn-light, .btn-outline-secondary {
+        background: #ffffff !important;
+        color: var(--ink) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-secondary:hover, .btn-light:hover, .btn-outline-secondary:hover {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: var(--ink) !important;
+    }
+
+    .btn-danger, #reworkSubmitBtn {
+        background: var(--red) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--red) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-danger:hover, #reworkSubmitBtn:hover {
+        background: #991b1b !important;
+        border-color: #991b1b !important;
+        color: #ffffff !important;
+    }
+
+    /* MODALS */
+    .modal-content {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 12px 36px rgba(20, 34, 48, 0.12) !important;
+    }
+
+    .modal-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 14px 20px !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title {
+        font-size: 15px !important;
+        font-weight: 650 !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .modal-footer {
+        background: #f8fafc !important;
+        border-top: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    /* TABLES */
+    .table thead th {
+        background: #f8fafc !important;
+        color: var(--muted) !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid var(--line) !important;
+        border-top: none !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--line) !important;
+        color: var(--ink) !important;
+        font-size: 13px !important;
+        vertical-align: middle !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody tr:hover td {
+        background: #fbfcfe !important;
+    }
+
+    /* BADGES */
+    .badge {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        border-radius: 999px !important;
+        padding: 3px 9px !important;
+    }
+    .badge.bg-success, .badge.status-complete {
+        background: #eaf8f1 !important;
+        color: var(--green) !important;
+        border: 1px solid rgba(22, 132, 91, 0.2) !important;
+    }
+    .badge.bg-danger, .badge.status-rework {
+        background: #fdf2f2 !important;
+        color: var(--red) !important;
+        border: 1px solid rgba(179, 59, 66, 0.2) !important;
+    }
+    .badge.bg-warning {
+        background: #fef8ee !important;
+        color: var(--amber) !important;
+        border: 1px solid rgba(170, 105, 0, 0.2) !important;
+    }
+    .badge.bg-light {
+        background: #f1f5f9 !important;
+        color: var(--muted) !important;
+        border: 1px solid var(--line) !important;
+    }
+
+    /* Autocomplete Dropdown */
+    .autocomplete-dropdown { 
+        position: absolute; 
+        z-index: 1000; 
+        background: #fff; 
+        width: 100%; 
+        max-height: 250px; 
+        overflow-y: auto; 
+        box-shadow: var(--shadow); 
+        border-radius: 0 0 8px 8px; 
+        border: 1px solid var(--line); 
+        border-top: none; 
+        padding: 0; 
+        margin: 0; 
+        list-style: none; 
+        top: 100%; 
+        left: 0; 
+    }
+    .autocomplete-item { 
+        padding: 10px 14px; 
+        cursor: pointer; 
+        border-bottom: 1px solid #f1f5f9; 
+        font-size: 13px; 
+        font-weight: 600; 
+        color: var(--ink); 
+        transition: all 0.15s; 
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: var(--brand-light); color: var(--brand); }
+</style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+
+
+        <div class="app-content">
+            <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-3 shadow-sm page-title-banner">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark"><i class="fa-solid fa-clock-rotate-left me-2"></i> Case Rework Dispatch Console</h4>
+                    <p class="text-muted m-0 small">Select Claim Number and Insurance to send completed cases into Rework pipeline</p>
+                </div>
+                
+            </div>
+
+            <div class="card p-4">
+                <form id="reworkForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Claim Number *</label>
+                        <input type="text" class="form-control " id="rework_claim_no" placeholder="Enter Claim Number..." required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Insurance Company</label>
+                        <select class="form-select" id="rework_insurance">
+                            <option value="">-- Select Insurance --</option>
+                            {{INSURERS_OPTIONS}}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Rework Reason *</label>
+                        <input type="text" class="form-control " id="rework_reason_text" placeholder="Specify why case is being reworked..." required>
+                    </div>
+                </form>
+
+                <div class="mt-4 border-top pt-3 text-end">
+                    
+                    <button class="btn btn-primary fw-bold px-4 py-2" onclick="executeRework()"><i class="fa-solid fa-clock-rotate-left me-1"></i> Submit to Rework</button>
+                    
+                </div>
+            </div>
+        </div>
+
+        
+
+{{FOOTER_PARTIAL}}
+
+
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<script>
+    function executeRework() {
+        let claimNo = $('#rework_claim_no').val();
+        let insId = $('#rework_insurance').val();
+        let reason = $('#rework_reason_text').val();
+        if(!claimNo || !reason) {
+            Swal.fire('Required Fields', 'Claim Number and Rework Reason are required.', 'warning');
+            return;
+        }
+
+        $.post('/api/cases/action', { claim_number: claimNo, insurance_id: insId, action: 'send_to_rework', rework_reason: reason }, function(res) {
+            if(res.status === 'success') {
+                Swal.fire('Dispatched', res.message, 'success').then(() => window.location.href = '/dashboard');
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        }, 'json');
+    }
+</script>
+</body>
+</html>

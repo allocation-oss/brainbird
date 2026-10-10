@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Architecture & Module Manager | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .stats-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: var(--shadow);
+    }
+    .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+
+    .table-container-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    .filter-bar {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+        background: #fdfdfd;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .pro-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .pro-table th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+    }
+    .pro-table td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+        vertical-align: middle;
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .pro-table tr:hover td { background: #fbfcfe; }
+
+    .slug-badge {
+        font-family: monospace;
+        font-size: 12px;
+        background: #f1f5f9;
+        color: #2563eb;
+        padding: 4px 8px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .status-active { background: #dcfce7; color: #15803d; }
+    .status-inactive { background: #fee2e2; color: #b91c1c; }
+
+    .icon-preview-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: var(--brand-light);
+        color: var(--brand);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Suite Navigation Bar -->
+            <div class="suite-nav-bar">
+                <a href="/settings/audit_logs" class="suite-nav-item"><i class="fa-solid fa-clipboard-list"></i> System Audit Logs</a>
+                <a href="/menu_manager" class="suite-nav-item active"><i class="fa-solid fa-bars-staggered"></i> Menu Manager</a>
+                <a href="/permission_manager" class="suite-nav-item"><i class="fa-solid fa-shield-halved"></i> Permission Manager</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-bars-staggered text-primary me-2"></i> Menu Architecture & Modules</h4>
+                    <span class="muted">Manage sidebar modules, navigation hierarchy, routes, icon tokens, and operational status</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow-sm" onclick="openAddModal()">
+                        <i class="fa-solid fa-circle-plus me-1"></i> New Module
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" onclick="loadMenus()">
+                        <i class="fa-solid fa-rotate me-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats KPI Cards -->
+            <div class="stats-card-grid">
+                <div class="stat-card">
+                    <div class="stat-title">Total Modules</div>
+                    <div class="stat-val" id="statTotalModules">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--brand)">Root / Parent Menus</div>
+                    <div class="stat-val" style="color:var(--brand)" id="statRootMenus">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:#10b981">Sub-Items</div>
+                    <div class="stat-val" style="color:#10b981" id="statSubMenus">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:#f59e0b">Active Modules</div>
+                    <div class="stat-val" style="color:#f59e0b" id="statActiveModules">0</div>
+                </div>
+            </div>
+
+            <!-- Main Table Card -->
+            <div class="table-container-card">
+                <div class="filter-bar">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        <input type="text" id="searchInput" class="form-control form-control-sm border-0 bg-transparent" placeholder="Search modules by name, slug or icon..." style="min-width: 280px;" oninput="filterTable()">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill font-monospace" id="recordCountBadge">0 Items</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">ID</th>
+                                <th>Module Name / Hierarchy</th>
+                                <th>Slug / Route</th>
+                                <th>Icon</th>
+                                <th>Parent Level</th>
+                                <th>Sort Order</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="menuTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading menu configuration...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </div>
+</div>
+
+<!-- Modal: Add / Edit Module -->
+<div class="modal fade" id="menuModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom px-4 py-3">
+                <h5 class="modal-title fw-bold" id="modalTitle"><i class="fa-solid fa-layer-group text-primary me-2"></i> Manage Module</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="menuForm" onsubmit="saveMenu(event)">
+                <div class="modal-body px-4 py-3">
+                    <input type="hidden" id="menu_id" name="menu_id" value="0">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Module Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control rounded-3" id="module_name" name="module_name" placeholder="e.g. Attendance Matrix" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Slug / Route URL <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted">/</span>
+                            <input type="text" class="form-control rounded-end-3" id="module_slug" name="module_slug" placeholder="e.g. attendance/manual_matrix" required>
+                        </div>
+                        <small class="text-muted">Use <code>#</code> if this item is only an expand/collapse parent category.</small>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Icon Class</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light" id="iconPreviewContainer"><i class="fa-solid fa-circle" id="formIconPreview"></i></span>
+                                <input type="text" class="form-control" id="icon_class" name="icon_class" value="fa-solid fa-circle" oninput="updateIconPreview(this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Quick Preset</label>
+                            <select class="form-select" onchange="applyIconPreset(this.value)">
+                                <option value="">Select Icon...</option>
+                                <option value="fa-solid fa-gauge">Dashboard</option>
+                                <option value="fa-solid fa-users">Users</option>
+                                <option value="fa-solid fa-sitemap">Staff Mapping</option>
+                                <option value="fa-solid fa-shield-halved">Dispatch</option>
+                                <option value="fa-solid fa-clipboard-user">Attendance</option>
+                                <option value="fa-solid fa-chart-pie">Analytics</option>
+                                <option value="fa-solid fa-gear">Settings</option>
+                                <option value="fa-solid fa-clipboard-list">Audit Logs</option>
+                                <option value="fa-solid fa-file-invoice-dollar">Payout</option>
+                                <option value="fa-solid fa-envelope-open-text">Letters</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Parent Menu</label>
+                            <select class="form-select rounded-3" id="parent_id" name="parent_id">
+                                <option value="0">Root Category (No Parent)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Sort Order</label>
+                            <input type="number" class="form-control rounded-3" id="sort_order" name="sort_order" value="0">
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Status</label>
+                        <select class="form-select rounded-3" id="status" name="status">
+                            <option value="active">Active (Visible)</option>
+                            <option value="inactive">Inactive (Hidden)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" id="submitBtn">
+                        <i class="fa-solid fa-check me-1"></i> Save Module
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let allMenus = [];
+let menuModalInstance = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    menuModalInstance = new bootstrap.Modal(document.getElementById('menuModal'));
+    loadMenus();
+
+    const notch = document.getElementById('notchToggleBtn');
+    const sidebar = document.querySelector('.app-sidebar');
+    if (notch && sidebar) {
+        notch.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+    }
+});
+
+function updateIconPreview(cls) {
+    const el = document.getElementById('formIconPreview');
+    if (el) {
+        el.className = cls || 'fa-solid fa-circle';
+    }
+}
+
+function applyIconPreset(val) {
+    if (!val) return;
+    document.getElementById('icon_class').value = val;
+    updateIconPreview(val);
+}
+
+async function loadMenus() {
+    try {
+        const res = await fetch('/api/menu_manager/list');
+        const json = await res.json();
+        if (json.status === 'success') {
+            allMenus = json.data || [];
+            updateStats();
+            renderTable(allMenus);
+            populateParentDropdown();
+        } else {
+            Swal.fire('Error', json.message || 'Failed to load menus', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Connection Error', 'Could not reach server', 'error');
+    }
+}
+
+function updateStats() {
+    const total = allMenus.length;
+    const roots = allMenus.filter(m => !m.parent_id).length;
+    const subs = allMenus.filter(m => !!m.parent_id).length;
+    const active = allMenus.filter(m => m.status === 'active').length;
+
+    document.getElementById('statTotalModules').textContent = total;
+    document.getElementById('statRootMenus').textContent = roots;
+    document.getElementById('statSubMenus').textContent = subs;
+    document.getElementById('statActiveModules').textContent = active;
+}
+
+function populateParentDropdown() {
+    const sel = document.getElementById('parent_id');
+    sel.innerHTML = '<option value="0">Root Category (No Parent)</option>';
+    allMenus.filter(m => !m.parent_id).forEach(p => {
+        sel.innerHTML += `<option value="${p.id}">${escapeHtml(p.menu_name)}</option>`;
+    });
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('menuTableBody');
+    document.getElementById('recordCountBadge').textContent = `${data.length} Items`;
+
+    if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-5 text-muted">No modules found matching your query.</td></tr>`;
+        return;
+    }
+
+    // Build hierarchy representation
+    const parentMap = {};
+    data.forEach(m => {
+        if (!m.parent_id) {
+            parentMap[m.id] = { ...m, children: [] };
+        }
+    });
+    data.forEach(m => {
+        if (m.parent_id && parentMap[m.parent_id]) {
+            parentMap[m.parent_id].children.push(m);
+        }
+    });
+
+    let html = '';
+    
+    // Render roots and their children in order
+    const roots = data.filter(m => !m.parent_id);
+    const orphans = data.filter(m => m.parent_id && !parentMap[m.parent_id]);
+
+    const renderRow = (item, isChild, parentName) => {
+        const indent = isChild ? '<span class="text-muted me-2" style="margin-left: 24px;">└─</span>' : '';
+        const levelBadge = isChild 
+            ? `<span class="badge bg-light text-muted border">Sub of: ${escapeHtml(parentName)}</span>`
+            : `<span class="badge bg-primary-subtle text-primary border border-primary-subtle">Root Menu</span>`;
+        const statusBadge = item.status === 'active' 
+            ? `<span class="status-pill status-active"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Active</span>`
+            : `<span class="status-pill status-inactive"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Inactive</span>`;
+
+        return `
+            <tr>
+                <td class="text-muted fw-bold">#${item.id}</td>
+                <td class="fw-semibold">
+                    ${indent}
+                    <span class="text-dark">${escapeHtml(item.menu_name)}</span>
+                </td>
+                <td><span class="slug-badge">${escapeHtml(item.menu_slug)}</span></td>
+                <td>
+                    <div class="icon-preview-box">
+                        <i class="${escapeHtml(item.icon)}"></i>
+                    </div>
+                </td>
+                <td>${levelBadge}</td>
+                <td><span class="badge bg-light text-dark border">${item.sort_order}</span></td>
+                <td>${statusBadge}</td>
+                <td style="text-align: right;">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="openEditModal(${item.id})" title="Edit Module">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteMenu(${item.id}, '${escapeHtml(item.menu_name)}')" title="Delete Module">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    };
+
+    roots.forEach(root => {
+        html += renderRow(root, false, '');
+        if (parentMap[root.id] && parentMap[root.id].children) {
+            parentMap[root.id].children.forEach(ch => {
+                html += renderRow(ch, true, root.menu_name);
+            });
+        }
+    });
+
+    orphans.forEach(orp => {
+        html += renderRow(orp, true, `Parent #${orp.parent_id}`);
+    });
+
+    tbody.innerHTML = html;
+}
+
+function filterTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (!q) {
+        renderTable(allMenus);
+        return;
+    }
+    const filtered = allMenus.filter(m => 
+        (m.menu_name && m.menu_name.toLowerCase().includes(q)) ||
+        (m.menu_slug && m.menu_slug.toLowerCase().includes(q)) ||
+        (m.icon && m.icon.toLowerCase().includes(q))
+    );
+    renderTable(filtered);
+}
+
+function openAddModal() {
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-circle-plus text-primary me-2"></i> Create New Module';
+    document.getElementById('menu_id').value = '0';
+    document.getElementById('module_name').value = '';
+    document.getElementById('module_slug').value = '';
+    document.getElementById('icon_class').value = 'fa-solid fa-circle';
+    document.getElementById('parent_id').value = '0';
+    document.getElementById('sort_order').value = (allMenus.length * 10) + 10;
+    document.getElementById('status').value = 'active';
+    updateIconPreview('fa-solid fa-circle');
+    menuModalInstance.show();
+}
+
+function openEditModal(id) {
+    const item = allMenus.find(m => m.id === id);
+    if (!item) return;
+
+    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-primary me-2"></i> Edit Module Configuration';
+    document.getElementById('menu_id').value = item.id;
+    document.getElementById('module_name').value = item.menu_name;
+    document.getElementById('module_slug').value = item.menu_slug;
+    document.getElementById('icon_class').value = item.icon || 'fa-solid fa-circle';
+    document.getElementById('parent_id').value = item.parent_id || '0';
+    document.getElementById('sort_order').value = item.sort_order;
+    document.getElementById('status').value = item.status;
+    updateIconPreview(item.icon);
+    menuModalInstance.show();
+}
+
+async function saveMenu(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    const formData = new FormData(document.getElementById('menuForm'));
+
+    try {
+        const res = await fetch('/api/menu_manager/save', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+            menuModalInstance.hide();
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: json.message || 'Module saved successfully',
+                timer: 1500,
+                showConfirmButton: false
+            });
+            await loadMenus();
+        } else {
+            Swal.fire('Error', json.message || 'Failed to save module', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Connection Error', 'Could not save module', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Save Module';
+    }
+}
+
+async function deleteMenu(id, name) {
+    const result = await Swal.fire({
+        title: 'Delete Module?',
+        text: `Are you sure you want to remove "${name}"? If it has submenus, they and associated permissions will also be deleted!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, Delete Permanently',
+        cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('id', id);
+
+        const res = await fetch('/api/menu_manager/delete', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Deleted!',
+                text: json.message,
+                timer: 1500,
+                showConfirmButton: false
+            });
+            await loadMenus();
+        } else {
+            Swal.fire('Error', json.message || 'Failed to delete module', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Connection Error', 'Could not delete module', 'error');
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+</script>
+
+</body>
+</html>

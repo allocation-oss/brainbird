@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Entry & Edit Matrix | Brain Bird</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+        <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    /* ========================================================
+       DASHBOARD DESIGN SYSTEM - UNIFIED THEME
+       ======================================================== */
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+
+        /* Compatibility aliases */
+        --primary: var(--brand);
+        --primary-light: var(--brand-hover);
+        --secondary: var(--muted);
+        --success: var(--green);
+        --danger: var(--red);
+        --border: var(--line);
+        --neutral-bg: var(--canvas);
+        --neutral-border: var(--line);
+        --text-dark: var(--ink);
+        --text-muted: var(--muted);
+        --slate-base: var(--canvas);
+        --slate-surface: var(--surface);
+        --brand-primary: var(--brand);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper {
+        display: flex;
+        min-height: 100vh;
+        position: relative;
+        background: var(--canvas);
+    }
+
+    .app-main {
+        margin-left: 0;
+        flex-grow: 1;
+        background-color: var(--canvas);
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .app-content {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 22px 26px 26px;
+        flex: 1;
+    }
+
+    /* TOP HEADER */
+    .app-header {
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        min-height: 70px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        padding: 10px 28px;
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom: 1px solid var(--line);
+        box-shadow: 0 1px 4px rgba(20, 34, 48, 0.03);
+    }
+
+    .header-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #ffffff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .header-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: var(--brand);
+    }
+
+    .header-btn-danger {
+        color: var(--red);
+        border-color: rgba(179, 59, 66, 0.2);
+    }
+    .header-btn-danger:hover {
+        background: #fdf2f2;
+        border-color: var(--red);
+        color: var(--red);
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 14px;
+        border-left: 1px solid var(--line);
+    }
+
+    .profile-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #ffffff;
+        background: var(--brand);
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .profile-copy {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+    }
+
+    .profile-name {
+        font-weight: 650;
+        font-size: 13px;
+        color: var(--ink);
+    }
+
+    .profile-role {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    /* SIDEBAR */
+    .app-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 260px;
+        display: flex;
+        flex-direction: column;
+        transform: translateX(-260px);
+        transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+        box-shadow: 4px 0 24px rgba(20, 34, 48, 0.08);
+        z-index: 1040;
+    }
+
+    .app-sidebar:hover, .app-sidebar.open, .sidebar-hover-notch:hover + .app-sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar-hover-notch {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 58px;
+        background-color: var(--brand);
+        color: #ffffff;
+        border: 0;
+        border-radius: 0 9px 9px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1041;
+        box-shadow: 2px 0 10px rgba(37, 99, 235, 0.25);
+    }
+
+    .sidebar-brand {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sidebar-brand img {
+        width: 38px;
+        height: 38px;
+        object-fit: contain;
+        border-radius: 7px;
+    }
+
+    .sidebar-brand .title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ink);
+    }
+
+    .sidebar-menu {
+        padding: 16px 12px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .menu-label {
+        padding: 0 10px 8px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .nav-item-link {
+        width: 100%;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 9px 12px;
+        margin-bottom: 3px;
+        border-radius: 7px;
+        color: var(--ink);
+        background: transparent;
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .nav-item-link:hover {
+        color: var(--brand);
+        background: var(--brand-light);
+    }
+
+    .nav-item-link.active {
+        color: var(--brand);
+        background: #eaf1ff;
+        font-weight: 700;
+    }
+
+    .nav-item-link i {
+        width: 18px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .nav-item-link.active i {
+        color: var(--brand);
+    }
+
+    /* PAGE TITLE BANNER */
+    .page-title-banner {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+        padding: 16px 22px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .page-title-banner h4 {
+        color: var(--ink) !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+    }
+
+    .page-title-banner h4 i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .page-title-banner p {
+        color: var(--muted) !important;
+        font-size: 12px !important;
+        margin: 3px 0 0 0 !important;
+    }
+
+    /* CARDS & PANELS */
+    .card, .form-card, .filter-card {
+        background: var(--surface) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: var(--shadow) !important;
+    }
+
+    .card-header, .section-head {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    .card-title, .section-title {
+        color: var(--ink) !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .card-title i, .section-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .card-body, .section-body {
+        padding: 20px 24px !important;
+    }
+
+    .form-section {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        margin-bottom: 20px !important;
+        overflow: hidden !important;
+    }
+
+    /* FORM LABELS & INPUTS */
+    .form-label, .f-label {
+        font-size: 11px !important;
+        font-weight: 650 !important;
+        color: var(--muted) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 6px !important;
+        display: block !important;
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--red) !important;
+    }
+
+    .form-control, .form-select {
+        font-size: 13.5px !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        color: var(--ink) !important;
+        background-color: #ffffff !important;
+        font-weight: 500 !important;
+        padding: 8px 12px !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--brand) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
+        outline: none !important;
+    }
+
+    .input-icon {
+        color: var(--muted) !important;
+    }
+
+    /* BUTTONS */
+    .btn-primary, .btn-magic, #finalSubmitBtn, #btnMasterSave, #btnConfirmExport {
+        background: var(--brand) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--brand) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-primary:hover, .btn-magic:hover, #finalSubmitBtn:hover, #btnMasterSave:hover, #btnConfirmExport:hover {
+        background: var(--brand-hover) !important;
+        border-color: var(--brand-hover) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    .btn-secondary, .btn-light, .btn-outline-secondary {
+        background: #ffffff !important;
+        color: var(--ink) !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-secondary:hover, .btn-light:hover, .btn-outline-secondary:hover {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: var(--ink) !important;
+    }
+
+    .btn-danger, #reworkSubmitBtn {
+        background: var(--red) !important;
+        color: #ffffff !important;
+        border: 1px solid var(--red) !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        padding: 8px 18px !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-danger:hover, #reworkSubmitBtn:hover {
+        background: #991b1b !important;
+        border-color: #991b1b !important;
+        color: #ffffff !important;
+    }
+
+    /* MODALS */
+    .modal-content {
+        background: #ffffff !important;
+        border: 1px solid var(--line) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 12px 36px rgba(20, 34, 48, 0.12) !important;
+    }
+
+    .modal-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid var(--line) !important;
+        padding: 14px 20px !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title {
+        font-size: 15px !important;
+        font-weight: 650 !important;
+        color: var(--ink) !important;
+    }
+
+    .modal-title i {
+        color: var(--brand) !important;
+        margin-right: 8px !important;
+    }
+
+    .modal-footer {
+        background: #f8fafc !important;
+        border-top: 1px solid var(--line) !important;
+        padding: 12px 20px !important;
+    }
+
+    /* TABLES */
+    .table thead th {
+        background: #f8fafc !important;
+        color: var(--muted) !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        border-bottom: 1px solid var(--line) !important;
+        border-top: none !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody td {
+        border-bottom: 1px solid var(--line) !important;
+        color: var(--ink) !important;
+        font-size: 13px !important;
+        vertical-align: middle !important;
+        padding: 10px 14px !important;
+    }
+
+    .table tbody tr:hover td {
+        background: #fbfcfe !important;
+    }
+
+    /* BADGES */
+    .badge {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        border-radius: 999px !important;
+        padding: 3px 9px !important;
+    }
+    .badge.bg-success, .badge.status-complete {
+        background: #eaf8f1 !important;
+        color: var(--green) !important;
+        border: 1px solid rgba(22, 132, 91, 0.2) !important;
+    }
+    .badge.bg-danger, .badge.status-rework {
+        background: #fdf2f2 !important;
+        color: var(--red) !important;
+        border: 1px solid rgba(179, 59, 66, 0.2) !important;
+    }
+    .badge.bg-warning {
+        background: #fef8ee !important;
+        color: var(--amber) !important;
+        border: 1px solid rgba(170, 105, 0, 0.2) !important;
+    }
+    .badge.bg-light {
+        background: #f1f5f9 !important;
+        color: var(--muted) !important;
+        border: 1px solid var(--line) !important;
+    }
+
+    /* Autocomplete Dropdown */
+    .autocomplete-dropdown { 
+        position: absolute; 
+        z-index: 1000; 
+        background: #fff; 
+        width: 100%; 
+        max-height: 250px; 
+        overflow-y: auto; 
+        box-shadow: var(--shadow); 
+        border-radius: 0 0 8px 8px; 
+        border: 1px solid var(--line); 
+        border-top: none; 
+        padding: 0; 
+        margin: 0; 
+        list-style: none; 
+        top: 100%; 
+        left: 0; 
+    }
+    .autocomplete-item { 
+        padding: 10px 14px; 
+        cursor: pointer; 
+        border-bottom: 1px solid #f1f5f9; 
+        font-size: 13px; 
+        font-weight: 600; 
+        color: var(--ink); 
+        transition: all 0.15s; 
+    }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover { background: var(--brand-light); color: var(--brand); }
+
+    /* FORM FLEX ROWS & INPUT WRAPPERS */
+    .form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+    .form-group { flex: 1; min-width: 220px; }
+    .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+    .input-icon { position: absolute; left: 14px; color: var(--muted) !important; font-size: 16px; pointer-events: none; z-index: 5; }
+    .input-wrapper .form-control, .input-wrapper .form-select { padding-left: 42px !important; }
+
+    #topAlertContainer {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        width: 90%;
+        max-width: 600px;
+        display: none;
+    }
+    .top-alert-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+</style>
+</head>
+<body>
+
+<!-- REAL TIME TOP ALERT CONTAINER -->
+<div id="topAlertContainer" style="display: none;">
+    <div id="topAlertBox" class="top-alert-box bg-danger text-white">
+        <div id="topAlertMessage"><i class="bi bi-exclamation-triangle-fill me-2"></i> Error Message</div>
+        <button type="button" class="btn-close btn-close-white ms-3" onclick="$('#topAlertContainer').fadeOut()"></button>
+    </div>
+</div>
+
+<<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+
+
+        <div class="app-content">
+
+            <div class="d-flex align-items-center justify-content-between mb-4 bg-white p-3 rounded-3 shadow-sm page-title-banner mx-auto" style="max-width: 1100px;" id="topHeaderBox">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark" id="headerTitle">Case Matrix Form</h4>
+                    <p class="text-muted m-0 small fw-medium">Smart Guided Data Entry & Edit System</p>
+                </div>
+                
+            </div>
+
+            <div class="form-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h1 class="card-title" id="formMainTitle"><i class="bi bi-folder-plus text-primary me-2"></i> Register New Case</h1>
+                    <span class="badge bg-light text-dark border px-3 py-2 fs-6 shadow-sm" id="displayClaimNo">Mode: Create</span>
+                </div>
+                <div class="card-body">
+                    
+                    <form id="mainMatrixForm" onsubmit="event.preventDefault(); verifyCaseData('submit');">
+                        <input type="hidden" id="m_case_id" value="{{CASE_ID}}">
+                        
+                        <!-- Section 1: Identity Profiling -->
+                        <div class="form-section">
+                            <div class="section-head"><h5 class="section-title"><i class="bi bi-shield-check me-2"></i> Section 1: Identity Profiling</h5></div>
+                            <div class="section-body">
+                                <div class="form-row">
+                                    <div class="form-group w-100">
+                                        <label class="form-label required">Allocation Date & Time</label>
+                                        <div class="input-wrapper mt-2"><i class="bi bi-calendar-event input-icon"></i><input type="datetime-local" id="m_alloc_date" name="allocation_date" class="form-control" required></div>
+                                    </div>
+                                </div>
+                                <div class="form-row mt-3">
+                                    <div class="form-group">
+                                        <label class="form-label required">Claim Number</label>
+                                        <div class="input-wrapper position-relative">
+                                            <i class="bi bi-hash input-icon"></i>
+                                            <input type="text" class="form-control" id="m_claim_no" required autocomplete="off" placeholder="Start typing to check duplicates...">
+                                            <ul id="claimSuggestions" class="autocomplete-dropdown" style="display:none;"></ul>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required">Insurance Company</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-building input-icon"></i>
+                                            <select class="form-control" id="m_insurance" required>
+                                                <option value="">-- Select Insurance --</option>
+                                                {{INSURERS_OPTIONS}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required">Case Type</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-folder2-open input-icon"></i>
+                                            <select class="form-control" id="m_type" required>
+                                                <option value="">-- Select Insurance First --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required">Sub Type</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-tags input-icon"></i>
+                                            <select class="form-control" id="m_subtype" required>
+                                                <option value="">-- Select Type First --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2: Financials & Policy -->
+                        <div class="form-section">
+                            <div class="section-head"><h5 class="section-title"><i class="fa-solid fa-file-shield me-2"></i> Section 2: Financials & Policy</h5></div>
+                            <div class="section-body">
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Insured Name</label><div class="input-wrapper"><i class="bi bi-person-badge input-icon"></i><input type="text" id="m_insured_name" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Insured Mobile</label><div class="input-wrapper"><i class="bi bi-phone-vibrating input-icon"></i><input type="text" id="m_insured_mobile" class="form-control" maxlength="10"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Policy Number</label><div class="input-wrapper"><i class="bi bi-card-heading input-icon"></i><input type="text" id="m_policy_no" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Assured Amount</label><div class="input-wrapper"><i class="bi bi-currency-rupee input-icon"></i><input type="number" id="m_assured_amount" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Claim Amount</label><div class="input-wrapper"><i class="bi bi-cash-stack input-icon"></i><input type="number" id="m_claim_amount" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row border-top pt-3 mt-3">
+                                    <div class="form-group"><label class="form-label">Policy Type</label><div class="input-wrapper"><i class="bi bi-shield-check input-icon"></i><input type="text" id="m_policy_type" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Policy Start Date</label><div class="input-wrapper"><i class="bi bi-calendar input-icon"></i><input type="date" id="m_policy_start_date" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Policy End Date</label><div class="input-wrapper"><i class="bi bi-calendar input-icon"></i><input type="date" id="m_policy_end_date" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">First Policy Inception Date</label><div class="input-wrapper"><i class="bi bi-calendar3 input-icon"></i><input type="date" id="m_policy_inception_date" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Portability Details</label><div class="input-wrapper"><i class="bi bi-arrow-left-right input-icon"></i><input type="text" id="m_portability_details" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group w-100"><label class="form-label">Previous Claim History</label><div class="input-wrapper"><i class="bi bi-clock-history input-icon"></i><input type="text" id="m_previous_claim_history" class="form-control"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3: Patient Details -->
+                        <div class="form-section">
+                            <div class="section-head d-flex justify-content-between align-items-center">
+                                <h5 class="section-title"><i class="bi bi-person-lines-fill me-2"></i> Section 3: Patient Details</h5>
+                                <!-- AUTO-FILL CHECKBOX 1 -->
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="copyInsuredToPatient">
+                                    <label class="form-check-label fw-semibold small" for="copyInsuredToPatient">Same as Insured Details</label>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label required">Patient Name</label><div class="input-wrapper"><i class="bi bi-person input-icon"></i><input type="text" id="m_pat_name" class="form-control" required></div></div>
+                                    <div class="form-group"><label class="form-label required">Mobile Number</label><div class="input-wrapper"><i class="bi bi-phone input-icon"></i><input type="text" id="m_pat_mobile" class="form-control" required maxlength="10"></div></div>
+                                </div>
+                                <div class="form-row pt-2">
+                                    <div class="form-group"><label class="form-label">Patient Age</label><div class="input-wrapper"><i class="bi bi-123 input-icon"></i><input type="text" id="m_patient_age" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Gender</label><div class="input-wrapper"><i class="bi bi-gender-ambiguous input-icon"></i><select class="form-control" id="m_gender"><option value="">-- Select --</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Relationship with Insured</label><div class="input-wrapper"><i class="bi bi-people input-icon"></i><input type="text" id="m_relationship_with_insured" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Occupation</label><div class="input-wrapper"><i class="bi bi-briefcase input-icon"></i><input type="text" id="m_patient_occupation" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Date of Joining (DOJ)</label><div class="input-wrapper"><i class="bi bi-calendar-plus input-icon"></i><input type="date" id="m_doj" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row border-top pt-3 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Patient State</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-map input-icon"></i>
+                                            <select class="form-control" id="m_patient_state_id" onchange="loadCities(this.value, '#m_patient_city_id')">
+                                                <option value="">-- Select State --</option>
+                                                {{STATES_OPTIONS}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Patient City / District</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-geo-fill input-icon"></i>
+                                            <select class="form-control" id="m_patient_city_id">
+                                                <option value="">-- Select State First --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group"><label class="form-label">Pin Code</label><div class="input-wrapper"><i class="bi bi-pin-map input-icon"></i><input type="text" id="m_patient_pin_code" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row"><div class="form-group w-100"><label class="form-label">Patient Address</label><div class="input-wrapper"><i class="bi bi-geo-alt input-icon"></i><input type="text" id="m_patient_address" class="form-control"></div></div></div>
+                                <div class="form-row border-top pt-3">
+                                    <div class="form-group"><label class="form-label">Aadhaar Card Number</label><div class="input-wrapper"><i class="bi bi-person-vcard input-icon"></i><input type="text" id="m_pat_aadhar" class="form-control" maxlength="12"></div></div>
+                                    <div class="form-group"><label class="form-label">Other Details</label><div class="input-wrapper"><i class="bi bi-card-text input-icon"></i><input type="text" id="m_other_details" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label required">Diagnosis</label><div class="input-wrapper"><i class="bi bi-clipboard2-pulse input-icon"></i><input type="text" id="m_diagnosis" class="form-control" required></div></div>
+                                    <div class="form-group"><label class="form-label required">Trigger Reason</label><div class="input-wrapper"><i class="bi bi-lightning-charge input-icon"></i><input type="text" id="m_trigger" class="form-control" required></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: Facility Details -->
+                        <div class="form-section">
+                            <div class="section-head d-flex justify-content-between align-items-center">
+                                <h5 class="section-title"><i class="bi bi-hospital me-2"></i> Section 4: Facility Details</h5>
+                                <!-- AUTO-FILL CHECKBOX 2 -->
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="copyPatientToHospLocation">
+                                    <label class="form-check-label fw-semibold small" for="copyPatientToHospLocation">Same as Patient Location</label>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required">Hospital Name</label>
+                                        <div class="input-wrapper position-relative">
+                                            <i class="bi bi-h-square input-icon"></i>
+                                            <input type="text" id="m_hosp_name" class="form-control" required autocomplete="off" placeholder="Start typing hospital name...">
+                                            <ul id="hospSuggestions" class="autocomplete-dropdown" style="display:none;"></ul>
+                                        </div>
+                                    </div>
+                                    <div class="form-group"><label class="form-label">Hospital Address</label><div class="input-wrapper"><i class="bi bi-geo-alt input-icon"></i><input type="text" id="m_hosp_address" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label required">Hospital State (For AM/ALM Map)</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-map input-icon"></i>
+                                            <select class="form-control " id="m_hosp_state_id" onchange="loadCities(this.value, '#m_hosp_city_id')">
+                                                <option value="">-- Select Hospital State --</option>
+                                                {{STATES_OPTIONS}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label required">Hospital City / District</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-geo-fill input-icon"></i>
+                                            <select class="form-control " id="m_hosp_city_id" onchange="fetchManagers()">
+                                                <option value="">-- Select State First --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Hospital Registration No</label><div class="input-wrapper"><i class="bi bi-file-earmark-text input-icon"></i><input type="text" id="m_hospital_reg_no" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Pin Code</label><div class="input-wrapper"><i class="bi bi-pin-map input-icon"></i><input type="text" id="m_pin_code" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row border-top pt-3 mt-2">
+                                    <div class="form-group"><label class="form-label">Date of Admission (DOA)</label><div class="input-wrapper"><i class="bi bi-box-arrow-in-right input-icon"></i><input type="datetime-local" id="m_doa" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Date of Discharge (DOD)</label><div class="input-wrapper"><i class="bi bi-box-arrow-right input-icon"></i><input type="datetime-local" id="m_dod" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">MLC Number</label><div class="input-wrapper"><i class="bi bi-file-medical input-icon"></i><input type="text" id="m_mlc_number" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Accidental Claim</label><div class="input-wrapper"><i class="bi bi-car-front input-icon"></i><select class="form-control" id="m_accidental_claim"><option value="">-- Select --</option><option value="Yes">Yes</option><option value="No">No</option></select></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Plan of Management</label><div class="input-wrapper"><i class="bi bi-journal-medical input-icon"></i><input type="text" id="m_plan_of_management" class="form-control"></div></div>
+                                    <div class="form-group"><label class="form-label">Collected Documents</label><div class="input-wrapper"><i class="bi bi-files input-icon"></i><input type="text" id="m_collected_documents" class="form-control"></div></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label class="form-label">Geographical Distance</label><div class="input-wrapper"><i class="bi bi-map input-icon"></i><input type="text" id="m_geographical_distance" class="form-control"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5: Allocation Management -->
+                        <div class="form-section">
+                            <div class="section-head d-flex justify-content-between align-items-center">
+                                <h5 class="section-title"><i class="bi bi-diagram-3 me-2"></i> Section 5: Allocation Management</h5>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="fetchManagers()"><i class="bi bi-arrow-repeat me-1"></i> Auto-Fetch Managers</button>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Area Manager (AM / CM)</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-person-badge input-icon"></i>
+                                            <select class="form-control" id="m_cm">
+                                                <option value="">-- Select Area Manager --</option>
+                                            </select>
+                                        </div>
+                                        <div class="mt-1 text-end">
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold" onclick="openQuickMapModal('AM')">+ Quick Map</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Internal Case Manager (ICM)</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-person-bounding-box input-icon"></i>
+                                            <select class="form-control " id="m_icm">
+                                                <option value="">-- Select Internal Case Manager --</option>
+                                            </select>
+                                        </div>
+                                        <div class="mt-1 text-end">
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold " onclick="openQuickMapModal('ICM')">+ Quick Map</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label required">Allocation Manager (ALM)</label>
+                                        <div class="input-wrapper">
+                                            <i class="bi bi-person-workspace input-icon"></i>
+                                            <select class="form-control" id="m_alm" required>
+                                                <option value="">-- Select Allocation Mgr --</option>
+                                            </select>
+                                        </div>
+                                        <div class="mt-1 text-end">
+                                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold " onclick="openQuickMapModal('ALM')">+ Quick Map</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pb-3 d-flex gap-3">
+                            <button type="button" class="btn btn-primary flex-grow-1 py-2 px-4 fw-bold" id="finalSubmitBtn" onclick="verifyCaseData('submit')">
+                                <i class="bi bi-send-fill me-2"></i> Generate & Publish Complete Case
+                            </button>
+                            <button type="button" class="btn btn-danger flex-grow-1 py-2 px-4 fw-bold d-none" id="reworkSubmitBtn" onclick="verifyCaseData('rework')">
+                                <i class="bi bi-arrow-repeat me-2"></i> Send to Rework
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        
+        
+
+{{FOOTER_PARTIAL}}
+
+
+
+    </main>
+</div>
+
+<!-- Modal: Quick Manager Mapping -->
+<div class="modal fade" id="quickMapModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="quickMapTitle"><i class="bi bi-diagram-3 me-2"></i> Quick Manager Mapping</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="quickMapForm">
+                    <input type="hidden" id="qm_role_type" value="AM">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6" id="qm_ins_block">
+                            <label class="form-label fw-bold small text-uppercase">Insurance Company</label>
+                            <select class="form-select" id="qm_insurance_id">
+                                <option value="">-- Select Insurance --</option>
+                                {{INSURERS_OPTIONS}}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label required">Target Manager User</label>
+                            <select class="form-select  fw-bold" id="qm_user_id" required>
+                                <option value="">-- Select User --</option>
+                                {{USERS_OPTIONS}}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="qm_type_block">
+                            <label class="form-label fw-bold small text-uppercase">Case Type / Category</label>
+                            <select class="form-select" id="qm_type_id">
+                                <option value="">-- All Categories --</option>
+                                {{QM_TYPES_OPTIONS}}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="qm_subtype_block">
+                            <label class="form-label fw-bold small text-uppercase">Case Sub-Type</label>
+                            <select class="form-select" id="qm_sub_type_id">
+                                <option value="">-- All Sub-Types --</option>
+                                {{QM_SUBTYPES_OPTIONS}}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="qm_state_block">
+                            <label class="form-label fw-bold small text-uppercase">Hospital State</label>
+                            <select class="form-select" id="qm_state_id" onchange="loadCities(this.value, '#qm_city_id')">
+                                <option value="">-- Select State --</option>
+                                {{STATES_OPTIONS}}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="qm_city_block">
+                            <label class="form-label fw-bold small text-uppercase">Hospital City / District</label>
+                            <select class="form-select" id="qm_city_id">
+                                <option value="">-- Select State First --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info py-2 small mt-3 mb-0" id="qm_info_note">
+                        <i class="bi bi-info-circle me-1"></i> Pre-filled with current selection parameters from main form.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm fw-bold" onclick="submitQuickMap()"><i class="bi bi-check-circle me-1"></i> Save Mapping</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DATA PREVIEW MODAL -->
+<div class="modal fade" id="casePreviewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header text-white py-3" id="previewModalHeader">
+                <h5 class="modal-title fw-bold" id="previewModalTitle"><i class="bi bi-search me-2"></i> Verify Case Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="alert alert-warning m-3 fw-bold text-center ">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Please verify all entered details carefully before final submission.
+                </div>
+                <div class="table-responsive px-3 pb-3">
+                    <table class="table table-bordered table-striped table-sm fs-6 align-middle">
+                        <tbody id="previewTableBody">
+                            <!-- Dynamic rows via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-3 justify-content-between">
+                <button type="button" class="btn btn-outline-secondary fw-bold px-4 rounded-2" data-bs-dismiss="modal">
+                    <i class="bi bi-pencil-square me-2"></i> Back to Edit
+                </button>
+                <button type="button" class="btn fw-bold px-5 rounded-2 shadow-sm" id="confirmSaveBtn" onclick="executeFinalSave()">
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<script>
+    const allCaseTypes = {{CASE_TYPES_JSON}};
+    const allSubTypes = {{SUB_TYPES_JSON}};
+    let isEditMode = false;
+    let topAlertTimeout;
+    
+    let currentHospData = [];
+    let duplicateOriginals = null; 
+    let pendingAction = '';
+
+    function safeMatch(val1, val2) {
+        return (val1 == val2) || (!val1 && !val2);
+    }
+
+    function showTopAlert(message, type = 'danger') {
+        const box = $('#topAlertBox');
+        let icon = type === 'success' ? 'bi-check-circle-fill' : (type === 'warning' ? 'bi-exclamation-circle-fill' : 'bi-exclamation-triangle-fill');
+        
+        box.removeClass('bg-danger bg-success bg-warning bg-info')
+           .addClass('bg-' + type)
+           .removeClass('text-white text-dark')
+           .addClass(type === 'warning' ? 'text-dark' : 'text-white');
+           
+        $('#topAlertMessage').html(`<i class="bi ${icon} me-2 fs-5 align-middle"></i> ${message}`);
+        $('#topAlertContainer').stop(true, true).fadeIn(300);
+        
+        clearTimeout(topAlertTimeout);
+        topAlertTimeout = setTimeout(() => { $('#topAlertContainer').fadeOut(300); }, 5000); 
+    }
+
+    $(document).on('input change', '#mainMatrixForm [required]', function() {
+        if ($(this).val()) {
+            $(this).removeClass('error-highlight');
+        }
+    });
+
+    $(document).ready(function() {
+        const caseId = $('#m_case_id').val();
+        fetchManagers();
+
+        // AUTO-FILL EVENT 1: Insured -> Patient
+        $('#copyInsuredToPatient').on('change', function() {
+            if($(this).is(':checked')) {
+                $('#m_pat_name').val($('#m_insured_name').val()).trigger('input');
+                $('#m_pat_mobile').val($('#m_insured_mobile').val()).trigger('input');
+            }
+        });
+
+        // AUTO-FILL EVENT 2: Patient -> Hospital Location
+        $('#copyPatientToHospLocation').on('change', function() {
+            if($(this).is(':checked')) {
+                let pState = $('#m_patient_state_id').val();
+                let pCity = $('#m_patient_city_id').val();
+                let pAddress = $('#m_patient_address').val();
+                
+                if(pState) {
+                    $('#m_hosp_state_id').val(pState).trigger('change');
+                    loadCities(pState, '#m_hosp_city_id', pCity);
+                }
+                if(pAddress) {
+                    $('#m_hosp_address').val(pAddress);
+                }
+            }
+        });
+
+        $('#m_insurance').on('change', function() {
+            let insId = $(this).val();
+            let typeOpt = '<option value="">-- Select Case Type --</option>';
+            let addedTypes = []; 
+            
+            if(insId) {
+                allCaseTypes.forEach(t => {
+                    if(t.insurance_company_id == insId && !addedTypes.includes(t.type_name)) {
+                        typeOpt += `<option value="${t.id}">${t.type_name}</option>`;
+                        addedTypes.push(t.type_name);
+                    }
+                });
+            } else {
+                typeOpt = '<option value="">-- Select Insurance First --</option>';
+            }
+            $('#m_type').html(typeOpt);
+            $('#m_subtype').html('<option value="">-- Select Type First --</option>');
+            
+            autoTriggerManagers();
+        });
+
+        $('#m_type').on('change', function() {
+            let typeId = $(this).val();
+            let subOpt = '<option value="">-- Select Sub Type --</option>';
+            let addedSubTypes = [];
+            
+            if(typeId) {
+                allSubTypes.forEach(s => {
+                    if(s.case_type_id == typeId && !addedSubTypes.includes(s.sub_type_name)) {
+                        subOpt += `<option value="${s.id}">${s.sub_type_name}</option>`;
+                        addedSubTypes.push(s.sub_type_name);
+                    }
+                });
+            } else {
+                subOpt = '<option value="">-- Select Type First --</option>';
+            }
+            $('#m_subtype').html(subOpt);
+            
+            autoTriggerManagers();
+        });
+
+        $('#m_subtype').on('change', function() {
+            autoTriggerManagers();
+        });
+
+        if (caseId && caseId !== '') {
+            isEditMode = true;
+            $('#displayClaimNo').text('Mode: Edit (Case ID: ' + caseId + ')');
+            $('#formMainTitle').html('<i class="bi bi-pencil-square me-2"></i> Edit Existing Case');
+            $('#topHeaderBox').removeClass('border-primary').addClass('');
+            $('#finalSubmitBtn').html('<i class="bi bi-check2-circle me-2"></i> Commit Updates to System');
+            
+            Swal.fire({ title: 'Fetching Details...', didOpen: () => { Swal.showLoading(); } });
+            $.get('/api/cases/fetch/' + caseId, function(res) {
+                Swal.close();
+                if(res.status === 'success' && res.data) {
+                    populateFormWithData(res.data);
+                }
+            });
+        } else {
+            $('#m_alloc_date').val(new Date().toISOString().slice(0,16));
+        }
+
+        // ---------------- AUTOCOMPLETE FOR HOSPITAL ----------------
+        let hospDebounce;
+        $('#m_hosp_name').on('input', function() {
+            clearTimeout(hospDebounce);
+            let val = $(this).val();
+            if(val.length < 2) { $('#hospSuggestions').hide(); return; }
+            
+            hospDebounce = setTimeout(() => {
+                $.post('/api/cases/search-hospital', { term: val }, function(res) {
+                    if(res.status === 'success' && res.data.length > 0) {
+                        currentHospData = res.data; 
+                        let html = '';
+                        res.data.forEach((h, index) => {
+                            let locParts = [];
+                            if (h.district_name) locParts.push(h.district_name);
+                            if (h.state_name) locParts.push(h.state_name);
+                            let locText = locParts.length > 0 ? ` <small class="text-muted fw-normal fst-italic">(${locParts.join(', ')})</small>` : '';
+                            html += `<li class="autocomplete-item" onclick="selectHosp(${index})"><i class="bi bi-h-circle me-2 text-muted"></i>${h.hospital_name}${locText}</li>`;
+                        });
+                        $('#hospSuggestions').html(html).show();
+                    } else {
+                        $('#hospSuggestions').hide();
+                    }
+                });
+            }, 300);
+        });
+
+        // ---------------- AUTOCOMPLETE FOR CLAIM ----------------
+        let claimDebounce;
+        $('#m_claim_no').on('input', function() {
+            clearTimeout(claimDebounce);
+            let val = $(this).val();
+            if(val.length < 2) { $('#claimSuggestions').hide(); return; }
+            
+            claimDebounce = setTimeout(() => {
+                $.post('/api/cases/search-claim', { term: val }, function(res) {
+                    if(res.status === 'success' && res.data.length > 0) {
+                        let html = '';
+                        res.data.forEach(c => {
+                            html += `<li class="autocomplete-item text-danger bg-danger bg-opacity-10" onclick="selectClaim('${c.replace(/'/g, "\\'")}')"><i class="bi bi-exclamation-triangle-fill me-2"></i>${c} (Duplicate Entry)</li>`;
+                        });
+                        $('#claimSuggestions').html(html).show();
+                    } else {
+                        $('#claimSuggestions').hide();
+                    }
+                });
+            }, 300);
+        });
+
+        $(document).on('click', function(e) {
+            if(!$(e.target).closest('#m_hosp_name, #hospSuggestions').length) $('#hospSuggestions').hide();
+            if(!$(e.target).closest('#m_claim_no, #claimSuggestions').length) $('#claimSuggestions').hide();
+        });
+    });
+
+    function checkDuplicateStatus() {
+        if (isEditMode || !duplicateOriginals) return;
+
+        let cIns = $('#m_insurance').val();
+        let cType = $('#m_type').val();
+        let cSubType = $('#m_subtype').val();
+
+        let cTypeTxt = $('#m_type option:selected').text();
+        let cSubTypeTxt = $('#m_subtype option:selected').text();
+
+        let matchIns = safeMatch(cIns, duplicateOriginals.insurance_id);
+        let matchType = safeMatch(cType, duplicateOriginals.type_id) || (cTypeTxt && cTypeTxt === duplicateOriginals.type_name);
+        let matchSubType = safeMatch(cSubType, duplicateOriginals.sub_type_id) || (cSubTypeTxt && cSubTypeTxt === duplicateOriginals.sub_type_name);
+
+        if (matchIns && matchType && matchSubType) {
+            $('#m_case_id').val(duplicateOriginals.case_id);
+            $('#finalSubmitBtn').addClass('d-none');
+            $('#reworkSubmitBtn').removeClass('d-none');
+            
+            $('#formMainTitle').html('<i class="bi bi-arrow-repeat me-2"></i> Duplicate Case (Rework Mode)');
+            $('#displayClaimNo').text('Mode: Duplicate Detect').removeClass('bg-light text-dark bg-success').addClass('bg-danger text-white');
+            $('#topHeaderBox').removeClass('border-primary border-success').addClass('');
+        } else {
+            $('#m_case_id').val(''); 
+            $('#reworkSubmitBtn').addClass('d-none');
+            $('#finalSubmitBtn').removeClass('d-none').html('<i class="bi bi-send-fill me-2"></i> Generate & Publish Complete Case');
+            
+            $('#formMainTitle').html('<i class="bi bi-folder-plus me-2"></i> Register New Case (Variant)');
+            $('#displayClaimNo').text('Mode: New Variant').removeClass('bg-light text-dark bg-danger').addClass('bg-success text-white');
+            $('#topHeaderBox').removeClass('border-primary ');
+        }
+    }
+
+    $(document).on('change', '#m_insurance, #m_type, #m_subtype', function() {
+        setTimeout(checkDuplicateStatus, 100);
+    });
+
+    window.selectHosp = function(index) {
+        let h = currentHospData[index];
+        if(!h) return;
+
+        $('#m_hosp_name').val(h.hospital_name);
+        
+        if(h.hospital_address) $('#m_hosp_address').val(h.hospital_address);
+        if(h.registration_no) $('#m_hospital_reg_no').val(h.registration_no);
+        if(h.pin_code) $('#m_pin_code').val(h.pin_code);
+        
+        if(h.state_id) {
+            $('#m_hosp_state_id').val(h.state_id);
+            loadCities(h.state_id, '#m_hosp_city_id', h.district_id);
+        } else {
+            autoTriggerManagers();
+        }
+        
+        $('#hospSuggestions').hide();
+    }
+
+    window.selectClaim = function(claimNo) {
+        $('#m_claim_no').val(claimNo);
+        $('#claimSuggestions').hide();
+        
+        Swal.fire({ title: 'Duplicate Found! Fetching Data...', didOpen: () => { Swal.showLoading(); } });
+        $.post('/api/master-edit/fetch', { claim_number: claimNo }, function(res) {
+            Swal.close();
+            if(res.status === 'success' && res.data) {
+                duplicateOriginals = {
+                    case_id: res.data.id,
+                    insurance_id: res.data.insurance_company_id,
+                    type_id: res.data.case_type_id,
+                    type_name: res.data.type_name,
+                    sub_type_id: res.data.case_sub_type_id,
+                    sub_type_name: res.data.sub_type_name
+                };
+                
+                populateFormWithData(res.data);
+                showTopAlert('Duplicate Claim Detected! Data Auto-filled.', 'warning');
+            }
+        });
+    }
+
+    function populateFormWithData(d) {
+        $('#m_case_id').val(d.id);
+        $('#m_claim_no').val(d.claim_number).prop('readonly', true);
+        
+        if(d.insurance_company_id) {
+            $('#m_insurance').val(d.insurance_company_id);
+            
+            let insId = d.insurance_company_id;
+            let typeOpt = '<option value="">-- Select Case Type --</option>';
+            let addedTypes = []; 
+            allCaseTypes.forEach(t => {
+                if(t.insurance_company_id == insId && !addedTypes.includes(t.type_name)) {
+                    typeOpt += `<option value="${t.id}">${t.type_name}</option>`;
+                    addedTypes.push(t.type_name);
+                }
+            });
+            $('#m_type').html(typeOpt);
+        }
+
+        setTimeout(() => {
+            if(d.case_type_id || d.type_name) {
+                $('#m_type').val(d.case_type_id);
+                
+                if (!$('#m_type').val() && d.type_name) {
+                    $('#m_type option').filter(function() { return $(this).text() === d.type_name; }).prop('selected', true);
+                }
+
+                let typeId = $('#m_type').val();
+                let subOpt = '<option value="">-- Select Sub Type --</option>';
+                let addedSubTypes = [];
+                allSubTypes.forEach(s => {
+                    if(s.case_type_id == typeId && !addedSubTypes.includes(s.sub_type_name)) {
+                        subOpt += `<option value="${s.id}">${s.sub_type_name}</option>`;
+                        addedSubTypes.push(s.sub_type_name);
+                    }
+                });
+                $('#m_subtype').html(subOpt);
+            }
+
+            setTimeout(() => {
+                if(d.case_sub_type_id || d.sub_type_name) {
+                    $('#m_subtype').val(d.case_sub_type_id);
+                    
+                    if (!$('#m_subtype').val() && d.sub_type_name) {
+                        $('#m_subtype option').filter(function() { return $(this).text() === d.sub_type_name; }).prop('selected', true);
+                    }
+                }
+                autoTriggerManagers();
+                
+                if (!isEditMode && duplicateOriginals) {
+                    checkDuplicateStatus();
+                }
+
+            }, 50);
+        }, 50);
+
+        $('#m_pat_name').val(d.patient_name);
+        $('#m_hosp_name').val(d.hospital_name);
+        $('#m_hosp_address').val(d.hospital_address);
+        $('#m_pat_mobile').val(d.patient_mobile);
+        $('#m_pat_aadhar').val(d.patient_aadhar);
+        $('#m_patient_address').val(d.patient_address);
+        $('#m_insured_name').val(d.insured_name);
+        $('#m_insured_mobile').val(d.insured_mobile);
+        $('#m_policy_no').val(d.policy_no);
+        $('#m_policy_type').val(d.policy_type);
+        $('#m_assured_amount').val(d.assured_amount);
+        $('#m_claim_amount').val(d.claim_amount);
+        $('#m_diagnosis').val(d.diagnosis);
+        $('#m_trigger').val(d.trigger_reason);
+        $('#m_patient_age').val(d.patient_age);
+        $('#m_gender').val(d.gender);
+        $('#m_relationship_with_insured').val(d.relationship_with_insured);
+        $('#m_patient_occupation').val(d.patient_occupation);
+        $('#m_hospital_reg_no').val(d.hospital_reg_no);
+        $('#m_pin_code').val(d.hospital_pin_code);
+        $('#m_mlc_number').val(d.mlc_number);
+        $('#m_accidental_claim').val(d.accidental_claim);
+        $('#m_plan_of_management').val(d.plan_of_management);
+        $('#m_collected_documents').val(d.collected_documents);
+        $('#m_geographical_distance').val(d.geographical_distance);
+        
+        if(d.patient_state_id) {
+            $('#m_patient_state_id').val(d.patient_state_id);
+            loadCities(d.patient_state_id, '#m_patient_city_id', d.patient_city_id);
+        }
+        if(d.state_id) {
+            $('#m_hosp_state_id').val(d.state_id);
+            loadCities(d.state_id, '#m_hosp_city_id', d.city_id);
+        }
+
+        setTimeout(() => {
+            if(d.cm_id) $('#m_cm').val(d.cm_id);
+            if(d.icm_id) $('#m_icm').val(d.icm_id);
+            if(d.allocation_manager_id) $('#m_alm').val(d.allocation_manager_id);
+        }, 500);
+        
+        if(d.allocation_date) $('#m_alloc_date').val(d.allocation_date.replace(' ', 'T'));
+        if(d.policy_start_date) $('#m_policy_start_date').val(d.policy_start_date.split('T')[0]);
+        if(d.policy_end_date) $('#m_policy_end_date').val(d.policy_end_date.split('T')[0]);
+        if(d.policy_inception_date) $('#m_policy_inception_date').val(d.policy_inception_date.split('T')[0]);
+        if(d.doj) $('#m_doj').val(d.doj.split('T')[0]);
+        if(d.doa) $('#m_doa').val(d.doa.replace(' ', 'T'));
+        if(d.dod) $('#m_dod').val(d.dod.replace(' ', 'T'));
+    }
+
+    function loadCities(stateId, citySelectId, selectedCityId = null) {
+        if(!stateId) {
+            $(citySelectId).html('<option value="">-- Select State First --</option>');
+            return;
+        }
+        $.post('/api/cases/get-cities', { state_id: stateId }, function(html) {
+            if (citySelectId === '#qm_city_id') {
+                html = html.replace('<option value="">-- Select City/District --</option>', '<option value="">-- Select City/District --</option><option value="0" class="text-primary fw-bold">-- ALL DISTRICTS / CITIES --</option>');
+            }
+            
+            $(citySelectId).html(html);
+            if(selectedCityId) {
+                $(citySelectId).val(selectedCityId);
+            }
+            
+            if (citySelectId === '#m_hosp_city_id') {
+                autoTriggerManagers();
+            }
+        }).fail(() => {
+            showTopAlert('Failed to load cities. Check your network connection.', 'danger');
+        });
+    }
+
+    function autoTriggerManagers() {
+        if($('#m_insurance').val() || $('#m_hosp_state_id').val() || $('#m_type').val()) {
+            fetchManagers();
+        }
+    }
+
+    function fetchManagers() {
+        let payload = {
+            insurance_id: $('#m_insurance').val(),
+            type_id: $('#m_type').val(),
+            sub_type_id: $('#m_subtype').val(),
+            hosp_state_id: $('#m_hosp_state_id').val(),
+            hosp_city_id: $('#m_hosp_city_id').val()
+        };
+        
+        $.post('/api/cases/get-mapped-managers', payload, function(res) {
+            if(res.status === 'success') {
+                
+                let amOpt = '<option value="">-- Select Area Manager --</option>';
+                if(res.ams && res.ams.length > 0) {
+                    res.ams.forEach(am => { amOpt += `<option value="${am.id}">${am.fullname}</option>`; });
+                } else {
+                    amOpt = '<option value="">-- No AM Mapped for this Region --</option>';
+                }
+                $('#m_cm').html(amOpt);
+                if(res.ams && res.ams.length === 1 && !$('#m_cm').val()) { $('#m_cm').val(res.ams[0].id); }
+
+                let icmOpt = '<option value="">-- Select Internal Case Manager --</option>';
+                if(res.icms && res.icms.length > 0) {
+                    res.icms.forEach(icm => { icmOpt += `<option value="${icm.id}">${icm.fullname}</option>`; });
+                } else {
+                    icmOpt = '<option value="">-- No ICM Mapped for Insurance --</option>';
+                }
+                $('#m_icm').html(icmOpt);
+                if(res.icms && res.icms.length === 1 && !$('#m_icm').val()) { $('#m_icm').val(res.icms[0].id); }
+
+                let almOpt = '<option value="">-- Select Allocation Mgr --</option>';
+                if(res.alms && res.alms.length > 0) {
+                    res.alms.forEach(alm => { almOpt += `<option value="${alm.id}">${alm.fullname}</option>`; });
+                } else {
+                    almOpt = '<option value="">-- No ALM Mapped for Criteria --</option>';
+                }
+                $('#m_alm').html(almOpt);
+                if(res.alms && res.alms.length === 1 && !$('#m_alm').val()) { $('#m_alm').val(res.alms[0].id); }
+                
+            }
+        }, 'json');
+    }
+
+    function openQuickMapModal(roleType) {
+        $('#qm_role_type').val(roleType);
+        $('#quickMapTitle').html(`<i class="bi bi-diagram-3 me-2"></i> Quick Map ${roleType}`);
+        
+        $('#qm_ins_block, #qm_type_block, #qm_subtype_block, #qm_state_block, #qm_city_block').show();
+        
+        if(roleType === 'AM') {
+            $('#qm_ins_block, #qm_type_block, #qm_subtype_block').hide();
+        } else if(roleType === 'ICM') {
+            $('#qm_type_block, #qm_subtype_block, #qm_state_block, #qm_city_block').hide();
+        }
+
+        $('#qm_insurance_id').val($('#m_insurance').val());
+        
+        let targetTypeVal = $('#m_type option:selected').text();
+        $('#qm_type_id option').filter(function() { return $(this).text() === targetTypeVal; }).prop('selected', true);
+        
+        let targetSubVal = $('#m_subtype option:selected').text();
+        $('#qm_sub_type_id option').filter(function() { return $(this).text() === targetSubVal; }).prop('selected', true);
+        
+        $('#qm_state_id').val($('#m_hosp_state_id').val() || $('#m_patient_state_id').val());
+        
+        let currentState = $('#qm_state_id').val();
+        let currentCity = $('#m_hosp_city_id').val() || $('#m_patient_city_id').val();
+        
+        if(currentState) {
+            loadCities(currentState, '#qm_city_id', currentCity);
+        }
+
+        $('#quickMapModal').modal('show');
+    }
+
+    function submitQuickMap() {
+        let payload = {
+            role_type: $('#qm_role_type').val(),
+            user_id: $('#qm_user_id').val(),
+            insurance_id: $('#qm_insurance_id').val(),
+            type_id: $('#qm_type_id').val(),
+            sub_type_id: $('#qm_sub_type_id').val(),
+            state_id: $('#qm_state_id').val(),
+            city_id: $('#qm_city_id').val()
+        };
+
+        if(!payload.user_id) {
+            showTopAlert('Please select a Target Manager User for Mapping.', 'danger');
+            return;
+        }
+
+        $.post('/api/cases/quick-map-manager', payload, function(res) {
+            if(res.status === 'success') {
+                $('#quickMapModal').modal('hide');
+                showTopAlert(res.message, 'success');
+                fetchManagers();
+            } else {
+                showTopAlert(res.message, 'danger');
+            }
+        }, 'json').fail(() => {
+            showTopAlert('Server error occurred during quick map.', 'danger');
+        });
+    }
+
+    function verifyCaseData(action) {
+        let hasError = false;
+        $('#mainMatrixForm [required]').each(function() {
+            if (!$(this).val() || $(this).val() === "") {
+                $(this).addClass('error-highlight');
+                hasError = true;
+            } else {
+                $(this).removeClass('error-highlight');
+            }
+        });
+
+        if(hasError) {
+            showTopAlert('Please fill in all mandatory fields marked in red.', 'danger');
+            $('html, body').animate({ scrollTop: $('.error-highlight').first().offset().top - 150 }, 500);
+            return; 
+        }
+
+        pendingAction = action;
+
+        if (action === 'rework') {
+            $('#previewModalHeader').removeClass('bg-success bg-primary').addClass('bg-danger');
+            $('#confirmSaveBtn').removeClass('btn-success btn-primary').addClass('btn-danger').html('<i class="bi bi-arrow-repeat me-2"></i> Confirm & Send to Rework');
+        } else {
+            $('#previewModalHeader').removeClass('bg-danger bg-success').addClass('bg-primary');
+            $('#confirmSaveBtn').removeClass('btn-danger btn-success').addClass('btn-primary').html('<i class="bi bi-cloud-upload-fill me-2"></i> Confirm & Publish Case');
+        }
+
+        let rows = '';
+        $('#mainMatrixForm .form-group').each(function() {
+            let label = $(this).find('.form-label').text().replace(' *', '').trim();
+            let input = $(this).find('input, select, textarea');
+            let val = '';
+            if(input.is('select')) {
+                val = input.find('option:selected').text();
+                if(val.includes('-- Select')) val = ''; 
+            } else {
+                val = input.val();
+            }
+            if(label && val) {
+                rows += `<tr><th class="bg-light text-muted text-uppercase" style="width:35%; font-size:12px;">${label}</th><td class="fw-bold text-dark">${val}</td></tr>`;
+            }
+        });
+        $('#previewTableBody').html(rows);
+        $('#casePreviewModal').modal('show');
+    }
+
+    function executeFinalSave() {
+        $('#casePreviewModal').modal('hide');
+        if (pendingAction === 'rework') {
+            triggerReworkAPI();
+        } else {
+            submitFinalCaseAPI();
+        }
+    }
+
+    function triggerReworkAPI() {
+        let caseId = $('#m_case_id').val();
+        if(!caseId) return;
+        
+        Swal.fire({
+            title: 'Send to Rework?',
+            input: 'text',
+            inputLabel: 'Rework Reason',
+            inputPlaceholder: 'Enter reason for rework...',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-arrow-repeat me-1"></i> Yes, Send to Rework',
+            confirmButtonColor: '#dc2626',
+            inputValidator: (value) => {
+                if (!value) return 'You need to provide a reason!'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showTopAlert('Processing Rework...', 'info');
+                $.post('/api/cases/action', {
+                    action: 'send_to_rework',
+                    case_id: caseId,
+                    rework_reason: result.value
+                }, function(res) {
+                    if(res.status === 'success') {
+                        showTopAlert(res.message, 'success');
+                        setTimeout(() => { window.location.href = '/dashboard'; }, 1500); 
+                    } else {
+                        showTopAlert(res.message, 'danger');
+                    }
+                }).fail(() => {
+                    showTopAlert('Server error occurred.', 'danger');
+                });
+            }
+        });
+    }
+
+    function submitFinalCaseAPI() {
+        showTopAlert('Processing Request...', 'info');
+        let payload = {
+            case_id: $('#m_case_id').val(),
+            claim_number: $('#m_claim_no').val(),
+            allocation_date: $('#m_alloc_date').val(), // Directly sent for allocation_date column
+            insurance_id: $('#m_insurance').val(),
+            type_id: $('#m_type').val(),
+            sub_type_id: $('#m_subtype').val(),
+            patient_name: $('#m_pat_name').val(),
+            patient_mobile: $('#m_pat_mobile').val(),
+            patient_aadhar: $('#m_pat_aadhar').val(),
+            patient_address: $('#m_patient_address').val(),
+            patient_state_id: $('#m_patient_state_id').val(),
+            patient_city_id: $('#m_patient_city_id').val(),
+            patient_pin_code: $('#m_patient_pin_code').val(),
+            patient_age: $('#m_patient_age').val(),
+            gender: $('#m_gender').val(),
+            patient_occupation: $('#m_patient_occupation').val(),
+            relationship_with_insured: $('#m_relationship_with_insured').val(),
+            doj: $('#m_doj').val(),
+            insured_name: $('#m_insured_name').val(),
+            insured_mobile: $('#m_insured_mobile').val(),
+            policy_no: $('#m_policy_no').val(),
+            policy_type: $('#m_policy_type').val(),
+            assured_amount: $('#m_assured_amount').val(),
+            claim_amount: $('#m_claim_amount').val(),
+            portability_details: $('#m_portability_details').val(),
+            previous_claim_history: $('#m_previous_claim_history').val(),
+            policy_start_date: $('#m_policy_start_date').val(),
+            policy_end_date: $('#m_policy_end_date').val(),
+            policy_inception_date: $('#m_policy_inception_date').val(),
+            hospital_name: $('#m_hosp_name').val(),
+            hospital_address: $('#m_hosp_address').val(),
+            hospital_reg_no: $('#m_hospital_reg_no').val(),
+            state_id: $('#m_hosp_state_id').val(),
+            city_id: $('#m_hosp_city_id').val(),
+            pin_code: $('#m_pin_code').val(),
+            hospital_lat: $('#m_hospital_lat').length ? $('#m_hospital_lat').val() : '',
+            hospital_lng: $('#m_hospital_lng').length ? $('#m_hospital_lng').val() : '',
+            doa: $('#m_doa').val(),
+            dod: $('#m_dod').val(),
+            mlc_number: $('#m_mlc_number').val(),
+            accidental_claim: $('#m_accidental_claim').val(),
+            plan_of_management: $('#m_plan_of_management').val(),
+            collected_documents: $('#m_collected_documents').val(),
+            geographical_distance: $('#m_geographical_distance').val(),
+            diagnosis: $('#m_diagnosis').val(),
+            trigger_reason: $('#m_trigger').val(),
+            cm_id: $('#m_cm').val(),
+            am_id: $('#m_cm').val(),
+            icm_id: $('#m_icm').val(),
+            alm_id: $('#m_alm').val()
+        };
+        
+        $.post('/api/cases/submit', payload, function(res) {
+            if(res.status === 'success') { 
+                showTopAlert('Case Saved Successfully! Redirecting...', 'success');
+                setTimeout(() => { window.location.href = '/dashboard'; }, 1500); 
+            } else { 
+                showTopAlert(res.message, 'danger'); 
+            }
+        }).fail(() => { 
+            showTopAlert('Submission failed due to a server or connection error.', 'danger'); 
+        });
+    }
+</script>
+</body>
+</html>

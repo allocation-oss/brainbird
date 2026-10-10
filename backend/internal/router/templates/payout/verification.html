@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payout Verification | Brain Bird</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #2563eb;
+            --neutral-bg: #f1f5f9;
+            --neutral-border: #e2e8f0;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--neutral-bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .app-wrapper { display: flex; min-height: 100vh; position: relative; }
+
+        img { max-width: 100%; height: auto; }
+        .sidebar-brand img,
+        .app-sidebar img,
+        .app-header img,
+        .navbar img,
+        header img {
+            max-width: 180px !important;
+            max-height: 45px !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+        }
+
+        .app-sidebar {
+            width: 260px; background-color: #ffffff; border-right: 1px solid var(--neutral-border);
+            display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0;
+            z-index: 1040; transform: translateX(-260px); transition: transform 0.3s ease; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+        }
+        .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+        .sidebar-hover-notch {
+            position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: 22px; height: 60px;
+            background-color: var(--brand-primary); color: #ffffff; border-radius: 0 12px 12px 0;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1035; box-shadow: 2px 0 10px rgba(37, 99, 235, 0.3);
+        }
+        .sidebar-brand { padding: 20px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--neutral-border); flex-shrink: 0; }
+        .sidebar-menu { padding: 20px 14px; flex-grow: 1; overflow-y: auto; }
+        .menu-label { font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; padding: 0 12px 10px; display: block; }
+        .app-sidebar a { text-decoration: none !important; color: inherit; }
+        .app-sidebar ul, .app-sidebar ol { list-style: none !important; padding-left: 0; margin: 0; }
+        .nav-item-link { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text-dark); font-size: 0.85rem; font-weight: 600; border-radius: 12px; margin-bottom: 4px; transition: 0.2s; }
+        .nav-item-link i:not(.ms-auto) { width: 20px; text-align: center; }
+        .nav-item-link:hover, .nav-item-link.active { background-color: var(--brand-primary); color: #ffffff !important; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+        .nav-item-link:hover i, .nav-item-link.active i { color: #ffffff !important; }
+        .app-sidebar .collapse.show { display: flex !important; flex-direction: column !important; padding-left: 12px !important; margin: 4px 0 8px 16px !important; border-left: 2px solid var(--neutral-border) !important; }
+        .app-sidebar .collapse a { display: flex !important; align-items: center !important; gap: 10px !important; padding: 7px 10px !important; color: var(--text-muted) !important; font-size: 0.80rem !important; font-weight: 600 !important; border-radius: 8px !important; margin-bottom: 3px !important; text-decoration: none !important; width: 100% !important; }
+
+        .app-main { margin-left: 0; flex-grow: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; background-color: var(--neutral-bg); position: relative; z-index: 1; }
+        .app-header { background-color: #ffffff; height: 70px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--neutral-border); position: sticky; top: 0; z-index: 1020; }
+        .app-content { padding: 24px 20px; flex-grow: 1; }
+
+        .glass-header { background: #ffffff; border: 1px solid var(--neutral-border); border-radius: 16px; padding: 20px 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .glossy-card { background: #ffffff; border: 1px solid var(--neutral-border); border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        .kpi-card { background: #ffffff; border: 1px solid var(--neutral-border); border-radius: 16px; padding: 16px 18px; height: 100%; position: relative; }
+        .kpi-card h3 { font-weight: 800; margin: 4px 0 0; font-size: 1.5rem; }
+        .kpi-click { cursor: pointer; transition: 0.15s; }
+        .kpi-click:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.12); border-color: var(--brand-primary) !important; }
+        .kpi-click.active-filter { outline: 2px solid var(--brand-primary); background: #eff6ff; }
+        
+        .upload-zone { border: 2px dashed #bfdbfe; border-radius: 16px; background: #f8fbff; padding: 28px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--brand-primary); background: #eff6ff; }
+
+        /* ADVANCED TABLE & MODAL UI LOGIC */
+        @media (min-width: 1200px) {
+            .modal-xl { max-width: 96vw !important; }
+        }
+        
+        .table-payout { table-layout: auto; width: 100%; margin: 0; }
+        .table-payout thead th { 
+            background: #1e293b !important; color: #fff !important; font-size: 0.72rem; 
+            text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 14px; border: none; white-space: nowrap; 
+        }
+        .table-payout td { 
+            font-size: 0.82rem; font-weight: 600; vertical-align: top; padding: 14px; border-bottom: 1px solid #f1f5f9; 
+        }
+
+        /* Column Constraints to prevent layout breakage */
+        .w-claim { min-width: 140px; white-space: nowrap; }
+        .w-patient { min-width: 220px; max-width: 280px; }
+        .w-amount { min-width: 130px; white-space: nowrap; }
+        .w-user { min-width: 160px; max-width: 200px; }
+        .w-parts { min-width: 220px; }
+        .w-date { min-width: 120px; white-space: nowrap; }
+        .w-notes { min-width: 240px; max-width: 350px; }
+
+        .text-truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; }
+
+        .st-badge { font-size: 0.68rem; font-weight: 800; padding: 5px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; white-space: nowrap; }
+        .st-verified { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .st-excel-dup { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .st-db-dup { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+        .st-not-found { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .st-withdrawn { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .st-suspicious { background: #fee2e2; color: #991b1b; border: 1px solid #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+
+        .hist-num { display: inline-block; min-width: 38px; padding: 3px 10px; border-radius: 20px; font-weight: 800; text-decoration: none !important; cursor: pointer; border: 1px solid transparent; transition: 0.15s; }
+        .hist-num:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.12); border-color: currentColor; background: #fff; }
+        .hist-total { color: #0f172a; background: #f1f5f9; }
+        .hist-saved { color: #15803d; background: #dcfce7; }
+        .hist-xdup  { color: #b91c1c; background: #fee2e2; }
+        .hist-dbdup { color: #c2410c; background: #ffedd5; }
+        .hist-susp  { color: #991b1b; background: #fecaca; }
+        .hist-notfound { color: #475569; background: #f1f5f9; }
+        .hist-withdrawn { color: #b45309; background: #fef3c7; }
+        .hist-onrole { color: #6d28d9; background: #ede9fe; }
+        .hist-zero  { opacity: 0.55; }
+        .hist-file  { color: var(--brand-primary); text-decoration: none !important; cursor: pointer; font-weight: 700; }
+        .hist-file:hover { text-decoration: underline !important; }
+        .month-row td { background: #eff6ff !important; color: #1e3a8a; font-weight: 800 !important; border-top: 2px solid #bfdbfe; border-bottom: 1px solid #bfdbfe !important; }
+
+        .chip-btn { border: 1px solid var(--neutral-border); background: #fff; border-radius: 12px; padding: 8px 14px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.15s; text-align: center; line-height: 1.2; }
+        .chip-btn:hover { border-color: var(--brand-primary); background: #eff6ff; }
+        .chip-btn.active { border-color: var(--brand-primary); background: #dbeafe; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+        .chip-btn .chip-n { display: block; font-size: 1.15rem; font-weight: 800; }
+        .month-chip small { display: block; color: var(--text-muted); font-weight: 600; font-size: 0.68rem; }
+        
+        /* Compact Mini KPI Cards for Modal Filtering */
+        .mini-kpi { border: 1px solid var(--neutral-border); border-radius: 8px; padding: 8px 12px; background: #ffffff; cursor: pointer; min-width: 100px; transition: 0.2s; display: flex; flex-direction: column; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .mini-kpi:hover { border-color: var(--brand-primary); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(37,99,235,0.08); }
+        .mini-kpi.active { border-color: var(--brand-primary); background: #eff6ff; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+        .mini-kpi .n { font-size: 1.15rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+        .mini-kpi .l { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+
+        .modal-sticky-head th { position: sticky; top: 0; z-index: 2; }
+        
+        /* Advanced Formatter UI components */
+        .parts-card { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--neutral-border); border-radius: 6px; padding: 4px 8px; background-color: #ffffff; margin-bottom: 4px; }
+        .parts-card .p-type { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+        .parts-card .p-name { font-size: 0.75rem; color: var(--text-dark); max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 8px; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <div class="sidebar-hover-notch"><i class="fa-solid fa-chevron-right"></i></div>
+    {{SIDEBAR_PARTIAL}}
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+        <div class="app-content">
+<div class="suite-nav-bar" style="display:flex;align-items:center;gap:8px;background:#ffffff;padding:6px 10px;border-radius:12px;border:1px solid #dce2e7;margin-bottom:20px;overflow-x:auto;">
+    <a href="/payout/verification" class="suite-nav-item active" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#ffffff;background:#2563eb;text-decoration:none;border-radius:8px;box-shadow:0 4px 12px rgba(37,99,235,.25);"><i class="fa-solid fa-file-invoice-dollar"></i> Payout Verification</a>
+    <a href="/settings/audit_logs" class="suite-nav-item" style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#6b7785;text-decoration:none;border-radius:8px;"><i class="fa-solid fa-clipboard-list"></i> System Audit Logs</a>
+</div>
+            <div class="container-fluid p-0">
+
+                <div class="glass-header d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                    <div>
+                        <h4 class="fw-bold m-0 text-dark"><i class="fa-solid fa-file-invoice-dollar text-primary me-2"></i> Payout Verification</h4>
+                        <p class="text-muted m-0 small fw-medium">Smart Detect Claims → Flag FO Mismatches → Generate Payouts</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm fw-bold rounded-pill px-3" onclick="openExportModal()">
+                            <i class="fa-solid fa-file-export me-1"></i> Export Excel
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm fw-bold rounded-pill px-3" onclick="openRatesModal()">
+                            <i class="fa-solid fa-coins me-1"></i> Fix Rates
+                        </button>
+                        <a href="/api/payout/sample" class="btn btn-outline-success btn-sm fw-bold rounded-pill px-3">
+                            <i class="fa-solid fa-file-excel me-1"></i> Sample Excel
+                        </a>
+                        <button type="button" class="btn btn-outline-primary btn-sm fw-bold rounded-pill px-3" onclick="loadHistory()">
+                            <i class="fa-solid fa-clock-rotate-left me-1"></i> Import History
+                        </button>
+                        <a href="/dashboard" class="btn btn-light border btn-sm fw-bold rounded-pill px-3"><i class="fa-solid fa-arrow-left me-1"></i> Dashboard</a>
+                    </div>
+                </div>
+
+                <!-- KPI -->
+                <div class="row g-3 mb-4" id="kpiRow">
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click" data-filter="" role="button" title="Show all" onclick="filterByCard('')">
+                            <span class="text-muted small fw-bold text-uppercase">Total</span>
+                            <h3 class="text-dark" id="kpi_total">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click border border-success" data-filter="VERIFIED_READY" role="button" onclick="filterByCard('VERIFIED_READY')">
+                            <span class="text-muted small fw-bold text-uppercase">Verified</span>
+                            <h3 class="text-success" id="kpi_verified">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click border border-danger border-opacity-50" data-filter="SUSPICIOUS" role="button" onclick="filterByCard('SUSPICIOUS')">
+                            <span class="text-danger small fw-bold text-uppercase"><i class="fa-solid fa-triangle-exclamation"></i> Suspicious</span>
+                            <h3 class="text-danger" id="kpi_suspicious">0</h3>
+                            <small class="text-muted" style="font-size:0.6rem">FO Mismatch</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click" data-filter="NOT_FOUND" role="button" onclick="filterByCard('NOT_FOUND')">
+                            <span class="text-muted small fw-bold text-uppercase">Not Found</span>
+                            <h3 class="text-secondary" id="kpi_not_found">0</h3>
+                            <small class="text-primary">Click to view</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click" data-filter="ALREADY_PAID" role="button" onclick="filterByCard('ALREADY_PAID')">
+                            <span class="text-muted small fw-bold text-uppercase">Already Paid</span>
+                            <h3 class="text-warning" id="kpi_db_dup">0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-2">
+                        <div class="kpi-card kpi-click border border-primary border-opacity-50" role="button" title="All payout cases month-wise" onclick="openCasesModal()">
+                            <span class="text-muted small fw-bold text-uppercase"><i class="fa-solid fa-calendar-days text-primary me-1"></i> Freelancer Payouts</span>
+                            <h3 class="text-primary" id="kpi_all_payout">0</h3>
+                            <small class="text-muted" id="kpi_all_payout_hint">Month-wise Generation</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Panel (Pro Features) -->
+                <div class="glossy-card p-4 mb-4 border-primary" style="border-width: 2px;">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-5">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark"><i class="fa-solid fa-user-shield text-info me-1"></i> Target FO (Suspicious Checking)</label>
+                                <select id="upload_fo_id" class="form-select border-primary fw-bold text-primary">
+                                    <option value="">-- No Specific FO (Open Check) --</option>
+                                </select>
+                                <small class="text-muted d-block mt-1">If selected, system will flag claims belonging to others as <b>Suspicious</b>.</small>
+                            </div>
+                            <div class="form-check form-switch p-3 bg-light rounded border border-info">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="smart_detect" value="1" checked style="width:2em;height:1em;cursor:pointer;">
+                                <label class="form-check-label fw-bold" for="smart_detect" style="cursor:pointer;margin-top:2px;">
+                                    Smart Claim Match (Pro Level)
+                                </label>
+                                <small class="d-block text-muted ms-4 mt-1">
+                                    Auto-detects Claim No. column from first rows regardless of header names.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="upload-zone h-100 d-flex flex-column justify-content-center" id="uploadZone" onclick="document.getElementById('payout_file').click()">
+                                <i class="fa-solid fa-file-excel fa-3x text-success mb-2"></i>
+                                <div class="fw-bold text-dark mt-2">Select Excel / CSV</div>
+                                <input type="file" id="payout_file" accept=".xlsx,.xls,.csv" class="d-none">
+                                <div class="mt-2 small fw-bold text-primary" id="fileLabel">No file selected</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-grid gap-3 h-100">
+                                <button type="button" class="btn btn-primary fw-bold py-2 rounded-3 shadow-sm" id="btnVerify" onclick="runVerify(false)">
+                                    <i class="fa-solid fa-magnifying-glass-chart me-2"></i> Scan / Preview
+                                </button>
+                                <button type="button" class="btn btn-success fw-bold py-2 rounded-3 shadow-sm" id="btnSave" onclick="runVerify(true)">
+                                    <i class="fa-solid fa-floppy-disk me-2"></i> Save Verified
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary fw-bold py-2 rounded-3" onclick="resetAll()">
+                                    <i class="fa-solid fa-rotate-left me-2"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="glossy-card table-responsive mb-4" id="resultsCard" style="display:none;">
+                    <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2 bg-light">
+                        <h6 class="fw-bold m-0 text-dark">
+                            <i class="fa-solid fa-list-check text-primary me-2"></i> Scan Result
+                            <span class="badge bg-primary ms-2" id="activeFilterLabel">All</span>
+                        </h6>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <select id="statusFilter" class="form-select form-select-sm fw-bold border-primary" style="width:auto" onchange="filterResults()">
+                                <option value="">All Status</option>
+                                <option value="VERIFIED_READY">Ready</option>
+                                <option value="SUSPICIOUS">Suspicious (FO Mismatch)</option>
+                                <option value="EXCEL_DUPLICATE">Excel Duplicate</option>
+                                <option value="ALREADY_PAID">Already Paid</option>
+                                <option value="NOT_FOUND">Not Found</option>
+                                <option value="WITHDRAWN">Withdrawn</option>
+                            </select>
+                            <input type="text" id="resultSearch" class="form-control form-control-sm border-primary fw-bold" placeholder="Search claim..." oninput="filterResults()" style="width:160px">
+                            <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3" onclick="exportFilteredExcel()">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export View
+                            </button>
+                        </div>
+                    </div>
+                    <table class="table table-hover table-payout m-0 align-middle">
+                        <thead class="modal-sticky-head">
+                            <tr>
+                                <th class="text-center" style="width:50px;">#</th>
+                                <th class="w-claim">Claim #</th>
+                                <th class="w-patient">Patient / Hospital</th>
+                                <th class="text-end w-amount">Amount</th>
+                                <th class="w-user">Assigned / FO</th>
+                                <th class="w-notes">Detailed Info / Alerts</th>
+                                <th class="text-center w-status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr><td colspan="7" class="text-center py-4 text-muted">No data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        {{FOOTER_PARTIAL}}
+    </main>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white border-0" style="background:#1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-file-excel me-2 text-success"></i> Export Payouts</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="small text-muted mb-3">Export comprehensive verified data, showing freelancer allocations and on-role records.</p>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Month</label>
+                    <input type="month" id="export_month" class="form-control fw-bold border-primary">
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">From</label>
+                        <input type="date" id="export_from" class="form-control fw-bold border-primary">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-bold text-muted">To</label>
+                        <input type="date" id="export_to" class="form-control fw-bold border-primary">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-success fw-bold w-100 rounded-3" onclick="doExportExcel()">
+                    <i class="fa-solid fa-download me-1"></i> Download Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fix Rates Modal -->
+<div class="modal fade" id="ratesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white border-0" style="background:#1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-coins me-2 text-warning"></i> Payout Rate Setup</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="rateForm" class="row g-3 mb-4 align-items-end" onsubmit="event.preventDefault(); saveRate();">
+                    <input type="hidden" id="rate_id" value="">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Insurance *</label>
+                        <select id="rate_insurance" class="form-select form-select-sm fw-bold border-primary" required onchange="filterTypes()"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Case Type *</label>
+                        <select id="rate_type" class="form-select form-select-sm fw-bold border-primary" required onchange="filterSubtypes()"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Sub Type</label>
+                        <select id="rate_subtype" class="form-select form-select-sm fw-bold border-primary">
+                            <option value="0">— All Subtypes —</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Part *</label>
+                        <select id="rate_part" class="form-select form-select-sm fw-bold border-primary">
+                            <option value="ALL">ALL (Full Case)</option>
+                            <option value="HOSPITAL">Hospital Part</option>
+                            <option value="PATIENT">Patient Part</option>
+                            <option value="PHARMACY">Pharmacy Part</option>
+                            <option value="PATHOLOGY">Pathology Part</option>
+                            <option value="DOCTOR">Doctor Part</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Scope *</label>
+                        <select id="rate_scope" class="form-select form-select-sm fw-bold border-primary" onchange="toggleRateUser()">
+                            <option value="all">All Freelancers (Same Rate)</option>
+                            <option value="individual">Individual Freelancer</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3" id="rateUserWrap" style="display:none;">
+                        <label class="form-label small fw-bold text-muted">Freelancer *</label>
+                        <select id="rate_user" class="form-select form-select-sm fw-bold border-primary"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Rate Amount (₹) *</label>
+                        <input type="number" step="0.01" min="0.01" id="rate_amount" class="form-control form-control-sm fw-bold border-primary" required>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary btn-sm fw-bold w-100 rounded-3" id="rateSaveBtn"><i class="fa-solid fa-floppy-disk me-1"></i> <span id="rateSaveLabel">Save Rate</span></button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm fw-bold w-100 rounded-3 mt-1" id="rateCancelEdit" style="display:none" onclick="resetRateForm()">Cancel Edit</button>
+                    </div>
+                </form>
+                <div class="table-responsive rounded border">
+                    <table class="table table-sm table-hover table-payout m-0">
+                        <thead>
+                            <tr>
+                                <th>Insurance</th>
+                                <th>Type</th>
+                                <th>Subtype</th>
+                                <th>Part</th>
+                                <th>Who</th>
+                                <th class="text-end">Rate ₹</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratesBody">
+                            <tr><td colspan="7" class="text-center py-3 text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white border-0" style="background:#1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-clock-rotate-left me-2 text-warning"></i> Import History</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="px-3 py-2 border-bottom bg-light d-flex flex-wrap align-items-center gap-2">
+                <label class="small fw-bold text-muted mb-0"><i class="fa-solid fa-calendar-days me-1"></i> Month</label>
+                <input type="month" id="hist_month" class="form-control form-control-sm fw-bold border-primary" style="width:170px" onchange="renderHistory()">
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3" onclick="$('#hist_month').val(''); renderHistory();">All Months</button>
+                <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3 ms-auto" onclick="exportHistoryMonth()">
+                    <i class="fa-solid fa-file-excel me-1"></i> Export Month
+                </button>
+                <span class="small text-muted w-100">Click on any numeric value or file name to view comprehensive data constraints.</span>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-payout m-0">
+                        <thead class="modal-sticky-head">
+                            <tr>
+                                <th>#</th>
+                                <th>File</th>
+                                <th>By</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Saved</th>
+                                <th class="text-center">Suspicious</th>
+                                <th class="text-center">Excel Dup</th>
+                                <th class="text-center">DB Dup</th>
+                                <th class="text-center">Not Found</th>
+                                <th class="text-center">Withdrawn</th>
+                                <th class="text-center">On-Role</th>
+                                <th>When</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr><td colspan="12" class="text-center py-4 text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Detail Modal -->
+<div class="modal fade" id="importDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white border-0" style="background:#1e293b !important;">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0"><i class="fa-solid fa-table-list me-2 text-info"></i> <span id="det_title">Import Details</span></h5>
+                    <small class="text-white-50" id="det_sub"></small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="p-3 border-bottom bg-light">
+                <div class="d-flex flex-wrap gap-2 mb-2" id="det_chips"></div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold rounded-pill px-3" onclick="backToHistory()">
+                        <i class="fa-solid fa-arrow-left me-1"></i> History
+                    </button>
+                    <input type="text" id="det_search" class="form-control form-control-sm border-primary fw-bold" placeholder="Search claim / patient..." style="width:220px" oninput="renderDetail()">
+                    <span class="badge bg-primary" id="det_filter_label">All</span>
+                    <span class="small text-muted fw-bold" id="det_summary"></span>
+                    <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3 ms-auto" onclick="exportImportDetail()">
+                        <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                    </button>
+                </div>
+                <div class="small text-warning-emphasis fw-bold mt-2" id="det_legacy" style="display:none">
+                    <i class="fa-solid fa-circle-info me-1"></i> This import is from before advanced logging capability — only saved records are available.
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-payout m-0 align-middle">
+                        <thead class="modal-sticky-head">
+                            <tr>
+                                <th class="text-center" style="width:50px;">#</th>
+                                <th class="w-claim">Claim #</th>
+                                <th class="w-patient">Patient / Hospital</th>
+                                <th class="text-end w-amount">Amount</th>
+                                <th class="w-user">Assigned / FO</th>
+                                <th class="w-notes">Detailed Info / Alerts</th>
+                                <th class="text-center w-status">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="det_body">
+                            <tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All Payout Cases (month-wise) Modal -->
+<div class="modal fade" id="casesModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header bg-dark text-white border-0" style="background:#1e293b !important;">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-calendar-days me-2 text-info"></i> All Payout Cases — Month Wise</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="p-3 border-bottom bg-light">
+                
+                <!-- Month Selection Chips -->
+                <div class="d-flex flex-wrap gap-2 mb-2" id="cases_chips"></div>
+                
+                <!-- Compact Status / Condition Filter Mini-Cards -->
+                <div class="d-flex flex-wrap gap-2 mb-2" id="cases_sub_chips"></div>
+                
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <input type="text" id="cases_search" class="form-control form-control-sm border-primary fw-bold" placeholder="Search claim / patient / hospital / FO..." style="width:280px" oninput="renderCases()">
+                    <span class="badge bg-primary" id="cases_month_label">—</span>
+                    <span class="small fw-bold text-muted" id="cases_summary"></span>
+                    <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3 ms-auto" onclick="exportCasesMonth()">
+                        <i class="fa-solid fa-file-excel me-1"></i> Export Complete Payout
+                    </button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-payout m-0 align-middle">
+                        <thead class="modal-sticky-head">
+                            <tr>
+                                <th class="text-center" style="width:50px;">#</th>
+                                <th class="w-claim">Claim #</th>
+                                <th class="w-patient">Patient / Hospital</th>
+                                <th class="text-end w-amount">Amount</th>
+                                <th class="w-user">Assigned / FO</th>
+                                <th class="w-parts">FO Parts</th>
+                                <th class="w-parts">On-Role</th>
+                                <th class="w-date">Paid Date</th>
+                                <th class="w-date">Saved On</th>
+                                <th class="w-notes">Import File</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cases_body">
+                            <tr><td colspan="10" class="text-center py-4 text-muted">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+<script>
+    let lastResults = [];
+
+    const FILTER_LABELS = {
+        '': 'All',
+        'VERIFIED_READY': 'Ready',
+        'SUSPICIOUS': 'Suspicious',
+        'EXCEL_DUPLICATE': 'Excel Dup',
+        'ALREADY_PAID': 'Already Paid',
+        'NOT_FOUND': 'Not Found',
+        'WITHDRAWN': 'Withdrawn',
+        'ON_ROLE': 'On-Role'
+    };
+
+    function esc(v) {
+        return String(v == null ? '' : v)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    $(function() {
+        loadAllPayoutSummary();
+        $.get('/api/payout/rate-masters', function(res) {
+            if (res.status === 'success') {
+                let fr = '<option value="">-- No Specific FO (Open Check) --</option>';
+                res.freelancers.forEach(f => {
+                    fr += `<option value="${f.id}">${esc(f.name)}</option>`;
+                });
+                $('#upload_fo_id').html(fr);
+            }
+        });
+    });
+
+    // Advanced Formatting logic for Parts and On-Role elements
+    function formatFoParts(str) {
+        if (!str) return '<span class="text-muted">—</span>';
+        return '<div class="d-flex flex-column gap-1">' + str.split(',').map(s => {
+            let parts = s.split(':');
+            if (parts.length === 2) {
+                 return `<div class="parts-card"><span class="p-type">${esc(parts[0].trim())}</span><span class="p-name" title="${esc(parts[1].trim())}">${esc(parts[1].trim())}</span></div>`;
+            }
+            return `<div class="parts-card"><span class="p-name w-100 m-0" title="${esc(s.trim())}">${esc(s.trim())}</span></div>`;
+        }).join('') + '</div>';
+    }
+
+    function onRoleHtml(v) {
+        if (!v) return '<span class="text-muted">—</span>';
+        return '<div class="d-flex flex-column gap-1">' + String(v).split(' | ').map(function (x) {
+            return `<div class="parts-card"><span class="badge bg-danger-subtle text-danger border border-danger-subtle me-2" style="font-size:0.55rem">ON-ROLE</span><span class="p-name m-0" title="${esc(x)}">${esc(x)}</span></div>`;
+        }).join('') + '</div>';
+    }
+
+    function filterByCard(status) {
+        $('#statusFilter').val(status || '');
+        $('.kpi-click').removeClass('active-filter');
+        if (status === '') {
+            $('.kpi-click[data-filter=""]').addClass('active-filter');
+        } else {
+            $('.kpi-click[data-filter="' + status + '"]').addClass('active-filter');
+        }
+        $('#activeFilterLabel').text(FILTER_LABELS[status] || status || 'All');
+        $('#resultsCard').show();
+        filterResults();
+        const el = document.getElementById('resultsCard');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function getFilteredRows() {
+        const st = $('#statusFilter').val();
+        const q = ($('#resultSearch').val() || '').toLowerCase().trim();
+        return (lastResults || []).filter(function(r) {
+            if (st && r.status !== st) return false;
+            if (q && String(r.claim_number).toLowerCase().indexOf(q) === -1) return false;
+            return true;
+        });
+    }
+
+    function exportFilteredExcel() {
+        const rows = getFilteredRows();
+        if (!rows.length) {
+            Swal.fire('No data', 'No rows match this filter configuration.', 'info');
+            return;
+        }
+        const headers = [
+            'Row', 'Claim #', 'Status', 'Patient', 'Hospital', 'Pay Amount',
+            'Prev Paid Amount', 'Prev Paid Month', 'Prev Paid On', 'Prev Paid Date',
+            'Assigned', 'Employment', 'FO Parts', 'Part Breakdown', 'Flags', 'Remark', 'Dup Note / Alerts'
+        ];
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        xml += '<?mso-application progid="Excel.Sheet"?>\n';
+        xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
+        xml += '<Styles><Style ss:ID="hdr"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#1E293B" ss:Pattern="Solid"/></Style></Styles>';
+        xml += '<Worksheet ss:Name="Filtered"><Table><Row>';
+        headers.forEach(function(h) {
+            xml += '<Cell ss:StyleID="hdr"><Data ss:Type="String">' + esc(h) + '</Data></Cell>';
+        });
+        xml += '</Row>';
+        rows.forEach(function(r) {
+            const bd = (r.part_breakdown || []).map(function(p) {
+                return p.part + ':' + p.user_name + (p.is_on_role ? '(On-Role)' : '(₹' + p.amount + ')');
+            }).join(' | ');
+            const cells = [
+                r.row_no,
+                r.claim_number,
+                r.status,
+                r.patient_name,
+                r.hospital_name,
+                r.freelancer_amount != null ? r.freelancer_amount : r.amount,
+                r.prev_paid_amount != null ? r.prev_paid_amount : '',
+                r.prev_paid_month || '',
+                r.prev_paid_on || '',
+                r.prev_paid_date || '',
+                r.assigned_user,
+                r.employment_type,
+                r.fo_parts_count,
+                bd || r.rate_parts_detail || '',
+                (r.flags || []).join(', '),
+                r.remark || '',
+                r.dup_note || ''
+            ];
+            xml += '<Row>';
+            cells.forEach(function(v) {
+                if (typeof v === 'number') {
+                    xml += '<Cell><Data ss:Type="Number">' + v + '</Data></Cell>';
+                } else {
+                    xml += '<Cell><Data ss:Type="String">' + esc(v) + '</Data></Cell>';
+                }
+            });
+            xml += '</Row>';
+        });
+        xml += '</Table></Worksheet></Workbook>';
+        const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+        const a = document.createElement('a');
+        const label = ($('#statusFilter').val() || 'ALL').toLowerCase();
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Payout_' + label + '_' + new Date().toISOString().slice(0,10) + '.xls';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+
+    function openExportModal() {
+        const now = new Date();
+        if (!$('#export_month').val()) {
+            $('#export_month').val(now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0'));
+        }
+        $('#exportModal').modal('show');
+    }
+    function doExportExcel() {
+        const q = new URLSearchParams();
+        if ($('#export_month').val()) q.set('month', $('#export_month').val());
+        if ($('#export_from').val()) q.set('from', $('#export_from').val());
+        if ($('#export_to').val()) q.set('to', $('#export_to').val());
+        window.location.href = '/api/payout/export?' + q.toString();
+        $('#exportModal').modal('hide');
+    }
+
+    let rateMasters = { insurance: [], types: [], subtypes: [], freelancers: [] };
+
+    function openRatesModal() {
+        $('#ratesModal').modal('show');
+        loadRateMasters().then(function() {
+            loadRatesList();
+        });
+    }
+
+    function toggleRateUser() {
+        if ($('#rate_scope').val() === 'individual') {
+            $('#rateUserWrap').show();
+        } else {
+            $('#rateUserWrap').hide();
+        }
+    }
+
+    function loadRateMasters() {
+        return $.get('/api/payout/rate-masters').then(function(res) {
+            if (res.status !== 'success') return;
+            rateMasters = res;
+            let ins = '<option value="">-- Select --</option>';
+            const seenIns = {};
+            (res.insurance || []).forEach(function(i) {
+                if (seenIns[i.id]) return;
+                seenIns[i.id] = true;
+                ins += '<option value="' + i.id + '">' + esc(i.name) + '</option>';
+            });
+            $('#rate_insurance').html(ins);
+
+            let fr = '<option value="">-- Select Freelancer --</option>';
+            const seenFr = {};
+            (res.freelancers || []).forEach(function(i) {
+                if (seenFr[i.id]) return;
+                seenFr[i.id] = true;
+                fr += '<option value="' + i.id + '">' + esc(i.name) + '</option>';
+            });
+            $('#rate_user').html(fr);
+
+            $('#rate_type').html('<option value="">-- Select Insurance first --</option>');
+            $('#rate_subtype').html('<option value="0">— All Subtypes —</option>');
+        });
+    }
+
+    function filterTypes() {
+        const insId = parseInt($('#rate_insurance').val() || '0', 10);
+        let html = '<option value="">-- Select --</option>';
+        const seenName = {};
+        if (insId > 0) {
+            (rateMasters.types || []).forEach(function(t) {
+                if (parseInt(t.insurance_company_id, 10) !== insId) return;
+                const key = String(t.name || '').toLowerCase();
+                if (seenName[key]) return;
+                seenName[key] = true;
+                html += '<option value="' + t.id + '">' + esc(t.name) + '</option>';
+            });
+        } else {
+            html = '<option value="">-- Select Insurance first --</option>';
+        }
+        $('#rate_type').html(html);
+        filterSubtypes();
+    }
+
+    function filterSubtypes() {
+        const typeId = parseInt($('#rate_type').val() || '0', 10);
+        let html = '<option value="0">— All Subtypes —</option>';
+        const seenName = {};
+        if (typeId > 0) {
+            (rateMasters.subtypes || []).forEach(function(s) {
+                if (parseInt(s.case_type_id, 10) !== typeId) return;
+                const key = String(s.name || '').toLowerCase();
+                if (seenName[key]) return;
+                seenName[key] = true;
+                html += '<option value="' + s.id + '">' + esc(s.name) + '</option>';
+            });
+        }
+        $('#rate_subtype').html(html);
+    }
+
+    function loadRatesList() {
+        $.get('/api/payout/rates', function(res) {
+            if (res.status !== 'success') {
+                $('#ratesBody').html('<tr><td colspan="7" class="text-danger text-center py-3">' + esc(res.message || 'Error') + '</td></tr>');
+                return;
+            }
+            if (!res.data || !res.data.length) {
+                $('#ratesBody').html('<tr><td colspan="7" class="text-center text-muted py-3">No rates configured yet.</td></tr>');
+                return;
+            }
+            let html = '';
+            res.data.forEach(function(r) {
+                const part = (r.part_code || 'ALL').toUpperCase();
+                html += '<tr>'
+                    + '<td class="small">' + esc(r.insurance_name || '—') + '</td>'
+                    + '<td class="small">' + esc(r.type_name || '—') + '</td>'
+                    + '<td class="small">' + esc(r.sub_type_name || '—') + '</td>'
+                    + '<td><span class="badge bg-primary bg-opacity-10 text-primary border">' + esc(part) + '</span></td>'
+                    + '<td class="small fw-bold">' + esc(r.user_name || 'ALL') + '</td>'
+                    + '<td class="text-end fw-bold text-success">₹' + parseFloat(r.rate_amount || 0).toFixed(2) + '</td>'
+                    + '<td class="text-center text-nowrap">'
+                    + '<button type="button" class="btn btn-sm btn-outline-primary me-1 btn-edit-rate" title="Edit"'
+                    + ' data-id="' + r.id + '"'
+                    + ' data-ins="' + (r.insurance_company_id || '') + '"'
+                    + ' data-type="' + (r.case_type_id || '') + '"'
+                    + ' data-sub="' + (r.case_sub_type_id || 0) + '"'
+                    + ' data-part="' + esc(part) + '"'
+                    + ' data-user="' + (r.user_id || '') + '"'
+                    + ' data-amount="' + parseFloat(r.rate_amount || 0) + '"'
+                    + '><i class="fa-solid fa-pen"></i></button>'
+                    + '<button type="button" class="btn btn-sm btn-outline-danger" title="Delete" onclick="deleteRate(' + r.id + ')"><i class="fa-solid fa-trash"></i></button>'
+                    + '</td>'
+                    + '</tr>';
+            });
+            $('#ratesBody').html(html);
+        }, 'json');
+    }
+
+    function resetRateForm() {
+        $('#rate_id').val('');
+        $('#rate_amount').val('');
+        $('#rate_scope').val('all');
+        toggleRateUser();
+        $('#rateSaveLabel').text('Save Rate');
+        $('#rateCancelEdit').hide();
+    }
+
+    function editRateFromBtn(btn) {
+        const $b = $(btn);
+        const ins = $b.data('ins');
+        const typeId = $b.data('type');
+        const sub = $b.data('sub') || 0;
+        const part = String($b.data('part') || 'ALL').toUpperCase();
+        const userId = $b.data('user') || '';
+        const amount = $b.data('amount');
+        const id = $b.data('id');
+
+        $('#rate_id').val(id);
+        $('#rate_insurance').val(String(ins));
+        filterTypes();
+        $('#rate_type').val(String(typeId));
+        filterSubtypes();
+        $('#rate_subtype').val(String(sub));
+        $('#rate_part').val(part);
+        if (userId) {
+            $('#rate_scope').val('individual');
+            toggleRateUser();
+            $('#rate_user').val(String(userId));
+        } else {
+            $('#rate_scope').val('all');
+            toggleRateUser();
+        }
+        $('#rate_amount').val(amount);
+        $('#rateSaveLabel').text('Update Rate');
+        $('#rateCancelEdit').show();
+        const f = document.getElementById('rateForm');
+        if (f) f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    $(document).on('click', '.btn-edit-rate', function() { editRateFromBtn(this); });
+
+    function saveRate() {
+        const data = {
+            id: $('#rate_id').val() || 0,
+            insurance_company_id: $('#rate_insurance').val(),
+            case_type_id: $('#rate_type').val(),
+            case_sub_type_id: $('#rate_subtype').val() || 0,
+            part_code: $('#rate_part').val() || 'ALL',
+            scope: $('#rate_scope').val(),
+            user_id: $('#rate_user').val() || 0,
+            rate_amount: $('#rate_amount').val()
+        };
+        if (!data.insurance_company_id || !data.case_type_id || !data.rate_amount) {
+            Swal.fire('Required', 'Insurance, Type and Rate amount are required.', 'warning');
+            return;
+        }
+        if (data.scope === 'individual' && !data.user_id) {
+            Swal.fire('Required', 'Select freelancer for individual rate.', 'warning');
+            return;
+        }
+        $.post('/api/payout/rates', data, function(res) {
+            if (res.status === 'success') {
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: res.message || 'Saved', showConfirmButton: false, timer: 1800 });
+                resetRateForm();
+                loadRatesList();
+            } else {
+                Swal.fire('Error', res.message || 'Save failed', 'error');
+            }
+        }, 'json').fail(function(xhr) {
+            const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Server error';
+            Swal.fire('Error', msg, 'error');
+        });
+    }
+
+    function deleteRate(id) {
+        Swal.fire({
+            title: 'Delete this rate?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete'
+        }).then(function(r) {
+            if (!r.isConfirmed) return;
+            $.ajax({
+                url: '/api/payout/rates/' + id,
+                type: 'POST',
+                data: { _method: 'DELETE' },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.status === 'success') loadRatesList();
+                    else Swal.fire('Error', res.message || 'Failed', 'error');
+                }
+            });
+        });
+    }
+
+    $('#payout_file').on('change', function () {
+        const f = this.files[0];
+        $('#fileLabel').text(f ? f.name + ' (' + Math.round(f.size / 1024) + ' KB)' : 'No file selected');
+    });
+
+    const zone = document.getElementById('uploadZone');
+    ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('dragover'); }));
+    ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('dragover'); }));
+    zone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files.length) {
+            document.getElementById('payout_file').files = files;
+            $('#fileLabel').text(files[0].name);
+        }
+    });
+
+    function statusBadge(st) {
+        const map = {
+            VERIFIED_READY: ['st-verified', 'Ready'],
+            EXCEL_DUPLICATE: ['st-excel-dup', 'Excel Dup'],
+            ALREADY_PAID: ['st-db-dup', 'Already Paid'],
+            NOT_FOUND: ['st-not-found', 'Not Found'],
+            WITHDRAWN: ['st-withdrawn', 'Withdrawn'],
+            SUSPICIOUS: ['st-suspicious', '<i class="fa-solid fa-triangle-exclamation"></i> Suspicious']
+        };
+        const m = map[st] || ['st-not-found', st];
+        return `<span class="st-badge ${m[0]}">${m[1]}</span>`;
+    }
+
+    function updateKpis(c, results) {
+        $('#kpi_total').text(c.total || 0);
+        $('#kpi_verified').text(c.verified || 0);
+        $('#kpi_suspicious').text(c.suspicious || 0);
+        $('#kpi_excel_dup').text(c.excel_duplicate || 0);
+        $('#kpi_db_dup').text(c.db_duplicate || 0);
+        $('#kpi_not_found').text(c.not_found || 0);
+        $('#kpi_withdrawn').text(c.withdrawn || 0);
+    }
+
+    function renderResults(rows) {
+        lastResults = rows || [];
+        filterResults();
+        $('#resultsCard').show();
+    }
+
+    function filterResults() {
+        const st = $('#statusFilter').val();
+        const q = ($('#resultSearch').val() || '').toLowerCase().trim();
+        let html = '';
+        const filtered = lastResults.filter(r => {
+            if (st && r.status !== st) return false;
+            if (q && String(r.claim_number).toLowerCase().indexOf(q) === -1) return false;
+            return true;
+        });
+        if (!filtered.length) {
+            html = '<tr><td colspan="7" class="text-center py-4 text-muted fw-bold">No rows match this filter.</td></tr>';
+        } else {
+            filtered.forEach(r => {
+                const bd = r.part_breakdown || [];
+                let bdHtml = '';
+                if (bd.length) {
+                    bdHtml = bd.map(function(p) {
+                        if (p.is_on_role) {
+                            return '<div class="text-start small mt-1" style="font-size:0.68rem;line-height:1.3">'
+                                + '<b class="text-uppercase">' + esc(p.part) + '</b>: ' + esc(p.user_name)
+                                + ' <span class="badge bg-warning text-dark" style="font-size:0.6rem">On-Role · no pay</span></div>';
+                        }
+                        return '<div class="text-start small mt-1" style="font-size:0.68rem;line-height:1.3">'
+                            + '<b class="text-uppercase">' + esc(p.part) + '</b>: ' + esc(p.user_name)
+                            + ' <span class="badge bg-success" style="font-size:0.6rem">Freelancer</span>'
+                            + ' <span class="fw-bold">₹' + parseFloat(p.amount||0).toFixed(2) + '</span></div>';
+                    }).join('');
+                } else if (r.rate_parts_detail) {
+                    bdHtml = '<small class="text-muted d-block mt-1" style="font-size:0.65rem">' + esc(r.rate_parts_detail) + '</small>';
+                }
+                const payAmt = parseFloat(r.freelancer_amount != null ? r.freelancer_amount : r.amount || 0);
+                
+                let noteHtml = r.remark ? `<div class="text-muted text-truncate-2" style="font-size:0.75rem;" title="${esc(r.remark)}">${esc(r.remark)}</div>` : '';
+                if (r.dup_note) noteHtml += `<div class="mt-1 small text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(r.dup_note)}</div>`;
+
+                html += `<tr>
+                    <td class="text-center text-muted">${esc(r.row_no)}</td>
+                    <td class="fw-bold text-primary w-claim">${esc(r.claim_number)}</td>
+                    <td class="w-patient">
+                        <strong class="d-block text-truncate" style="max-width:250px;" title="${esc(r.patient_name || '—')}">${esc(r.patient_name || '—')}</strong>
+                        <small class="text-muted d-block text-truncate" style="max-width:250px;" title="${esc(r.hospital_name || '—')}">${esc(r.hospital_name || '—')}</small>
+                    </td>
+                    <td class="text-end w-amount">
+                        ${r.status === 'ALREADY_PAID' ? (
+                            '<div class="fw-bold text-warning">Paid ₹' + parseFloat(r.prev_paid_amount != null ? r.prev_paid_amount : 0).toFixed(2) + '</div>'
+                            + (r.prev_paid_month ? '<div class="small text-muted">Month: <b>' + esc(r.prev_paid_month) + '</b></div>' : '')
+                            + (r.prev_paid_on ? '<div class="small text-muted">On: ' + esc(r.prev_paid_on) + '</div>' : '')
+                        ) : (
+                            '<div class="fw-bold text-success">Pay ₹' + payAmt.toFixed(2) + '</div>' + bdHtml
+                        )}
+                    </td>
+                    <td class="w-user">
+                        <span class="d-block fw-bold text-truncate" style="max-width:180px;" title="${esc(r.assigned_user || '—')}">${esc(r.assigned_user || '—')}</span>
+                        <small class="text-muted text-uppercase" style="font-size:0.65rem;">${r.is_on_role ? 'Salaried' : esc(r.employment_type || '—')}</small>
+                    </td>
+                    <td class="w-notes">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle me-2" style="font-size:0.65rem;">${r.fo_parts_count || 0} Parts</span>
+                        </div>
+                        ${formatFoParts(r.fo_parts_done)}
+                        <div class="mt-2">${noteHtml}</div>
+                    </td>
+                    <td class="text-center w-status">${statusBadge(r.status)}</td>
+                </tr>`;
+            });
+        }
+        $('#resultsBody').html(html);
+    }
+
+    function runVerify(doSave) {
+        const fileInput = document.getElementById('payout_file');
+        if (!fileInput.files.length) {
+            Swal.fire('File Required', 'Please select a CSV / Excel file first.', 'warning');
+            return;
+        }
+        const fd = new FormData();
+        fd.append('payout_file', fileInput.files[0]);
+        fd.append('save', doSave ? '1' : '0');
+        fd.append('upload_fo_id', $('#upload_fo_id').val());
+        fd.append('smart_detect', $('#smart_detect').is(':checked') ? '1' : '0');
+
+        Swal.fire({
+            title: doSave ? 'Saving Verified Claims...' : 'Smart Scanning (Pro)...',
+            text: 'Analyzing claims & detecting mismatches...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        $.ajax({
+            url: '/api/payout/verify',
+            type: 'POST',
+            data: fd,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function (res) {
+                Swal.close();
+                if (res.status !== 'success') {
+                    Swal.fire('Error', res.message || 'Verification failed', 'error');
+                    return;
+                }
+                updateKpis(res.counts || {}, res.results || []);
+                renderResults(res.results || []);
+                if (doSave) {
+                    loadAllPayoutSummary();
+                    Swal.fire(
+                        'Saved',
+                        `${res.saved_count || 0} verified claim(s) saved.\nSuspicious & Duplicates skipped.`,
+                        'success'
+                    );
+                } else {
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'success',
+                        title: 'Scan complete — Review Results', showConfirmButton: false, timer: 2200
+                    });
+                }
+            },
+            error: function (xhr) {
+                Swal.close();
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Server error';
+                Swal.fire('Error', msg, 'error');
+            }
+        });
+    }
+
+    function resetAll() {
+        document.getElementById('payout_file').value = '';
+        $('#fileLabel').text('No file selected');
+        lastResults = [];
+        updateKpis({ total: 0, verified: 0, suspicious: 0, excel_duplicate: 0, db_duplicate: 0, not_found: 0, withdrawn: 0 }, []);
+        $('#resultsCard').hide();
+        $('#resultsBody').html('<tr><td colspan="7" class="text-center py-4 text-muted">No data</td></tr>');
+    }
+
+    // =====================================================================
+    //  IMPORT HISTORY 
+    // =====================================================================
+    let historyData = [];
+
+    function loadHistory() {
+        $('#historyBody').html('<tr><td colspan="12" class="text-center py-4 text-muted">Loading...</td></tr>');
+        $('#historyModal').modal('show');
+        $.get('/api/payout/history', function (res) {
+            if (res.status !== 'success') {
+                $('#historyBody').html('<tr><td colspan="12" class="text-center text-danger py-4">' + esc(res.message || 'Error') + '</td></tr>');
+                return;
+            }
+            historyData = res.data || [];
+            renderHistory();
+        }, 'json');
+    }
+
+    function histNum(id, val, st, cls) {
+        const n = parseInt(val || 0, 10);
+        return '<a href="#" class="hist-num ' + cls + (n === 0 ? ' hist-zero' : '') + '" title="Click for details"'
+            + ' onclick="openImportDetail(' + id + ', \'' + st + '\'); return false;">' + n + '</a>';
+    }
+
+    function renderHistory() {
+        const m = $('#hist_month').val();
+        const list = (historyData || []).filter(function (r) { return !m || r.month_key === m; });
+        if (!list.length) {
+            $('#historyBody').html('<tr><td colspan="12" class="text-center py-4 text-muted">' + (m ? 'No imports found for this month.' : 'No imports yet.') + '</td></tr>');
+            return;
+        }
+        let html = '';
+        let cur = null;
+        list.forEach(function (r) {
+            if (r.month_key !== cur) {
+                cur = r.month_key;
+                const grp = list.filter(function (x) { return x.month_key === cur; });
+                let sTot = 0, sSaved = 0;
+                grp.forEach(function (x) { sTot += parseInt(x.total_rows || 0, 10); sSaved += parseInt(x.verified_count || 0, 10); });
+                html += '<tr class="month-row"><td colspan="12">'
+                    + '<i class="fa-solid fa-calendar-days me-2"></i>' + esc(r.month_label)
+                    + ' <span class="ms-2 small fw-bold text-primary">' + grp.length + ' import(s) · ' + sTot + ' rows · ' + sSaved + ' saved</span>'
+                    + (cur ? '<button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3 py-0 float-end" onclick="exportMonth(\'' + esc(cur) + '\')"><i class="fa-solid fa-file-excel me-1"></i> Export ' + esc(r.month_label) + '</button>' : '')
+                    + '</td></tr>';
+            }
+            html += '<tr>'
+                + '<td class="text-muted"><a href="#" class="hist-file" onclick="openImportDetail(' + r.id + ', \'\'); return false;">#' + r.id + '</a></td>'
+                + '<td><a href="#" class="hist-file small" onclick="openImportDetail(' + r.id + ', \'\'); return false;">' + esc(r.file_name) + '</a></td>'
+                + '<td class="small">' + esc(r.uploaded_by_name || '—') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.total_rows, '', 'hist-total') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.verified_count, 'VERIFIED_READY', 'hist-saved') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.suspicious_count, 'SUSPICIOUS', 'hist-susp') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.excel_duplicate_count, 'EXCEL_DUPLICATE', 'hist-xdup') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.db_duplicate_count, 'ALREADY_PAID', 'hist-dbdup') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.not_found_count, 'NOT_FOUND', 'hist-notfound') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.withdrawn_count, 'WITHDRAWN', 'hist-withdrawn') + '</td>'
+                + '<td class="text-center">' + histNum(r.id, r.on_role_count, 'ON_ROLE', 'hist-onrole') + '</td>'
+                + '<td class="small text-muted">' + esc(r.created_at_fmt) + '</td>'
+                + '</tr>';
+        });
+        $('#historyBody').html(html);
+    }
+
+    function exportMonth(monthKey) {
+        if (!monthKey) return;
+        window.location.href = '/api/payout/export?month=' + encodeURIComponent(monthKey);
+    }
+
+    function exportHistoryMonth() {
+        const m = $('#hist_month').val();
+        if (!m) {
+            Swal.fire('Select Month', 'Please select a month above, then click Export Month.', 'info');
+            return;
+        }
+        exportMonth(m);
+    }
+
+    // =====================================================================
+    //  IMPORT DETAIL MODAL
+    // =====================================================================
+    let detailImportId = 0;
+    let detailRows = [];
+    let detailStatus = '';
+
+    function openImportDetail(id, status) {
+        detailImportId = id;
+        detailStatus = status || '';
+        detailRows = [];
+        $('#det_title').text('Import #' + id);
+        $('#det_sub').text('Loading...');
+        $('#det_chips').html('');
+        $('#det_search').val('');
+        $('#det_legacy').hide();
+        $('#det_body').html('<tr><td colspan="7" class="text-center py-4 text-muted">Loading...</td></tr>');
+
+        const show = function () {
+            $('#importDetailModal').modal('show');
+            $.get('/api/payout/import/' + id, function (res) {
+                if (res.status !== 'success') {
+                    $('#det_body').html('<tr><td colspan="7" class="text-center text-danger py-4">' + esc(res.message || 'Error') + '</td></tr>');
+                    return;
+                }
+                const imp = res.import || {};
+                detailRows = res.rows || [];
+                $('#det_title').text(imp.file_name || ('Import #' + id));
+                $('#det_sub').text('Import #' + id + ' · ' + (imp.uploaded_by_name || '—') + ' · ' + (imp.created_at_fmt || ''));
+                if (res.legacy) $('#det_legacy').show();
+                renderDetail();
+            }, 'json');
+        };
+
+        if ($('#historyModal').hasClass('show')) {
+            $('#historyModal').one('hidden.bs.modal', show).modal('hide');
+        } else {
+            show();
+        }
+    }
+
+    function backToHistory() {
+        $('#importDetailModal').one('hidden.bs.modal', function () {
+            $('#historyModal').modal('show');
+        }).modal('hide');
+    }
+
+    function setDetailFilter(st) {
+        detailStatus = st || '';
+        renderDetail();
+    }
+
+    function renderDetail() {
+        const q = ($('#det_search').val() || '').toLowerCase().trim();
+
+        const cnt = { '': detailRows.length, VERIFIED_READY: 0, SUSPICIOUS: 0, EXCEL_DUPLICATE: 0, ALREADY_PAID: 0, NOT_FOUND: 0, WITHDRAWN: 0, ON_ROLE: 0 };
+        detailRows.forEach(function (r) {
+            if (cnt[r.status] !== undefined) cnt[r.status]++;
+            if (r.on_role_parts) cnt.ON_ROLE++;
+        });
+        const chipDefs = [
+            ['', 'Total'], ['VERIFIED_READY', 'Saved / Ready'], ['SUSPICIOUS', 'Suspicious'], ['EXCEL_DUPLICATE', 'Excel Dup'],
+            ['ALREADY_PAID', 'DB Dup'], ['NOT_FOUND', 'Not Found'], ['WITHDRAWN', 'Withdrawn'], ['ON_ROLE', 'On-Role']
+        ];
+        let chips = '';
+        chipDefs.forEach(function (c) {
+            chips += '<div class="chip-btn ' + (detailStatus === c[0] ? 'active' : '') + '" onclick="setDetailFilter(\'' + c[0] + '\')">'
+                + '<span class="chip-n">' + cnt[c[0]] + '</span>' + c[1] + '</div>';
+        });
+        $('#det_chips').html(chips);
+        $('#det_filter_label').text(FILTER_LABELS[detailStatus] || 'All');
+
+        const rows = detailRows.filter(function (r) {
+            if (detailStatus === 'ON_ROLE') { if (!r.on_role_parts) return false; }
+            else if (detailStatus && r.status !== detailStatus) return false;
+            if (q) {
+                const hay = (r.claim_number + ' ' + (r.patient_name || '') + ' ' + (r.hospital_name || '') + ' ' + (r.assigned_user || '')).toLowerCase();
+                if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+        });
+
+        if (!rows.length) {
+            $('#det_body').html('<tr><td colspan="7" class="text-center py-4 text-muted fw-bold">No records found.</td></tr>');
+            return;
+        }
+        let html = '';
+        rows.forEach(function (r) {
+            let amt;
+            if (r.status === 'ALREADY_PAID') {
+                amt = '<div class="fw-bold text-warning">Paid ₹' + parseFloat(r.prev_paid_amount != null ? r.prev_paid_amount : 0).toFixed(2) + '</div>'
+                    + (r.prev_paid_month ? '<div class="small text-muted">Month: <b>' + esc(r.prev_paid_month) + '</b></div>' : '')
+                    + (r.prev_paid_on ? '<div class="small text-muted">On: ' + esc(r.prev_paid_on) + '</div>' : '');
+            } else {
+                amt = '<div class="fw-bold ' + (r.status === 'VERIFIED_READY' ? 'text-success' : 'text-muted') + '">₹' + parseFloat(r.amount || 0).toFixed(2) + '</div>'
+                    + (r.part_detail ? '<div class="text-muted" style="font-size:0.65rem;line-height:1.3">' + esc(r.part_detail) + '</div>' : '');
+            }
+            
+            let noteHtml = r.remark ? `<div class="text-muted text-truncate-2" style="font-size:0.75rem;" title="${esc(r.remark)}">${esc(r.remark)}</div>` : '';
+            if (r.dup_note) noteHtml += `<div class="mt-1 small text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(r.dup_note)}</div>`;
+
+            html += `<tr>
+                <td class="text-center text-muted">${esc(r.row_no)}</td>
+                <td class="fw-bold text-primary w-claim">${esc(r.claim_number)}</td>
+                <td class="w-patient">
+                    <strong class="d-block text-truncate" style="max-width:250px;" title="${esc(r.patient_name || '—')}">${esc(r.patient_name || '—')}</strong>
+                    <small class="text-muted d-block text-truncate" style="max-width:250px;" title="${esc(r.hospital_name || '—')}">${esc(r.hospital_name || '—')}</small>
+                </td>
+                <td class="text-end w-amount">${amt}</td>
+                <td class="w-user">
+                    <span class="d-block fw-bold text-truncate" style="max-width:180px;" title="${esc(r.assigned_user || '—')}">${esc(r.assigned_user || '—')}</span>
+                    <small class="text-muted text-uppercase" style="font-size:0.65rem;">${r.is_on_role ? 'Salaried' : esc(r.employment_type || '—')}</small>
+                </td>
+                <td class="w-notes">
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle me-2" style="font-size:0.65rem;">${r.fo_parts_count || 0} Parts</span>
+                    </div>
+                    ${formatFoParts(r.fo_parts_done)}
+                    <div class="mt-2">${noteHtml}</div>
+                </td>
+                <td class="text-center w-status">${statusBadge(r.status)}</td>
+            </tr>`;
+        });
+        $('#det_body').html(html);
+    }
+
+    function exportImportDetail() {
+        if (!detailImportId) return;
+        window.location.href = '/api/payout/import/' + detailImportId + '/export?status=' + encodeURIComponent(detailStatus || '');
+    }
+
+    // =====================================================================
+    //  ALL PAYOUT CASES — MONTH WISE 
+    // =====================================================================
+    let casesMonth = '';
+    let casesStatus = '';
+    let casesRows = [];
+    let casesMonths = [];
+
+    function loadAllPayoutSummary() {
+        $.get('/api/payout/records', { summary: 1 }, function (res) {
+            if (res.status !== 'success') return;
+            $('#kpi_all_payout').text(res.total_count || 0);
+        }, 'json');
+    }
+
+    function openCasesModal() {
+        $('#casesModal').modal('show');
+        loadCases('latest');
+    }
+
+    function loadCases(month) {
+        casesStatus = '';
+        $('#cases_body').html('<tr><td colspan="10" class="text-center py-4 text-muted">Loading...</td></tr>');
+        $.get('/api/payout/records', { month: month }, function (res) {
+            if (res.status !== 'success') {
+                $('#cases_body').html('<tr><td colspan="10" class="text-center text-danger py-4">' + esc(res.message || 'Error') + '</td></tr>');
+                return;
+            }
+            casesMonth = res.month || '';
+            casesMonths = res.months || [];
+            casesRows = res.rows || [];
+            
+            let html = '<div class="chip-btn month-chip ' + (casesMonth === '' ? 'active' : '') + '" onclick="loadCases(\'\')">'
+                + '<span class="chip-n">All</span><small>' + (res.total_count || 0) + ' · ₹' + parseFloat(res.total_amount || 0).toFixed(0) + '</small></div>';
+            casesMonths.forEach(function (m) {
+                html += '<div class="chip-btn month-chip ' + (casesMonth === m.key ? 'active' : '') + '" onclick="loadCases(\'' + esc(m.key) + '\')">'
+                    + '<span class="chip-n" style="font-size:0.95rem">' + esc(m.label) + '</span>'
+                    + '<small>' + m.count + ' case(s) · ₹' + parseFloat(m.amount).toFixed(0) + '</small></div>';
+            });
+            $('#cases_chips').html(html);
+            
+            const cur = casesMonths.find(function (m) { return m.key === casesMonth; });
+            $('#cases_month_label').text(casesMonth === '' ? 'All Months' : (cur ? cur.label : casesMonth));
+            
+            renderCases();
+        }, 'json');
+    }
+
+    function setCasesFilter(st) {
+        casesStatus = st;
+        renderCases();
+    }
+
+    function renderCases() {
+        const q = ($('#cases_search').val() || '').toLowerCase().trim();
+
+        let cAll = 0, cPaid = 0, cZero = 0, cOnRole = 0;
+        (casesRows || []).forEach(function (r) {
+            const amt = parseFloat(r.amount || 0);
+            cAll++;
+            if (amt > 0) cPaid++;
+            if (amt === 0 && !r.has_on_role_part) cZero++;
+            if (r.has_on_role_part) cOnRole++;
+        });
+
+        const chipsHtml = 
+            '<div class="mini-kpi ' + (casesStatus === '' ? 'active' : '') + '" onclick="setCasesFilter(\'\')">' +
+                '<span class="n text-dark">' + cAll + '</span>' +
+                '<span class="l">Total Cases</span>' +
+            '</div>' +
+            '<div class="mini-kpi ' + (casesStatus === 'PAID' ? 'active' : '') + '" onclick="setCasesFilter(\'PAID\')">' +
+                '<span class="n text-success">' + cPaid + '</span>' +
+                '<span class="l">Paid (>₹0)</span>' +
+            '</div>' +
+            '<div class="mini-kpi ' + (casesStatus === 'ZERO' ? 'active' : '') + '" onclick="setCasesFilter(\'ZERO\')">' +
+                '<span class="n text-danger">' + cZero + '</span>' +
+                '<span class="l">Rate Not Set</span>' +
+            '</div>' +
+            '<div class="mini-kpi ' + (casesStatus === 'ONROLE' ? 'active' : '') + '" onclick="setCasesFilter(\'ONROLE\')">' +
+                '<span class="n text-warning">' + cOnRole + '</span>' +
+                '<span class="l">On-Role Part</span>' +
+            '</div>';
+        $('#cases_sub_chips').html(chipsHtml);
+
+        const rows = (casesRows || []).filter(function (r) {
+            const amt = parseFloat(r.amount || 0);
+            if (casesStatus === 'PAID' && amt <= 0) return false;
+            if (casesStatus === 'ZERO' && (amt > 0 || r.has_on_role_part)) return false;
+            if (casesStatus === 'ONROLE' && !r.has_on_role_part) return false;
+
+            if (!q) return true;
+            const hay = [r.claim_number, r.patient_name, r.hospital_name, r.assigned_user, r.fo_parts_done, r.on_role_parts, r.import_file].join(' ').toLowerCase();
+            return hay.indexOf(q) !== -1;
+        });
+
+        let sum = 0;
+        rows.forEach(function (r) { sum += parseFloat(r.amount || 0); });
+        $('#cases_summary').text(rows.length + ' case(s) · Total ₹' + sum.toFixed(2));
+
+        if (!rows.length) {
+            $('#cases_body').html('<tr><td colspan="10" class="text-center py-4 text-muted fw-bold">No payout cases found.</td></tr>');
+            return;
+        }
+        let html = '';
+        rows.forEach(function (r, i) {
+            html += `<tr>
+                <td class="text-center text-muted">${i + 1}</td>
+                <td class="fw-bold text-primary w-claim">${esc(r.claim_number)}</td>
+                <td class="w-patient">
+                    <strong class="d-block text-truncate" style="max-width:250px;" title="${esc(r.patient_name || '—')}">${esc(r.patient_name || '—')}</strong>
+                    <small class="text-muted d-block text-truncate" style="max-width:250px;" title="${esc(r.hospital_name || '—')}">${esc(r.hospital_name || '—')}</small>
+                </td>
+                <td class="text-end fw-bold text-success w-amount">
+                    ₹${parseFloat(r.amount || 0).toFixed(2)}
+                    ${r.has_on_role_part ? '<br><span class="badge bg-warning text-dark mt-1" style="font-size:0.6rem">On-Role part · no pay</span>' : ''}
+                </td>
+                <td class="w-user">
+                    <span class="d-block fw-bold text-truncate" style="max-width:180px;" title="${esc(r.assigned_user || '—')}">${esc(r.assigned_user || '—')}</span>
+                    <small class="text-muted text-uppercase" style="font-size:0.65rem;">${r.is_on_role ? 'Salaried' : esc(r.employment_type || '—')}</small>
+                </td>
+                <td class="w-parts">
+                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle mb-1" style="font-size:0.65rem;">${r.fo_parts_count || 0} Parts</span>
+                    ${formatFoParts(r.fo_parts_done)}
+                </td>
+                <td class="w-parts">${onRoleHtml(r.on_role_parts)}</td>
+                <td class="small w-date">${esc(r.paid_date || '—')}</td>
+                <td class="small text-muted w-date">${esc(r.saved_on || '—')}</td>
+                <td class="small text-muted w-notes">
+                    <div class="text-truncate-2" title="${esc(r.import_file || '—')}">${esc(r.import_file || '—')}</div>
+                </td>
+            </tr>`;
+        });
+        $('#cases_body').html(html);
+    }
+
+    function exportCasesMonth() {
+        const q = newSearchParams();
+        if (casesMonth) q.set('month', casesMonth);
+        window.location.href = '/api/payout/export?' + q.toString();
+    }
+
+</script>
+</body>
+</html>

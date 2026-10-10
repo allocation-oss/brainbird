@@ -1,0 +1,5 @@
+tmp
+.git
+*.exe
+*.log
+.air.toml

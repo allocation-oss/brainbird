@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Matrix | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .stats-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: var(--shadow);
+    }
+    .stat-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+
+    /* ULTRA COMPACT MATRIX */
+    .matrix-wrapper { 
+        width: 100%; 
+        overflow-x: auto; 
+        border: 1px solid var(--line); 
+        border-radius: 14px; 
+        background: var(--surface); 
+        box-shadow: var(--shadow); 
+        margin-bottom: 24px;
+    }
+    .matrix-table { 
+        border-collapse: collapse; 
+        width: 100%; 
+        font-size: 11px; 
+        margin: 0; 
+    }
+    .matrix-table th, .matrix-table td { 
+        padding: 4px 2px; 
+        text-align: center; 
+        border-bottom: 1px solid var(--line); 
+        border-right: 1px solid var(--line); 
+        vertical-align: middle; 
+    }
+    .matrix-table th { 
+        background: #1e293b; 
+        color: #fff; 
+        font-weight: 700; 
+        position: sticky; 
+        top: 0; 
+        z-index: 10; 
+        font-size: 10px; 
+        letter-spacing: -0.2px; 
+    }
+    
+    .matrix-table td.sticky-col-sno, .matrix-table th.sticky-col-sno { 
+        position: sticky; 
+        left: 0; 
+        z-index: 11; 
+        font-weight: 700; 
+        background: #ffffff; 
+        width: 32px; 
+        min-width: 32px; 
+    }
+    .matrix-table th.sticky-col-sno { background: #0f172a; color: #fff; z-index: 12; }
+
+    .matrix-table td.sticky-col, .matrix-table th.sticky-col { 
+        position: sticky; 
+        left: 32px; 
+        background: #ffffff; 
+        z-index: 11; 
+        font-weight: 700; 
+        text-align: left; 
+        padding-left: 8px; 
+        white-space: nowrap; 
+        border-right: 2px solid var(--line); 
+    }
+    .matrix-table th.sticky-col { background: #0f172a; z-index: 12; }
+
+    .matrix-table tbody tr:hover td { background-color: #f0f7ff !important; }
+    .matrix-table tbody tr:hover td.sticky-col,
+    .matrix-table tbody tr:hover td.sticky-col-sno { background-color: #f0f7ff !important; }
+
+    .cell-mark { 
+        width: 100%; 
+        height: 22px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        border-radius: 4px; 
+        font-weight: 800; 
+        cursor: pointer; 
+        border: 1px solid transparent; 
+        font-size: 10px; 
+    }
+    .cell-mark:hover { transform: scale(1.15); border-color: var(--brand); position: relative; z-index: 5; }
+    
+    .mark-P { background: #dcfce7; color: #166534; }
+    .mark-A { background: #fee2e2; color: #991b1b; }
+    .mark-H { background: #fef9c3; color: #854d0e; }
+    .mark-L { background: #ffedd5; color: #a16207; } 
+    .mark-L-Pen { background: #ea580c; color: #ffffff; } 
+    .mark-CL { background: #e0e7ff; color: #1e40af; }
+    .mark-ML { background: #fce7f3; color: #be185d; }
+    .mark-EL { background: #fae8ff; color: #9d174d; }
+    .mark-WO, .mark-HO { background: #f1f5f9; color: #64748b; pointer-events: none; }
+    .mark-empty { background: #ffffff; color: #cbd5e1; border: 1px dashed #cbd5e1; }
+
+    .pop-menu { position: absolute; background: #fff; border-radius: 12px; padding: 10px; display: none; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.25); border: 1px solid var(--brand); width: max-content; }
+    .pop-grid { display: grid; grid-template-columns: repeat(4, 40px); gap: 8px; }
+    .pop-btn { border: none; outline: none; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; height: 32px; display: flex; align-items: center; justify-content: center; width: 100%; transition: opacity 0.2s;}
+    .pop-btn:hover { opacity: 0.8; }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Navigation Suite Bar -->
+            <div class="suite-nav-bar">
+                <a href="/cases/matrix" class="suite-nav-item"><i class="fa-solid fa-table-cells"></i> Cases Matrix</a>
+                <a href="/dispatch" class="suite-nav-item"><i class="fa-solid fa-truck-fast"></i> Dispatch Console</a>
+                <a href="/attendance/manual_matrix" class="suite-nav-item active"><i class="fa-solid fa-calendar-check"></i> Attendance Matrix</a>
+                <a href="/master_edit" class="suite-nav-item"><i class="fa-solid fa-pen-to-square"></i> Master Edit</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-calendar-check text-primary me-2"></i> Attendance & SLA Matrix</h4>
+                    <span class="muted">Automated leave calculations, penalty deductions, and monthly roster tracking</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="input-group input-group-sm" style="max-width: 200px;">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="matrixSearch" class="form-control border-start-0 fw-semibold" placeholder="Search Staff..." onkeyup="filterMatrixTable()">
+                    </div>
+                    <input type="month" id="monthPicker" class="form-control form-control-sm fw-bold border-primary" style="max-width: 150px;" onchange="loadMatrix()">
+                    <button class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3 shadow-sm" onclick="$('#manualLeaveModal').modal('show')"><i class="fa-solid fa-pen-to-square me-1"></i> Add Entry</button>
+                    <button class="btn btn-sm btn-secondary fw-semibold rounded-pill px-3 shadow-sm" onclick="openStaffStatusModal()"><i class="fa-solid fa-users-gear me-1"></i> Staff Status</button>
+                    <button class="btn btn-sm btn-outline-dark fw-semibold rounded-pill px-3 shadow-sm" onclick="$('#addStaffModal').modal('show')"><i class="fa-solid fa-user-plus me-1"></i> Add Staff</button>
+                    <button class="btn btn-sm btn-outline-primary fw-semibold rounded-pill px-3 shadow-sm" onclick="openSettingsModal()"><i class="fa-solid fa-gears me-1"></i> Settings</button>
+                    <button class="btn btn-sm btn-success fw-semibold rounded-pill px-3 shadow-sm" onclick="exportExcel()"><i class="fa-solid fa-file-excel me-1"></i> Export</button>
+                </div>
+            </div>
+
+            <!-- Stats KPI Cards -->
+            <div class="stats-card-grid">
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--green)">Present (Today)</div>
+                    <div class="stat-val" style="color:var(--green)" id="st_present">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--red)">Absent (Today)</div>
+                    <div class="stat-val" style="color:var(--red)" id="st_absent">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--amber)">Lates (Today)</div>
+                    <div class="stat-val" style="color:var(--amber)" id="st_late">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title" style="color:var(--brand)">Leaves (Today)</div>
+                    <div class="stat-val" style="color:var(--brand)" id="st_leave">0</div>
+                </div>
+            </div>
+
+            <!-- Matrix Table Container -->
+            <div class="matrix-wrapper">
+                <table class="matrix-table" id="matrixTable">
+                    <thead id="matrixHead"></thead>
+                    <tbody id="matrixBody">
+                        <tr><td colspan="40" class="py-5 text-center text-muted fw-bold"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2 d-block"></i> Generating Matrix...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-bar">
+            {{FOOTER_PARTIAL}}
+        </div>
+    </div>
+</div>
+
+<!-- Context Pop Menu for Cell Mark -->
+<div class="pop-menu" id="cellPopMenu">
+    <div class="pop-grid mb-2 border-bottom pb-2">
+        <button class="pop-btn mark-P" onclick="markCell('P')" title="Present">P</button>
+        <button class="pop-btn mark-A" onclick="markCell('A')" title="Absent">A</button>
+        <button class="pop-btn mark-H" onclick="markCell('H')" title="Half Day">H</button>
+        <button class="pop-btn mark-L" onclick="markCell('L')" title="Late">L</button>
+        <button class="pop-btn mark-CL" onclick="markCell('CL')" title="Casual Leave">CL</button>
+        <button class="pop-btn mark-ML" onclick="markCell('ML')" title="Medical Leave">ML</button>
+        <button class="pop-btn mark-EL" onclick="markCell('EL')" title="Earned Leave">EL</button>
+        <button class="pop-btn bg-dark text-white" onclick="markCellCustom()" title="Manual Text Input"><i class="fa-solid fa-pen"></i></button>
+    </div>
+    <button class="btn btn-light w-100 btn-sm text-danger fw-bold shadow-sm" onclick="markCell('')"><i class="fa-solid fa-eraser me-1"></i> Erase Data</button>
+</div>
+
+<!-- Modal: Manual Leave / Waiver -->
+<div class="modal fade" id="manualLeaveModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <form id="manualEntryForm">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-pen-to-square me-2 text-warning"></i> Manual Leave / Waiver Entry</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="fw-bold small text-muted">Select Employee *</label>
+                            <select name="staff_id" id="manualStaffSelect" class="form-select select2-single" required style="width:100%;">
+                                <option value="">-- Choose Staff --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="fw-bold small text-muted">Entry Type *</label>
+                            <select name="leave_type" class="form-select fw-bold border-warning text-dark" required>
+                                <optgroup label="Standard Entries">
+                                    <option value="CL">Casual Leave (CL)</option>
+                                    <option value="ML">Medical/Sick Leave (ML)</option>
+                                    <option value="EL">Earned Leave (EL)</option>
+                                    <option value="H">Half-Day (H)</option>
+                                    <option value="A">Force Absent (A)</option>
+                                    <option value="P">Force Present (P)</option>
+                                </optgroup>
+                                <optgroup label="Waivers / Exemptions">
+                                    <option value="Late Waiver">Late Waiver (Converts L to P)</option>
+                                    <option value="Absent Waiver">Absent Waiver (Converts A to P)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label class="fw-bold small text-muted">From Date *</label><input type="date" name="start_date" class="form-control fw-bold" required></div>
+                        <div class="col-md-6"><label class="fw-bold small text-muted">To Date *</label><input type="date" name="end_date" class="form-control fw-bold" required></div>
+                        <div class="col-md-12">
+                            <label class="fw-bold small text-muted">Remark / Reason (Visible on Hover)</label>
+                            <input type="text" name="reason" class="form-control" placeholder="e.g. Doctor Approved, Travel Exemption" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2 justify-content-between">
+                    <button type="button" class="btn btn-secondary btn-sm fw-bold px-3 rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-4 rounded-pill">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Staff Status -->
+<div class="modal fade" id="staffStatusModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-users-gear me-2 text-warning"></i> Manage Staff Active / Inactive Status</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" id="staffStatusSearch" class="form-control border-start-0" placeholder="Type staff name to search in real-time..." onkeyup="filterStaffStatusTable()">
+                </div>
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table table-hover align-middle m-0" id="staffStatusTable">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th>Staff Name (Double click to rename)</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffStatusTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-secondary btn-sm fw-bold px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Staff -->
+<div class="modal fade" id="addStaffModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-dark text-white py-3">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-user-plus me-2 text-warning"></i> Add Staff to Matrix</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="nav nav-tabs mb-3" id="staffTabs" role="tablist">
+                    <li class="nav-item" role="presentation"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#salary" type="button">Salary Staff</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#freelance" type="button">Freelancers</button></li>
+                </ul>
+                <div class="tab-content" id="staffTabsContent">
+                    <div class="tab-pane fade show active" id="salary">
+                        <select id="staffSelectSalary" class="form-select select2-multiple" multiple="multiple"></select>
+                    </div>
+                    <div class="tab-pane fade" id="freelance">
+                        <select id="staffSelectFreelancer" class="form-select select2-multiple" multiple="multiple"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <button type="button" class="btn btn-primary btn-sm fw-bold px-4 rounded-pill" onclick="submitAddStaff()">Add Selected</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Settings -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <form id="settingsForm">
+                <div class="modal-header bg-dark text-white py-3">
+                    <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-gears me-2 text-warning"></i> Attendance Rules & Policy Settings</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="fw-bold small text-muted">Reporting Time</label><input type="time" name="reporting_time" id="set_time" class="form-control fw-bold border-primary" required></div>
+                        <div class="col-md-4"><label class="fw-bold small text-muted">Grace Period (Mins)</label><input type="number" name="grace_period_mins" id="set_grace" class="form-control fw-bold border-primary" required></div>
+                        <div class="col-md-4"><label class="fw-bold small text-muted">Late Threshold</label><input type="number" name="late_threshold" id="set_thresh" class="form-control fw-bold border-danger" required></div>
+                        <div class="col-md-12"><label class="fw-bold small text-muted">Penalty Type</label><select name="penalty_type" id="set_penalty" class="form-select fw-bold border-danger"><option value="Half-Day">Half-Day Deduction (-0.5)</option><option value="Full-Day">Full-Day Deduction (-1.0)</option></select></div>
+                        
+                        <div class="col-md-12 mt-3"><label class="fw-bold small text-muted border-bottom w-100 pb-1 mb-2">Annual Leave Quotas</label></div>
+                        <div class="col-md-4"><label class="small fw-bold">CL (Casual)</label><input type="number" name="q_cl" id="set_q_cl" class="form-control border-primary" required></div>
+                        <div class="col-md-4"><label class="small fw-bold">ML (Medical)</label><input type="number" name="q_ml" id="set_q_ml" class="form-control border-primary" required></div>
+                        <div class="col-md-4"><label class="small fw-bold">EL (Earned)</label><input type="number" name="q_el" id="set_q_el" class="form-control border-primary" required></div>
+                        <div class="col-md-12 mt-3"><label class="fw-bold small text-muted border-bottom w-100 pb-1 mb-2">Automated Week-Offs</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Sunday" id="wo_Sunday"><label class="form-check-label fw-bold" for="wo_Sunday">Sunday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Monday" id="wo_Monday"><label class="form-check-label fw-bold" for="wo_Monday">Monday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Tuesday" id="wo_Tuesday"><label class="form-check-label fw-bold" for="wo_Tuesday">Tuesday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Wednesday" id="wo_Wednesday"><label class="form-check-label fw-bold" for="wo_Wednesday">Wednesday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Thursday" id="wo_Thursday"><label class="form-check-label fw-bold" for="wo_Thursday">Thursday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Friday" id="wo_Friday"><label class="form-check-label fw-bold" for="wo_Friday">Friday</label></div>
+                                <div class="form-check"><input class="form-check-input wo-chk" type="checkbox" value="Saturday" id="wo_Saturday"><label class="form-check-label fw-bold" for="wo_Saturday">Saturday</label></div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 mt-3"><label class="fw-bold small text-info border-bottom w-100 pb-1 mb-2">Holidays (JSON Format)</label><textarea name="holidays_json" id="set_hols" class="form-control font-monospace text-muted" rows="2" placeholder='{"2026-08-15": "Independence Day"}'></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold px-4 rounded-pill">Save Configurations</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let globalData = {};
+let activeCell = null;
+
+$(document).ready(function() {
+    // Default to latest populated month (2026-09) with 61 staff attendance records
+    let curMonth = '2026-09';
+    $('#monthPicker').val(curMonth);
+
+    $('.select2-multiple').select2();
+    $('.select2-single').select2({ dropdownParent: $('#manualLeaveModal'), width: '100%' });
+    $('#staffSelectSalary, #staffSelectFreelancer').select2({ dropdownParent: $('#addStaffModal'), width: '100%' });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.cell-mark, #cellPopMenu').length) { $('#cellPopMenu').hide(); }
+    });
+
+    $('#settingsForm').submit(function(e) {
+        e.preventDefault();
+        let wos = []; 
+        $('.wo-chk:checked').each(function() { wos.push($(this).val()); });
+
+        let formData = {
+            reporting_time: $('#set_time').val(),
+            grace_period_mins: $('#set_grace').val(),
+            late_threshold: $('#set_thresh').val(),
+            penalty_type: $('#set_penalty').val(),
+            week_offs: JSON.stringify(wos),
+            holidays_json: $('#set_hols').val(),
+            q_cl: $('#set_q_cl').val(),
+            q_ml: $('#set_q_ml').val(),
+            q_el: $('#set_q_el').val()
+        };
+
+        $.post('/api/attendance/save-settings', formData, function(res) {
+            if(res.status === 'success') {
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 1500});
+                $('#settingsModal').modal('hide');
+                loadMatrix();
+            }
+        });
+    });
+
+    $('#manualEntryForm').submit(function(e) {
+        e.preventDefault();
+        $.post('/api/attendance/manual-entry', $(this).serialize(), function(res) {
+            if(res.status === 'success') {
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 1500});
+                $('#manualLeaveModal').modal('hide');
+                loadMatrix();
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        });
+    });
+    
+    loadMatrix();
+});
+
+function filterMatrixTable() {
+    let query = $('#matrixSearch').val().toLowerCase().trim();
+    $('.matrix-data-row').each(function() {
+        let empName = $(this).attr('data-emp-name') || '';
+        if(empName.indexOf(query) !== -1) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
+function loadMatrix() {
+    let month = $('#monthPicker').val();
+    $('#matrixBody').html('<tr><td colspan="40" class="py-5 text-center text-muted fw-bold"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2 d-block"></i> Generating Matrix...</td></tr>');
+    
+    $.post('/api/attendance/data', { month: month }, function(res) {
+        if (res.status === 'success') {
+            globalData = res;
+            populateStaffSelect(res.availableUsers || []);
+            populateManualEntryStaff(res.staff || []);
+            renderMatrix();
+            filterMatrixTable();
+        } else {
+            $('#matrixBody').html('<tr><td colspan="40" class="text-danger text-center fw-bold py-4">Error loading data</td></tr>');
+        }
+    });
+}
+
+function populateStaffSelect(users) {
+    let salHtml = ''; let freeHtml = '';
+    users.forEach(u => {
+        if(u.employment_type === 'freelancer') { freeHtml += `<option value="${u.id}">${u.fullname}</option>`; } 
+        else { salHtml += `<option value="${u.id}">${u.fullname}</option>`; }
+    });
+    $('#staffSelectSalary').html(salHtml);
+    $('#staffSelectFreelancer').html(freeHtml);
+}
+
+function populateManualEntryStaff(staffList) {
+    let optHtml = '<option value="">-- Choose Staff --</option>';
+    staffList.forEach(st => {
+        optHtml += `<option value="${st.id}">${st.fullname}</option>`;
+    });
+    $('#manualStaffSelect').html(optHtml).trigger('change');
+}
+
+function openStaffStatusModal() {
+    let list = globalData.allStaffStatusList || [];
+    let html = '';
+    
+    list.forEach(st => {
+        let isAct = (st.status === 'active');
+        let badge = isAct ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>';
+        let btnText = isAct ? 'Mark Inactive' : 'Mark Active';
+        let btnClass = isAct ? 'btn-outline-danger' : 'btn-outline-success';
+
+        html += `<tr class="staff-status-row" data-name="${st.fullname.toLowerCase()}">
+            <td class="fw-bold text-primary" style="cursor: pointer;" ondblclick="enableInlineEdit(this, ${st.id}, \`${st.fullname.replace(/'/g, "\\'")}\`)" title="Double click to edit name">${st.fullname}</td>
+            <td class="text-muted small">${st.working_location || '-'}</td>
+            <td>${badge}</td>
+            <td class="text-end text-nowrap">
+                <button class="btn btn-sm ${btnClass} fw-bold rounded-pill px-3 py-1" onclick="toggleStaffStatusModal(${st.id}, '${st.status}')">${btnText}</button>
+            </td>
+        </tr>`;
+    });
+
+    if(html === '') html = '<tr><td colspan="4" class="text-center text-muted py-3">No staff found.</td></tr>';
+    
+    $('#staffStatusTableBody').html(html);
+    $('#staffStatusSearch').val('');
+    $('#staffStatusModal').modal('show');
+}
+
+function enableInlineEdit(td, staffId, currentName) {
+    if ($(td).find('input').length > 0) return;
+
+    let input = $('<input>', {
+        type: 'text',
+        class: 'form-control form-control-sm border-primary fw-bold text-dark',
+        value: currentName
+    });
+
+    $(td).html(input);
+    input.focus();
+    let val = input.val();
+    input.val('').val(val);
+
+    input.on('blur keydown', function(e) {
+        if (e.type === 'keydown' && e.key !== 'Enter') return;
+        let newName = $(this).val().trim();
+        if (newName === '' || newName === currentName) {
+            $(td).html(currentName);
+            return;
+        }
+
+        input.prop('disabled', true);
+        $.post('/api/attendance/edit-staff-name', { staff_id: staffId, new_name: newName }, function(res) {
+            if(res.status === 'success') {
+                Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Name Updated', showConfirmButton: false, timer: 1200});
+                $(td).html(newName);
+                $(td).attr('ondblclick', `enableInlineEdit(this, ${staffId}, \`${newName.replace(/'/g, "\\'")}\`)`);
+                $(td).closest('tr').attr('data-name', newName.toLowerCase());
+                let staff = globalData.allStaffStatusList.find(s => s.id == staffId);
+                if(staff) staff.fullname = newName;
+                loadMatrix();
+            } else {
+                Swal.fire('Error', res.message, 'error');
+                $(td).html(currentName);
+            }
+        }).fail(function() {
+            Swal.fire('Error', 'Update failed.', 'error');
+            $(td).html(currentName);
+        });
+    });
+}
+
+function filterStaffStatusTable() {
+    let query = $('#staffStatusSearch').val().toLowerCase().trim();
+    $('.staff-status-row').each(function() {
+        let name = $(this).attr('data-name') || '';
+        if(name.indexOf(query) !== -1) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
+
+function toggleStaffStatusModal(staffId, currentStatus) {
+    let newStatus = (currentStatus === 'active') ? 'inactive' : 'active';
+    $.post('/api/attendance/toggle-staff-status', { staff_id: staffId, status: newStatus }, function(res) {
+        if(res.status === 'success') {
+            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: res.message, showConfirmButton: false, timer: 1200});
+            $('#staffStatusModal').modal('hide');
+            loadMatrix();
+        }
+    });
+}
+
+function submitAddStaff() {
+    let idsSal = $('#staffSelectSalary').val() || [];
+    let idsFree = $('#staffSelectFreelancer').val() || [];
+    let ids = idsSal.concat(idsFree);
+    if(!ids || ids.length === 0) { Swal.fire('Notice', 'Please select at least one employee', 'warning'); return; }
+
+    $.post('/api/attendance/add-staff', { user_ids: ids.join(',') }, function(res) {
+        if(res.status === 'success') {
+            Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'Staff Added', showConfirmButton: false, timer: 1000});
+            $('#addStaffModal').modal('hide');
+            loadMatrix();
+        }
+    });
+}
+
+function openSettingsModal() {
+    let set = globalData.settings || {};
+    $('#set_time').val(set.reporting_time || '09:30:00');
+    $('#set_grace').val(set.grace_period_mins || 15);
+    $('#set_thresh').val(set.late_threshold || 3);
+    $('#set_penalty').val(set.penalty_type || 'Half-Day');
+    $('#set_hols').val(set.holidays || '{}');
+    
+    let q = { CL: 12, ML: 12, EL: 15 };
+    try { q = JSON.parse(set.leave_quotas || '{"CL":12,"ML":12,"EL":15}'); } catch(e) {}
+    $('#set_q_cl').val(q.CL); $('#set_q_ml').val(q.ML); $('#set_q_el').val(q.EL);
+
+    $('.wo-chk').prop('checked', false);
+    try { 
+        let wos = JSON.parse(set.week_offs || '["Sunday"]'); 
+        wos.forEach(d => { $('#wo_' + d).prop('checked', true); }); 
+    } catch(e) {}
+    
+    $('#settingsModal').modal('show');
+}
+
+function getDaysInMonth(year, month) { return new Date(year, month, 0).getDate(); }
+function getDayName(year, month, day) { return new Date(year, month - 1, day).toLocaleDateString('en-US', { weekday: 'short' }); }
+function getFullDayName(year, month, day) { return new Date(year, month - 1, day).toLocaleDateString('en-US', { weekday: 'long' }); }
+
+function renderMatrix() {
+    let monthVal = $('#monthPicker').val(); 
+    if(!monthVal) return;
+    let parts = monthVal.split('-');
+    let year = parseInt(parts[0]); let month = parseInt(parts[1]);
+    let daysCount = getDaysInMonth(year, month);
+    
+    let todayDate = new Date();
+    let targetDay = (year === todayDate.getFullYear() && month === (todayDate.getMonth() + 1)) ? todayDate.getDate() : 0; 
+    
+    let set = globalData.settings || {};
+    let wos = []; try { wos = JSON.parse(set.week_offs || '["Sunday"]'); } catch(e) {}
+    let hols = {}; try { hols = JSON.parse(set.holidays || '{}'); } catch(e) {}
+
+    let thresh = parseInt(set.late_threshold) || 3;
+    let penMult = set.penalty_type === 'Half-Day' ? 0.5 : 1.0;
+
+    let thead = '<tr><th class="sticky-col-sno">#</th><th class="sticky-col" style="width: 140px;">Employee Name</th>';
+    for (let d = 1; d <= daysCount; d++) {
+        let dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let dayName = getDayName(year, month, d).substring(0,1);
+        let isWO = wos.includes(getFullDayName(year, month, d));
+        let isHO = hols[dateStr] !== undefined;
+        let bg = isHO ? 'bg-danger text-white' : (isWO ? 'bg-secondary text-white' : '');
+        thead += `<th class="${bg}" style="width: 25px;"><div class="fw-bold">${d}</div><div style="font-size:8px; opacity:0.8;">${dayName}</div></th>`;
+    }
+    thead += '<th class="bg-success text-white" style="width: 40px;">Pr</th><th class="bg-danger text-white" style="width: 40px;">Ab</th><th class="bg-info text-dark" style="width: 40px;">Lv</th><th class="bg-warning text-dark" style="width: 40px;">Lt</th><th class="bg-dark text-white" style="width: 40px;">Pen</th><th class="bg-primary text-white" style="width: 45px;">Total</th></tr>';
+    $('#matrixHead').html(thead);
+
+    let tbody = '';
+    let todayP = 0, todayA = 0, todayL = 0, todayLeave = 0;
+
+    (globalData.staff || []).forEach((emp, index) => {
+        let dData = (globalData.records && globalData.records[emp.id]) || {};
+        let rData = (globalData.remarks && globalData.remarks[emp.id]) || {};
+
+        let empRow = `<tr class="matrix-data-row" data-emp-name="${emp.fullname.toLowerCase()}">
+            <td class="sticky-col-sno text-center text-muted fw-bold">${index + 1}</td>
+            <td class="sticky-col border-end" style="width: 140px;"><div class="fw-bold text-dark text-truncate" style="max-width:130px;" title="${emp.fullname}">${emp.fullname}</div></td>`;
+        
+        let present = 0, absent = 0, half = 0, leave = 0, lateCount = 0;
+        let latesInMonth = [];
+        for (let d = 1; d <= daysCount; d++) { 
+            let m = dData[d]; 
+            if (m && String(m).startsWith('L') && m !== 'CL' && m !== 'ML' && m !== 'EL') latesInMonth.push(d); 
+        }
+
+        for (let d = 1; d <= daysCount; d++) {
+            let dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            let fullDay = getFullDayName(year, month, d);
+            let isWO = wos.includes(fullDay);
+            let isHO = hols[dateStr] !== undefined;
+
+            let mark = dData[d] || '';
+            let remark = rData[d] || '';
+            let cellHtml = '';
+            let tooltipAttr = remark ? `title="${remark}"` : '';
+            
+            if (d === targetDay) {
+                if (mark === 'P') todayP++;
+                else if (mark === 'A') todayA++;
+                else if (mark === 'H') todayP += 0.5;
+                else if (String(mark).startsWith('L') && mark !== 'CL' && mark !== 'ML' && mark !== 'EL') { todayL++; todayP++; }
+                else if (['CL','ML','EL'].includes(mark)) todayLeave++;
+            }
+            
+            if (isHO && mark === '') { cellHtml = `<div class="cell-mark mark-HO" title="${hols[dateStr]}">HO</div>`; } 
+            else if (isWO && mark === '') { cellHtml = `<div class="cell-mark mark-WO" title="Week Off">WO</div>`; } 
+            else {
+                let onClick = `onclick="openCellMenu(this, ${emp.id}, ${d})"`;
+                
+                if (String(mark).startsWith('L') && mark !== 'CL' && mark !== 'ML' && mark !== 'EL') {
+                    lateCount++; present++; 
+                    let lIdx = latesInMonth.indexOf(d) + 1; 
+                    if (lIdx % thresh === 0) {
+                        let causedBy = latesInMonth.slice(lIdx - thresh, lIdx);
+                        let tip = remark ? remark : `Penalty Triggered! Dates: ${causedBy.join(', ')}`;
+                        cellHtml = `<div class="cell-mark mark-L-Pen" ${onClick} title="${tip}">L${lIdx}</div>`;
+                    } else {
+                        cellHtml = `<div class="cell-mark mark-L" ${onClick} ${tooltipAttr}>L${lIdx}</div>`;
+                    }
+                } else if (mark === 'P') { present++; cellHtml = `<div class="cell-mark mark-P" ${onClick} ${tooltipAttr}>P</div>`; }
+                else if (mark === 'A') { absent++; cellHtml = `<div class="cell-mark mark-A" ${onClick} ${tooltipAttr}>A</div>`; }
+                else if (mark === 'H') { half++; present += 0.5; cellHtml = `<div class="cell-mark mark-H" ${onClick} ${tooltipAttr}>H</div>`; }
+                else if (['CL','ML','EL'].includes(mark)) { leave++; cellHtml = `<div class="cell-mark mark-${mark}" ${onClick} ${tooltipAttr}>${mark}</div>`; }
+                else if (mark !== '') { cellHtml = `<div class="cell-mark bg-white text-dark border-primary" ${onClick} ${tooltipAttr}>${mark}</div>`; }
+                else { cellHtml = `<div class="cell-mark mark-empty" ${onClick}>-</div>`; }
+            }
+
+            let bg = isHO ? 'bg-danger bg-opacity-10' : (isWO ? 'bg-secondary bg-opacity-10' : '');
+            empRow += `<td class="${bg}">${cellHtml}</td>`;
+        }
+
+        let penaltyCount = Math.floor(lateCount / thresh);
+        let deduction = penaltyCount * penMult;
+        let finalPresent = present - deduction;
+        let finalAbsent = absent + deduction;
+
+        empRow += `
+            <td class="fw-bold text-success bg-success bg-opacity-10">${finalPresent > 0 ? finalPresent : 0}</td>
+            <td class="fw-bold text-danger bg-danger bg-opacity-10">${finalAbsent > 0 ? finalAbsent : 0}</td>
+            <td class="fw-bold text-info bg-info bg-opacity-10">${leave}</td>
+            <td class="fw-bold text-warning text-dark bg-warning bg-opacity-10">${lateCount}</td>
+            <td class="fw-bold bg-dark text-white">${deduction > 0 ? '-'+deduction : '0'}</td>
+            <td class="fw-bolder text-primary bg-primary bg-opacity-10">${finalPresent > 0 ? finalPresent : 0}</td>
+        </tr>`;
+
+        tbody += empRow;
+    });
+
+    $('#matrixBody').html(tbody);
+    $('#st_present').text(todayP);
+    $('#st_absent').text(todayA);
+    $('#st_late').text(todayL);
+    $('#st_leave').text(todayLeave);
+}
+
+function openCellMenu(el, empId, day) {
+    activeCell = { empId: empId, day: day, element: $(el) };
+    let rect = el.getBoundingClientRect();
+    $('#cellPopMenu').css({ top: rect.bottom + window.scrollY + 5 + 'px', left: rect.left + window.scrollX - 80 + 'px' }).fadeIn(100);
+}
+
+function markCell(mark) {
+    if(!activeCell) return;
+    $('#cellPopMenu').hide();
+    let month = $('#monthPicker').val();
+    let empId = activeCell.empId;
+    let day = activeCell.day;
+
+    activeCell.element.html('<i class="fa-solid fa-spinner fa-spin"></i>').addClass('opacity-50');
+    $.post('/api/attendance/mark', { staff_id: empId, month: month, day: day, mark: mark }, function(res) {
+        if(res.status === 'success') {
+            if(!globalData.records[empId]) globalData.records[empId] = {};
+            if(mark==='') { delete globalData.records[empId][day]; } else { globalData.records[empId][day] = mark; }
+            renderMatrix();
+        }
+    });
+}
+
+function markCellCustom() {
+    $('#cellPopMenu').hide();
+    let val = prompt("Enter Custom Mark (e.g. L, CL, ML, P, A, etc.):");
+    if(val !== null) { 
+        let remark = prompt("Enter Remark / Justification (Optional, for Hover Tooltip):") || '';
+        let month = $('#monthPicker').val();
+        let empId = activeCell.empId;
+        let day = activeCell.day;
+
+        $.post('/api/attendance/mark', { staff_id: empId, month: month, day: day, mark: val.toUpperCase().trim(), remark: remark }, function(res) {
+            if(res.status === 'success') {
+                loadMatrix();
+            }
+        });
+    }
+}
+
+function exportExcel() {
+    let month = $('#monthPicker').val();
+    window.location.href = '/attendance/export?month=' + month;
+}
+</script>
+</body>
+</html>

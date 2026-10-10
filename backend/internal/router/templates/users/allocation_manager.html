@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocation Manager Console | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/branding/logo-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --teal: #14b8a6;
+        --green: #16845b;
+        --amber: #aa6900;
+        --red: #b33b42;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { min-height: 42px; padding: 9px 11px; margin-bottom: 3px; font-size: 13px; }
+    .nav-subitem-link { min-height: 34px; padding: 7px 10px 7px 38px; color: var(--muted); font-size: 12px; }
+    .nav-item-link:hover, .nav-subitem-link:hover { color: var(--brand); background: var(--brand-light); }
+    .nav-item-link.active { color: var(--brand); background: #eaf1ff; }
+    .nav-icon { width: 17px; text-align: center; color: var(--muted); }
+    .sidebar-footer { border-top: 1px solid var(--line); padding: 14px 16px; color: var(--muted); font-size: 11px; }
+
+    .app-main { min-height: 100vh; display: flex; flex-direction: column; flex: 1; margin-left: 0; width: 100%; min-width: 0; }
+    .app-header { position: sticky; z-index: 1020; top: 0; min-height: 70px; display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 10px 28px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+    .page-heading { min-width: 0; }
+    .eyebrow { margin: 0 0 3px; color: var(--brand); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 20px; line-height: 1.25; font-weight: 700; color: var(--ink); }
+    .header-actions, .profile { display: flex; align-items: center; gap: 12px; }
+    .profile { padding-left: 12px; border-left: 1px solid var(--line); }
+    .profile-avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--brand); font-weight: 700; }
+    .profile-copy { display: flex; flex-direction: column; }
+    .profile-name { display: block; font-weight: 600; font-size: 12px; }
+    .profile-role { display: block; color: var(--muted); font-size: 11px; }
+    .secondary-button { min-height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); font-weight: 600; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+    .app-content { width: min(1520px, 100%); margin: 0 auto; padding: 20px 24px 30px; flex: 1; }
+
+    .suite-nav-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 6px 10px; background: #fff; border: 1px solid var(--line); border-radius: 999px; box-shadow: var(--shadow); overflow-x: auto; }
+    .suite-nav-item { display: inline-flex; align-items: center; gap: 7px; padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--muted); text-decoration: none; white-space: nowrap; transition: all .16s ease; }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: #fff; background: var(--brand); box-shadow: 0 2px 8px rgba(37,99,235,.28); }
+
+    .page-title-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .module-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 20px; }
+    
+    .table-custom { margin-bottom: 0; font-size: 13px; }
+    .table-custom thead th { background: #f8fafc; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid var(--line); padding: 10px 12px; }
+    .table-custom tbody td { padding: 12px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+    .table-custom tbody tr:hover { background-color: #f8fafc; }
+    .page-footer { padding: 18px 24px; color: var(--muted); font-size: 11px; text-align: center; border-top: 1px solid var(--line); background: #fff; margin-top: auto; }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    {{SIDEBAR_PARTIAL}}
+
+    <main class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Suite Navigation Bar -->
+            <div class="suite-nav-bar">
+                <a href="/users/manage" class="suite-nav-item"><i class="fa-solid fa-users"></i> Users Directory</a>
+                <a href="/staff_mapping" class="suite-nav-item"><i class="fa-solid fa-network-wired"></i> Staff Mapping</a>
+                <a href="/users/allocation_manager" class="suite-nav-item active"><i class="fa-solid fa-map-location-dot"></i> Allocation Manager</a>
+                <a href="/users/points_setup" class="suite-nav-item"><i class="fa-solid fa-sliders"></i> Points & TAT Setup</a>
+            </div>
+
+            <!-- Page Header Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-map-location-dot text-primary me-2"></i> Allocation Manager Configuration</h4>
+                    <span class="muted">Assign geographic & insurer jurisdiction to Allocation Managers</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="loadMappings()"><i class="fa-solid fa-rotate me-1"></i> Refresh</button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left Form: Add Mapping -->
+                <div class="col-lg-4">
+                    <div class="module-card">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3 text-uppercase text-muted"><i class="fa-solid fa-plus-circle me-1"></i> Create Geographic Rule</h6>
+                        <form id="allocForm" onsubmit="event.preventDefault(); saveMapping();">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Allocation Manager *</label>
+                                <select id="allocation_manager_id" name="allocation_manager_id" class="form-select form-select-sm" required>
+                                    <option value="">-- Select Manager --</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">State</label>
+                                <select id="state_id" name="state_id" class="form-select form-select-sm" onchange="loadDistricts()">
+                                    <option value="">All States</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">District / City</label>
+                                <select id="district_id" name="district_id" class="form-select form-select-sm">
+                                    <option value="">All Districts</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Insurance Company</label>
+                                <select id="insurance_company_id" name="insurance_company_id" class="form-select form-select-sm">
+                                    <option value="">All Companies</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Case Category</label>
+                                <select id="category_id" name="category_id" class="form-select form-select-sm" onchange="loadSubcategories()">
+                                    <option value="">All Categories</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Case Subcategory</label>
+                                <select id="subcategory_id" name="subcategory_id" class="form-select form-select-sm">
+                                    <option value="">All Subcategories</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold" id="saveAllocBtn"><i class="fa-solid fa-save me-1"></i> Save Geographic Rule</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right Table: Active Mappings -->
+                <div class="col-lg-8">
+                    <div class="module-card">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                            <h6 class="fw-bold m-0 text-uppercase text-muted"><i class="fa-solid fa-list me-1"></i> Active Allocation Rules</h6>
+                            <span class="badge bg-primary rounded-pill px-3 py-1" id="mappingCountBadge">0 Rules</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="text" id="filterInput" class="form-control form-control-sm" placeholder="Search rules by manager, state, insurer..." oninput="filterTable()">
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-custom align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Allocation Manager</th>
+                                        <th>State / District</th>
+                                        <th>Company</th>
+                                        <th>Category / Subcategory</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mappingTableBody">
+                                    <tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading rules...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let mappingsData = [];
+
+$(document).ready(function() {
+    loadLayout();
+    loadInitialData();
+    loadMappings();
+});
+
+function loadLayout() {
+    $.get('/api/v1/dashboard/layout', function(data) {
+        if (!data) return;
+        var profile = data.userProfile || {};
+        var settings = data.appSettings || {};
+        $('#companyName').text(settings.company_name || 'Brain Bird');
+        $('#profileName').text(profile.fullname || profile.username || 'Account');
+        $('#profileRole').text('Role ' + (profile.role_id || ''));
+        $('#profileAvatar').text((profile.fullname || profile.username || 'B').trim().charAt(0).toUpperCase());
+        $('#sidebarFooter').text(settings.app_version ? 'Version ' + settings.app_version : 'Operations portal');
+        $('#pageFooter').text((settings.company_name || 'Brain Bird') + ' · Operations portal');
+
+        var sidebarModules = data.sidebarModules || [];
+        var nav = $('#sidebarMenu');
+        nav.empty();
+        sidebarModules.forEach(function(m) {
+            nav.append(buildMenuItem(m, false));
+        });
+    });
+}
+
+function buildMenuItem(menu, isChild) {
+    var group = $('<div class="nav-group"></div>');
+    var isParent = menu.submenus && menu.submenus.length;
+    var link = isParent ? $('<button type="button" class="nav-item-link"></button>') : $('<a class="nav-item-link"></a>');
+    if (isChild) link.removeClass('nav-item-link').addClass('nav-subitem-link');
+    if (!isParent) link.attr('href', menu.module_slug.startsWith('/') ? menu.module_slug : '/' + menu.module_slug);
+    if (menu.module_slug === 'users/allocation_manager' || menu.module_slug === '/users/allocation_manager') link.addClass('active');
+
+    link.append('<i class="nav-icon ' + (menu.icon || 'fa-solid fa-circle') + '"></i>');
+    link.append('<span>' + (menu.module_name || '') + '</span>');
+    if (isParent) link.append('<i class="fa-solid fa-chevron-down ms-auto text-muted" style="font-size:10px;"></i>');
+
+    if (isParent) {
+        link.on('click', function() { group.toggleClass('expanded'); });
+    }
+    group.append(link);
+
+    if (isParent) {
+        var childContainer = $('<div class="nav-children"></div>');
+        menu.submenus.forEach(function(child) {
+            childContainer.append(buildMenuItem(child, true));
+        });
+        group.append(childContainer);
+    }
+    return group;
+}
+
+function loadInitialData() {
+    $.get('/api/alloc_mgr/get_initial_data', function(res) {
+        if (res.status === 'success') {
+            var amSelect = $('#allocation_manager_id');
+            (res.allocManagers || []).forEach(function(m) {
+                amSelect.append('<option value="' + m.id + '">' + m.fullname + '</option>');
+            });
+
+            var stSelect = $('#state_id');
+            (res.states || []).forEach(function(s) {
+                stSelect.append('<option value="' + s.id + '">' + s.state_name + '</option>');
+            });
+
+            var cpSelect = $('#insurance_company_id');
+            (res.companies || []).forEach(function(c) {
+                cpSelect.append('<option value="' + c.id + '">' + c.company_name + '</option>');
+            });
+
+            var ctSelect = $('#category_id');
+            (res.categories || []).forEach(function(cat) {
+                ctSelect.append('<option value="' + cat.id + '">' + cat.type_name + '</option>');
+            });
+        }
+    });
+}
+
+function loadDistricts() {
+    var stateId = $('#state_id').val();
+    var distSelect = $('#district_id');
+    distSelect.empty().append('<option value="">All Districts</option>');
+    if (!stateId) return;
+
+    $.post('/api/alloc_mgr/get_districts', { state_id: stateId }, function(res) {
+        if (res.status === 'success' && res.data) {
+            res.data.forEach(function(d) {
+                distSelect.append('<option value="' + d.id + '">' + d.district_name + '</option>');
+            });
+        }
+    });
+}
+
+function loadSubcategories() {
+    var catId = $('#category_id').val();
+    var subSelect = $('#subcategory_id');
+    subSelect.empty().append('<option value="">All Subcategories</option>');
+    if (!catId) return;
+
+    $.post('/api/alloc_mgr/get_subcategories', { category_id: catId }, function(res) {
+        if (res.status === 'success' && res.data) {
+            res.data.forEach(function(sc) {
+                subSelect.append('<option value="' + sc.id + '">' + sc.sub_type_name + '</option>');
+            });
+        }
+    });
+}
+
+function loadMappings() {
+    $('#mappingTableBody').html('<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i> Loading rules...</td></tr>');
+    $.get('/api/alloc_mgr/list', function(res) {
+        if (res.status === 'success') {
+            mappingsData = res.data || [];
+            $('#mappingCountBadge').text(mappingsData.length + ' Rules');
+            renderTable(mappingsData);
+        } else {
+            $('#mappingTableBody').html('<tr><td colspan="6" class="text-center py-4 text-danger">' + (res.message || 'Failed to load rules') + '</td></tr>');
+        }
+    });
+}
+
+function renderTable(list) {
+    if (list.length === 0) {
+        $('#mappingTableBody').html('<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa-solid fa-folder-open me-2"></i> No active rules found.</td></tr>');
+        return;
+    }
+    var html = '';
+    list.forEach(function(m, idx) {
+        html += '<tr>' +
+            '<td class="text-muted fw-bold">' + (idx + 1) + '</td>' +
+            '<td><strong class="text-primary">' + escapeHTML(m.alloc_manager) + '</strong></td>' +
+            '<td>' + escapeHTML(m.state_name) + ' <small class="text-muted">(' + escapeHTML(m.district_name) + ')</small></td>' +
+            '<td>' + escapeHTML(m.company_name) + '</td>' +
+            '<td>' + escapeHTML(m.category) + ' <small class="text-muted">(' + escapeHTML(m.subcategory) + ')</small></td>' +
+            '<td class="text-end">' +
+                '<button class="btn btn-outline-danger btn-sm" onclick="deleteMapping(' + m.id + ')"><i class="fa-solid fa-trash-can"></i></button>' +
+            '</td>' +
+        '</tr>';
+    });
+    $('#mappingTableBody').html(html);
+}
+
+function filterTable() {
+    var q = $('#filterInput').val().toLowerCase();
+    var filtered = mappingsData.filter(function(m) {
+        return (m.alloc_manager || '').toLowerCase().includes(q) ||
+               (m.state_name || '').toLowerCase().includes(q) ||
+               (m.district_name || '').toLowerCase().includes(q) ||
+               (m.company_name || '').toLowerCase().includes(q) ||
+               (m.category || '').toLowerCase().includes(q);
+    });
+    renderTable(filtered);
+}
+
+function saveMapping() {
+    var formData = $('#allocForm').serialize();
+    $('#saveAllocBtn').prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...');
+    $.post('/api/alloc_mgr/save', formData, function(res) {
+        $('#saveAllocBtn').prop('disabled', false).html('<i class="fa-solid fa-save me-1"></i> Save Geographic Rule');
+        if (res.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Saved', text: res.message, timer: 1200, showConfirmButton: false });
+            $('#allocForm')[0].reset();
+            loadMappings();
+        } else {
+            Swal.fire('Error', res.message || 'Failed to save', 'error');
+        }
+    }).fail(function() {
+        $('#saveAllocBtn').prop('disabled', false).html('<i class="fa-solid fa-save me-1"></i> Save Geographic Rule');
+        Swal.fire('Error', 'Server error saving rule.', 'error');
+    });
+}
+
+function deleteMapping(id) {
+    Swal.fire({
+        title: 'Delete Rule?',
+        text: 'This geographic mapping will be removed immediately.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $.post('/api/alloc_mgr/delete', { id: id }, function(res) {
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'Deleted', text: res.message, timer: 1200, showConfirmButton: false });
+                    loadMappings();
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+function escapeHTML(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+    });
+}
+</script>
+</body>
+</html>

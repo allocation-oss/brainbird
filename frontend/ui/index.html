@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brainbird | Secure Access</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one"></div>
+    <div class="bg-orb orb-two"></div>
+
+    <div id="authView" class="auth-shell">
+      <div class="login-card">
+        <aside class="brand-panel">
+          <div class="brand-block">
+            <div class="brand-icon">B</div>
+            <div>
+              <p class="eyebrow">BRAINBIRD</p>
+              <h1>Operations Suite</h1>
+            </div>
+          </div>
+
+          <div class="brand-copy">
+            <p class="mini-label">CASE INTELLIGENCE</p>
+            <h2>Track every case with clarity, speed, and control.</h2>
+            <p>
+              Monitor your database workflow, performance signals, and business-critical cases from a single premium command center.
+            </p>
+          </div>
+
+          <div class="metrics-strip">
+            <div>
+              <strong>1.2K</strong>
+              <span>Active cases</span>
+            </div>
+            <div>
+              <strong>96.4%</strong>
+              <span>SLA health</span>
+            </div>
+            <div>
+              <strong>24/7</strong>
+              <span>Monitoring</span>
+            </div>
+          </div>
+        </aside>
+
+        <section class="login-panel">
+          <div class="login-head">
+            <div>
+              <p class="eyebrow accent">SECURE ACCESS</p>
+              <h3>Welcome back</h3>
+            </div>
+            <span class="status-pill online">System online</span>
+          </div>
+
+          <form id="loginForm" class="login-form">
+            <label>
+              <span>Email</span>
+              <input type="email" id="email" value="admin@brainbird.com" placeholder="name@company.com" required />
+            </label>
+
+            <label>
+              <span>Password</span>
+              <input type="password" id="password" value="admin123" placeholder="Enter password" required />
+            </label>
+
+            <div class="form-row">
+              <label class="check-row">
+                <input type="checkbox" checked />
+                <span>Keep me signed in</span>
+              </label>
+              <a href="#">Need help?</a>
+            </div>
+
+            <button type="submit" class="primary-btn">Sign in to dashboard</button>
+
+            <div class="demo-box">
+              <small>Demo credentials</small>
+              <strong>admin@brainbird.com / admin123</strong>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <div id="dashboardView" class="dashboard hidden">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-icon small">B</div>
+          <div>
+            <span class="eyebrow">BRAINBIRD</span>
+            <strong>Control center</strong>
+          </div>
+        </div>
+
+        <nav class="nav-menu">
+          <button class="nav-item active">Overview</button>
+          <button class="nav-item">Case queue</button>
+          <button class="nav-item">Database health</button>
+          <button class="nav-item">Analytics</button>
+          <button class="nav-item">Reports</button>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="mini-label">ACTIVE ALERTS</span>
+          <strong>12</strong>
+          <small>3 require action</small>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow accent">OPERATIONS OVERVIEW</p>
+            <h2>Case intelligence dashboard</h2>
+          </div>
+
+          <div class="topbar-actions">
+            <button id="refreshDashboard" class="ghost-btn">Refresh data</button>
+            <div class="user-chip">
+              <span class="avatar">A</span>
+              <div>
+                <strong>Ananya</strong>
+                <small>Operations lead</small>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="kpi-grid">
+          <article class="kpi-card primary">
+            <div class="kpi-head">
+              <span>Total live cases</span>
+              <span class="trend up">+12.5%</span>
+            </div>
+            <strong id="totalsCase">0</strong>
+            <small>Across database & workflow queues</small>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <span>Resolved today</span>
+              <span class="trend up">+8.1%</span>
+            </div>
+            <strong id="resolvedCount">0</strong>
+            <small>Completed within SLA window</small>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <span>At-risk cases</span>
+              <span class="trend down">-4.2%</span>
+            </div>
+            <strong id="riskCount">0</strong>
+            <small>Needs escalation</small>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <span>Database health</span>
+              <span class="trend up">98.7%</span>
+            </div>
+            <strong id="healthScore">0%</strong>
+            <small>System uptime & sync stability</small>
+          </article>
+        </section>
+
+        <section class="analytics-grid">
+          <article class="panel large-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">WORKFLOW FLOW</p>
+                <h3>Case volume trend</h3>
+              </div>
+              <span class="muted-label">Last 30 days</span>
+            </div>
+
+            <div class="chart-bars" id="chartBars"></div>
+          </article>
+
+          <article class="panel donut-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">SEGMENTATION</p>
+                <h3>Case mix</h3>
+              </div>
+            </div>
+
+            <div class="donut-wrap">
+              <div class="donut-ring">
+                <div class="donut-center">
+                  <strong id="mixScore">0%</strong>
+                  <span>Healthy</span>
+                </div>
+              </div>
+
+              <ul class="legend-list" id="legendList"></ul>
+            </div>
+          </article>
+        </section>
+
+        <section class="bottom-grid">
+          <article class="panel table-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">CASE TRACKER</p>
+                <h3>Latest cases</h3>
+              </div>
+              <button class="text-btn">Export</button>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Case ID</th>
+                  <th>Source</th>
+                  <th>Owner</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody id="caseTableBody"></tbody>
+            </table>
+          </article>
+
+          <article class="panel side-panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">DATABASE MONITOR</p>
+                <h3>System pulse</h3>
+              </div>
+            </div>
+
+            <div class="status-list" id="dbStatusList"></div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

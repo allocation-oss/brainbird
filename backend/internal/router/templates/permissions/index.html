@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Control &amp; Permission Matrix | Brain Bird</title>
+    <meta name="theme-color" content="#f4f6f7">
+    <link rel="icon" type="image/png" href="/assets/branding/logo-192.png">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+    :root {
+        color-scheme: light;
+        --canvas: #f4f6f7;
+        --surface: #ffffff;
+        --ink: #202a35;
+        --muted: #6b7785;
+        --line: #dce2e7;
+        --brand: #2563eb;
+        --brand-hover: #1d4ed8;
+        --brand-light: #eef4ff;
+        --shadow: 0 8px 28px rgba(25,39,52,.06);
+        --font-heading: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        background-color: var(--canvas) !important;
+        color: var(--ink) !important;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .app-wrapper { display: flex; min-height: 100vh; position: relative; background: var(--canvas); }
+    .sidebar-hover-notch { position: fixed; z-index: 1041; top: 50%; left: 0; width: 22px; height: 58px; transform: translateY(-50%); border: 0; border-radius: 0 9px 9px 0; color: #fff; background: var(--brand); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-sidebar { position: fixed; z-index: 1040; inset: 0 auto 0 0; width: 260px; display: flex; flex-direction: column; transform: translateX(-260px); transition: transform .24s ease; background: var(--surface); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,34,48,.08); }
+    .app-sidebar.open, .app-sidebar:hover, .sidebar-hover-notch:hover + .app-sidebar { transform: translateX(0); }
+    .sidebar-brand { min-height: 70px; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+    .sidebar-brand img { width: 36px; height: 36px; object-fit: contain; border-radius: 7px; }
+    .brand-title { font-weight: 700; font-size: 14px; }
+    .brand-caption, .muted { color: var(--muted); font-size: 12px; }
+    .sidebar-menu { padding: 16px 12px; overflow: auto; flex: 1; }
+    .menu-label { padding: 0 10px 8px; color: var(--muted); font-size: 10px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-item-link, .nav-subitem-link { width: 100%; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 7px; text-align: left; color: var(--ink); background: transparent; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .nav-item-link { padding: 9px 12px; font-size: 13px; }
+    .nav-subitem-link { padding: 7px 12px 7px 32px; font-size: 12px; color: var(--muted); }
+    .nav-item-link:hover, .nav-subitem-link:hover, .nav-item-link.active, .nav-subitem-link.active { background: var(--brand-light); color: var(--brand); font-weight: 700; }
+    .nav-flyout { margin-left: 8px; padding-left: 8px; border-left: 2px solid var(--line); }
+
+    .app-main { flex: 1; min-width: 0; display: flex; flex-direction: column; background: var(--canvas); }
+    .app-header { height: 70px; background: var(--surface); border-bottom: 1px solid var(--line); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1020; }
+    .app-content { padding: 24px 28px; flex: 1; }
+
+    /* Suite Navigation Bar */
+    .suite-nav-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        padding: 6px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .suite-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--muted);
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .suite-nav-item:hover { color: var(--brand); background: var(--brand-light); }
+    .suite-nav-item.active { color: var(--surface); background: var(--brand); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+
+    .page-title-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 24px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .selector-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px 24px;
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+    }
+
+    .table-container-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .table-responsive { width: 100%; overflow-x: auto; }
+    .pro-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .pro-table th {
+        background: #f8fafc;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+    }
+    .pro-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+        vertical-align: middle;
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .pro-table tr:hover td { background: #fbfcfe; }
+
+    .parent-row td {
+        background: #fcfdfe;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .parent-row td:first-child {
+        border-left: 4px solid var(--brand);
+    }
+
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        cursor: pointer;
+    }
+    .form-check-input:checked {
+        background-color: var(--brand);
+        border-color: var(--brand);
+    }
+
+    .footer-bar { padding: 18px 28px; background: var(--surface); border-top: 1px solid var(--line); text-align: center; font-size: 12px; color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <button class="sidebar-hover-notch" id="notchToggleBtn" title="Toggle Sidebar">
+        <i class="fa-solid fa-angle-right"></i>
+    </button>
+
+    {{SIDEBAR_PARTIAL}}
+
+    <div class="app-main">
+        {{HEADER_PARTIAL}}
+
+        <div class="app-content">
+            <!-- Suite Navigation Bar -->
+            <div class="suite-nav-bar">
+                <a href="/settings/audit_logs" class="suite-nav-item"><i class="fa-solid fa-clipboard-list"></i> System Audit Logs</a>
+                <a href="/menu_manager" class="suite-nav-item"><i class="fa-solid fa-bars-staggered"></i> Menu Manager</a>
+                <a href="/permission_manager" class="suite-nav-item active"><i class="fa-solid fa-shield-halved"></i> Permission Manager</a>
+            </div>
+
+            <!-- Page Title Card -->
+            <div class="page-title-card">
+                <div>
+                    <h4 class="fw-bold m-0"><i class="fa-solid fa-shield-halved text-primary me-2"></i> Access Control &amp; Permission Matrix</h4>
+                    <span class="muted">Role-Based Access Control (RBAC) and granular user overrides for pages and actions</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <button type="button" class="btn btn-primary fw-bold px-4 rounded-pill shadow-sm" id="saveBtn" onclick="savePermissions()" disabled>
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Permissions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Selector Card -->
+            <div class="selector-card">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-muted small text-uppercase mb-2">Scope Target</label>
+                        <div class="d-flex gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="permType" id="typeRole" value="role" checked onchange="onTypeChanged()">
+                                <label class="form-check-label fw-bold text-primary" for="typeRole">
+                                    <i class="fa-solid fa-user-group me-1"></i> Manage by Role
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="permType" id="typeUser" value="user" onchange="onTypeChanged()">
+                                <label class="form-check-label fw-bold text-success" for="typeUser">
+                                    <i class="fa-solid fa-user-gear me-1"></i> Individual User Override
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7">
+                        <div id="roleSelectBlock">
+                            <label class="form-label fw-bold text-muted small text-uppercase mb-2">Choose Role</label>
+                            <select id="roleSelector" class="form-select border-primary fw-bold" onchange="onTargetSelected()">
+                                <option value="">-- Select Role to Configure --</option>
+                            </select>
+                        </div>
+
+                        <div id="userSelectBlock" style="display:none;">
+                            <label class="form-label fw-bold text-muted small text-uppercase mb-2 text-success">Choose User</label>
+                            <select id="userSelector" class="form-select border-success fw-bold" onchange="onTargetSelected()">
+                                <option value="">-- Select User to Configure --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permission Matrix Table Card -->
+            <div class="table-container-card">
+                <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill font-monospace" id="targetBadge">No Target Selected</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <small class="text-muted fw-bold">Bulk Columns:</small>
+                        <div class="form-check form-check-inline m-0">
+                            <input type="checkbox" class="form-check-input" id="checkAllView" onchange="toggleColumn('view', this.checked)">
+                            <label class="form-check-label small fw-bold" for="checkAllView">All View</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0">
+                            <input type="checkbox" class="form-check-input" id="checkAllAdd" onchange="toggleColumn('add', this.checked)">
+                            <label class="form-check-label small fw-bold" for="checkAllAdd">All Add</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0">
+                            <input type="checkbox" class="form-check-input" id="checkAllEdit" onchange="toggleColumn('edit', this.checked)">
+                            <label class="form-check-label small fw-bold" for="checkAllEdit">All Edit</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0">
+                            <input type="checkbox" class="form-check-input" id="checkAllDelete" onchange="toggleColumn('delete', this.checked)">
+                            <label class="form-check-label small fw-bold" for="checkAllDelete">All Delete</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45%;">Module &amp; Feature Name</th>
+                                <th class="text-center" style="width: 12%;">View</th>
+                                <th class="text-center" style="width: 12%;">Add</th>
+                                <th class="text-center" style="width: 12%;">Edit</th>
+                                <th class="text-center" style="width: 12%;">Delete</th>
+                                <th class="text-center" style="width: 7%;">Quick</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrixTbody">
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-arrow-up text-primary me-2"></i> Select a Role or User above to inspect and assign permissions.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{FOOTER_PARTIAL}}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.7/dist/sweetalert2.all.min.js"></script>
+
+<script>
+let state = {
+    roles: [],
+    users: [],
+    modules: [],
+    currentTargetType: 'role',
+    currentTargetId: 0,
+    currentPerms: {}
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadInitialData();
+
+    const notch = document.getElementById('notchToggleBtn');
+    const sidebar = document.querySelector('.app-sidebar');
+    if (notch && sidebar) {
+        notch.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+    }
+});
+
+async function loadInitialData() {
+    try {
+        const res = await fetch('/api/permissions/initial_data');
+        const json = await res.json();
+        if (json.status === 'success') {
+            state.roles = json.roles || [];
+            state.users = json.users || [];
+            state.modules = json.modules || [];
+            populateSelectors();
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'Failed to initialize permission matrix', 'error');
+    }
+}
+
+function populateSelectors() {
+    const rSel = document.getElementById('roleSelector');
+    rSel.innerHTML = '<option value="">-- Select Role to Configure --</option>';
+    state.roles.forEach(r => {
+        rSel.innerHTML += `<option value="${r.id}">${escapeHtml(r.role_name)}</option>`;
+    });
+
+    const uSel = document.getElementById('userSelector');
+    uSel.innerHTML = '<option value="">-- Select User to Configure --</option>';
+    state.users.forEach(u => {
+        uSel.innerHTML += `<option value="${u.id}">${escapeHtml(u.fullname)}</option>`;
+    });
+}
+
+function onTypeChanged() {
+    const isUser = document.getElementById('typeUser').checked;
+    state.currentTargetType = isUser ? 'user' : 'role';
+    document.getElementById('roleSelectBlock').style.display = isUser ? 'none' : 'block';
+    document.getElementById('userSelectBlock').style.display = isUser ? 'block' : 'none';
+
+    document.getElementById('roleSelector').value = '';
+    document.getElementById('userSelector').value = '';
+    state.currentTargetId = 0;
+    state.currentPerms = {};
+    document.getElementById('saveBtn').disabled = true;
+    document.getElementById('targetBadge').textContent = 'No Target Selected';
+    renderTable();
+}
+
+async function onTargetSelected() {
+    const isUser = state.currentTargetType === 'user';
+    const sel = isUser ? document.getElementById('userSelector') : document.getElementById('roleSelector');
+    const id = parseInt(sel.value, 10) || 0;
+    state.currentTargetId = id;
+
+    if (id <= 0) {
+        document.getElementById('saveBtn').disabled = true;
+        document.getElementById('targetBadge').textContent = 'No Target Selected';
+        state.currentPerms = {};
+        renderTable();
+        return;
+    }
+
+    const targetLabel = sel.options[sel.selectedIndex].text;
+    document.getElementById('targetBadge').textContent = `${isUser ? 'User' : 'Role'}: ${targetLabel}`;
+    document.getElementById('saveBtn').disabled = false;
+
+    // Fetch permissions
+    const formData = new FormData();
+    formData.append('target_type', state.currentTargetType);
+    formData.append('target_id', id);
+
+    try {
+        const res = await fetch('/api/permissions/fetch', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+            state.currentPerms = json.data || {};
+            renderTable();
+        } else {
+            Swal.fire('Error', json.message || 'Failed to fetch permissions', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Connection Error', 'Could not load target permissions', 'error');
+    }
+}
+
+function renderTable() {
+    const tbody = document.getElementById('matrixTbody');
+    if (state.currentTargetId <= 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-arrow-up text-primary me-2"></i> Select a Role or User above to inspect and assign permissions.</td></tr>`;
+        return;
+    }
+
+    if (!state.modules.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">No modules registered in the system.</td></tr>`;
+        return;
+    }
+
+    let html = '';
+
+    const renderRow = (mod, isChild) => {
+        const p = state.currentPerms[mod.id] || { can_view: 0, can_add: 0, can_edit: 0, can_delete: 0 };
+        const indent = isChild ? '<span class="text-muted me-2" style="margin-left: 28px;">└─</span>' : '';
+        const rowClass = isChild ? '' : 'parent-row';
+
+        return `
+            <tr class="${rowClass}" id="row-${mod.id}">
+                <td>
+                    ${indent}
+                    <i class="${escapeHtml(mod.icon || 'fa-solid fa-circle')} me-2 ${isChild ? 'text-muted' : 'text-primary'}"></i>
+                    <span>${escapeHtml(mod.module_name)}</span>
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input perm-chk chk-view" data-mod="${mod.id}" data-action="can_view" ${p.can_view ? 'checked' : ''} onchange="updatePermState(${mod.id}, 'can_view', this.checked)">
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input perm-chk chk-add" data-mod="${mod.id}" data-action="can_add" ${p.can_add ? 'checked' : ''} onchange="updatePermState(${mod.id}, 'can_add', this.checked)">
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input perm-chk chk-edit" data-mod="${mod.id}" data-action="can_edit" ${p.can_edit ? 'checked' : ''} onchange="updatePermState(${mod.id}, 'can_edit', this.checked)">
+                </td>
+                <td class="text-center">
+                    <input type="checkbox" class="form-check-input perm-chk chk-delete" data-mod="${mod.id}" data-action="can_delete" ${p.can_delete ? 'checked' : ''} onchange="updatePermState(${mod.id}, 'can_delete', this.checked)">
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-light border py-0 px-2 text-muted" onclick="toggleRowAll(${mod.id})" title="Toggle All">
+                        <i class="fa-solid fa-check-double" style="font-size:11px;"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    };
+
+    state.modules.forEach(root => {
+        html += renderRow(root, false);
+        if (root.submenus && root.submenus.length) {
+            root.submenus.forEach(sub => {
+                html += renderRow(sub, true);
+            });
+        }
+    });
+
+    tbody.innerHTML = html;
+}
+
+function updatePermState(modId, action, checked) {
+    if (!state.currentPerms[modId]) {
+        state.currentPerms[modId] = { module_id: modId, can_view: 0, can_add: 0, can_edit: 0, can_delete: 0 };
+    }
+    state.currentPerms[modId][action] = checked ? 1 : 0;
+}
+
+function toggleRowAll(modId) {
+    const row = document.getElementById(`row-${modId}`);
+    if (!row) return;
+    const chks = row.querySelectorAll('.perm-chk');
+    const allChecked = Array.from(chks).every(c => c.checked);
+    const targetVal = !allChecked;
+    chks.forEach(c => {
+        c.checked = targetVal;
+        const action = c.getAttribute('data-action');
+        updatePermState(modId, action, targetVal);
+    });
+}
+
+function toggleColumn(actionType, checked) {
+    const selector = `.chk-${actionType}`;
+    const chks = document.querySelectorAll(selector);
+    chks.forEach(c => {
+        c.checked = checked;
+        const modId = parseInt(c.getAttribute('data-mod'), 10);
+        updatePermState(modId, `can_${actionType}`, checked);
+    });
+}
+
+async function savePermissions() {
+    if (state.currentTargetId <= 0) return;
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    const formData = new FormData();
+    formData.append('target_type', state.currentTargetType);
+    formData.append('target_id', state.currentTargetId);
+    formData.append('perms_json', JSON.stringify(state.currentPerms));
+
+    try {
+        const res = await fetch('/api/permissions/save', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Permissions Saved!',
+                text: json.message || 'Access matrix updated successfully.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire('Error', json.message || 'Failed to save permissions', 'error');
+        }
+    } catch (err) {
+        console.error(err);
+        Swal.fire('Connection Error', 'Could not save permissions', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Save Permissions';
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+</script>
+
+</body>
+</html>
