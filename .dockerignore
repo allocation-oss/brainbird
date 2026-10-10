@@ -1,0 +1,8 @@
+.git
+**/.env
+**/.env.*
+!**/.env.example
+brainbir1_brainbird.sql
+**/tmp/
+**/*.exe
+**/*.exe~

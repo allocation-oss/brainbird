@@ -1,15 +1,14 @@
 services:
-  postgres:
-    image: citusdata/citus:12.1
-    container_name: brainbird-postgres
+  mariadb:
+    image: mariadb:11
+    container_name: brainbird-mariadb
     environment:
-      POSTGRES_USER: brainbird
-      POSTGRES_PASSWORD: brainbird
-      POSTGRES_DB: brainbird
+      MARIADB_ROOT_PASSWORD: brainbird
+      MARIADB_DATABASE: brainbir1_brainbird_local
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mariadb_data:/var/lib/mysql
 
   redis:
     image: redis:7-alpine
@@ -36,15 +35,13 @@ services:
     image: phpmyadmin:5.2-apache
     container_name: brainbird-phpmyadmin
     depends_on:
-      - postgres
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - mariadb
     ports:
-      - "8081:80"
+      - "8082:80"
     environment:
-      PMA_HOST: host.docker.internal
+      PMA_HOST: mariadb
       PMA_PORT: 3306
       UPLOAD_LIMIT: 128M
 
 volumes:
-  postgres_data:
+  mariadb_data:

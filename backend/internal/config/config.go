@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -17,10 +19,19 @@ type Config struct {
 }
 
 func Load() (Config, error) {
-	viper.SetConfigFile(".env")
+	configFile := ".env"
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		configFile = filepath.Join("backend", ".env")
+	}
+	viper.SetConfigFile(configFile)
 	viper.SetConfigType("env")
 	_ = viper.ReadInConfig()
 	viper.AutomaticEnv()
+	if viper.GetString("HTTP_ADDR") == "" {
+		if port := viper.GetString("PORT"); port != "" {
+			viper.Set("HTTP_ADDR", ":"+port)
+		}
+	}
 	viper.SetDefault("APP_ENV", "development")
 	viper.SetDefault("HTTP_ADDR", ":8080")
 	viper.SetDefault("REDIS_ADDR", "localhost:6379")
