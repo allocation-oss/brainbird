@@ -23,7 +23,7 @@ COPY --from=builder /src/bin/brainbird-api /app/api
 COPY frontend/ui /app/frontend/ui
 
 ENV APP_ENV=production \
-    HTTP_ADDR=:8081 \
+    PORT=8081 \
     DATABASE_URL=root@tcp(mariadb:3306)/brainbir1_brainbird_local?parseTime=true \
     REDIS_ADDR=redis:6379 \
     JWT_SECRET=production-secret-change-me
@@ -31,6 +31,6 @@ ENV APP_ENV=production \
 EXPOSE 8081
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8081/api/v1/health || exit 1
+  CMD curl -f "http://localhost:${PORT}/api/v1/health" || exit 1
 
 ENTRYPOINT ["/app/api"]
